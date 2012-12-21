@@ -15,7 +15,7 @@ http://ruggedcircuits.com/gerbmerge
 import sys
 import re
 import string
-import __builtin__
+import builtins
 import copy
 import types
 
@@ -459,17 +459,17 @@ class Job:
         match = drawXY_pat.match(sub_line)
         isLastShorthand = False    # By default assume we don't make use of last_x and last_y
         if match:
-          x, y, d = map(__builtin__.int, match.groups())
+          x, y, d = map(builtins.int, match.groups())
         else:
           match = drawX_pat.match(sub_line)
           if match:
-            x, d = map(__builtin__.int, match.groups())
+            x, d = map(builtins.int, match.groups())
             y = last_y
             isLastShorthand = True  # Indicate we're making use of last_x/last_y
           else:
             match = drawY_pat.match(sub_line)
             if match:
-              y, d = map(__builtin__.int, match.groups())
+              y, d = map(builtins.int, match.groups())
               x = last_x
               isLastShorthand = True  # Indicate we're making use of last_x/last_y
 
@@ -477,17 +477,17 @@ class Job:
         if match is None:
           match = cdrawXY_pat.match(sub_line)
           if match:
-            x, y, I, J, d = map(__builtin__.int, match.groups())
+            x, y, I, J, d = map(builtins.int, match.groups())
           else:
             match = cdrawX_pat.match(sub_line)
             if match:
-              x, I, J, d = map(__builtin__.int, match.groups())
+              x, I, J, d = map(builtins.int, match.groups())
               y = last_y
               isLastShorthand = True  # Indicate we're making use of last_x/last_y
             else:
               match = cdrawY_pat.match(sub_line)
               if match:
-                y, I, J, d = map(__builtin__.int, match.groups())
+                y, I, J, d = map(builtins.int, match.groups())
                 x = last_x
                 isLastShorthand = True  # Indicate we're making use of last_x/last_y
 
@@ -1205,10 +1205,10 @@ def rotateJob(job, degrees = 90, firstpass = True):
       # Is it a drawing command?
       if type(cmd) is types.TupleType:
         if len(cmd)==3:
-          x, y, d = map(__builtin__.int, cmd)
+          x, y, d = map(builtins.int, cmd)
           II=JJ=None
         else:
-          x, y, II, JJ, d, signed = map(__builtin__.int, cmd)   # J is already used as Job object
+          x, y, II, JJ, d, signed = map(builtins.int, cmd)   # J is already used as Job object
       else:
         # No, must be a string indicating aperture change, G-code, or RS274-X command.
         if cmd[0] in ('G', '%'):
