@@ -194,9 +194,9 @@ def findJob(jobname, rotated, Jobs=config.Jobs):
         if existingjob.lower() == jobname.lower(): ## job names are case insensitive
           job = Jobs[existingjob]
     except:
-      raise RuntimeError, "Job name '%s' not found" % jobname
+      raise RuntimeError("Job name '%s' not found" % jobname)
   else:
-    raise RuntimeError, "Job name '%s' not found" % jobname
+    raise RuntimeError("Job name '%s' not found" % jobname)
 
   # Make a rotated job
   job = jobs.rotateJob(job, rotated)
@@ -224,14 +224,14 @@ def parseJobSpec(spec, data):
         elif rotation == "Rotate270":
             rotated = 270
         else:
-            raise RuntimeError, "Unsupported rotation: %s" % rotation
+            raise RuntimeError("Unsupported rotation: %s" % rotation)
 
       else:
         rotated = 0
 
       return findJob(jobname, rotated)
     else:
-      raise RuntimeError, "Matrix panels not yet supported"
+      raise RuntimeError("Matrix panels not yet supported")
 
 def parseColSpec(spec, data):
   jobs = Col()
@@ -299,8 +299,8 @@ def parseLayoutFile(fname):
 
   try:
     fid = file(fname, 'rt')
-  except Exception, detail:
-    raise RuntimeError, "Unable to open layout file: %s\n  %s" % (fname, str(detail))
+  except Exception as detail:
+    raise RuntimeError("Unable to open layout file: %s\n  %s" % (fname, str(detail)))
 
   data = fid.read()
   fid.close()
@@ -314,10 +314,10 @@ def parseLayoutFile(fname):
 
   # Last element of tree is number of characters parsed
   if not tree[0]:
-    raise RuntimeError, "Layout file cannot be parsed"
+    raise RuntimeError("Layout file cannot be parsed")
 
   if tree[2] != len(data):
-    raise RuntimeError, "Parse error at character %d in layout file" % tree[2]
+    raise RuntimeError("Parse error at character %d in layout file" % tree[2])
 
   Rows = []
   for rowspec in tree[1]:
