@@ -643,38 +643,29 @@ def merge(opts, args, gui = None):
 
   # Get a list of all tools used by merging keys from each job's dictionary
   # of tools.
-  if 0:
-    Tools = {}
-    for job in config.Jobs.values():
-      for key in job.xcommands.keys():
-        Tools[key] = 1
+  toolNum = 0
 
-    Tools = Tools.keys()
-    Tools.sort()
-  else:
-    toolNum = 0
+  # First construct global mapping of diameters to tool numbers
+  for job in config.Jobs.values():
+    for tool,diam in job.xdiam.items():
+      if config.GlobalToolRMap.has_key(diam):
+        continue
 
-    # First construct global mapping of diameters to tool numbers
-    for job in config.Jobs.values():
-      for tool,diam in job.xdiam.items():
-        if config.GlobalToolRMap.has_key(diam):
-          continue
+      toolNum += 1
+      config.GlobalToolRMap[diam] = "T%02d" % toolNum
 
-        toolNum += 1
-        config.GlobalToolRMap[diam] = "T%02d" % toolNum
+  # Cluster similar tool sizes to reduce number of drills
+  if config.Config['drillclustertolerance'] > 0:
+    config.GlobalToolRMap = drillcluster.cluster( config.GlobalToolRMap, config.Config['drillclustertolerance'] )
+    drillcluster.remap( Place.jobs, config.GlobalToolRMap.items() )
 
-    # Cluster similar tool sizes to reduce number of drills
-    if config.Config['drillclustertolerance'] > 0:
-      config.GlobalToolRMap = drillcluster.cluster( config.GlobalToolRMap, config.Config['drillclustertolerance'] )
-      drillcluster.remap( Place.jobs, config.GlobalToolRMap.items() )
+  # Now construct mapping of tool numbers to diameters
+  for diam,tool in config.GlobalToolRMap.items():
+    config.GlobalToolMap[tool] = diam
 
-    # Now construct mapping of tool numbers to diameters
-    for diam,tool in config.GlobalToolRMap.items():
-      config.GlobalToolMap[tool] = diam
-
-    # Tools is just a list of tool names
-    Tools = config.GlobalToolMap.keys()
-    Tools.sort()   
+  # Tools is just a list of tool names
+  Tools = config.GlobalToolMap.keys()
+  Tools.sort()   
 
   fullname = config.Config['fabricationdrawingfile']
   if fullname and fullname.lower() != 'none':

@@ -276,16 +276,10 @@ def writeScoring(fid, Place, OriginX, OriginY, MaxXExtent, MaxYExtent):
     # 2.5 limits.
     x,y,X,Y = [round(val,5) for val in [x,y,X,Y]]
 
-    if 0: # Scoring lines go all the way across the panel now
-      addHorizontalLine(Lines, x, X, Y, extents)   # above job
-      addVerticalLine(Lines, X, y, Y, extents)     # to the right of job
-      addHorizontalLine(Lines, x, X, y, extents)   # below job
-      addVerticalLine(Lines, x, y, Y, extents)     # to the left of job
-    else:
-      addHorizontalLine(Lines, OriginX, MaxXExtent, Y, extents)   # above job
-      addVerticalLine(Lines, X, OriginY, MaxYExtent, extents)     # to the right of job
-      addHorizontalLine(Lines, OriginX, MaxXExtent, y, extents)   # below job
-      addVerticalLine(Lines, x, OriginY, MaxYExtent, extents)     # to the left of job
+    addHorizontalLine(Lines, OriginX, MaxXExtent, Y, extents)   # above job
+    addVerticalLine(Lines, X, OriginY, MaxYExtent, extents)     # to the right of job
+    addHorizontalLine(Lines, OriginX, MaxXExtent, y, extents)   # below job
+    addVerticalLine(Lines, x, OriginY, MaxYExtent, extents)     # to the left of job
 
   # Combine disparate lines into single lines
   Lines = mergeLines(Lines)
