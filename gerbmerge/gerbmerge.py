@@ -513,7 +513,7 @@ def merge(opts, args, gui = None):
       print("  Thickening", lname, "feature dimensions ...")
       
       # Fix each aperture used in this layer
-      for ap in apUsedDict.keys():
+      for ap in list(apUsedDict.keys()):
         new = config.GAT[ap].getAdjusted( config.MinimumFeatureDimension[layername] )
         if not new: ## current aperture size met minimum requirement
           continue
@@ -654,7 +654,7 @@ def merge(opts, args, gui = None):
   # Cluster similar tool sizes to reduce number of drills
   if config.Config['drillclustertolerance'] > 0:
     config.GlobalToolRMap = drillcluster.cluster( config.GlobalToolRMap, config.Config['drillclustertolerance'] )
-    drillcluster.remap( Place.jobs, config.GlobalToolRMap.items() )
+    drillcluster.remap( Place.jobs, list(config.GlobalToolRMap.items()) )
 
   # Now construct mapping of tool numbers to diameters
   for diam,tool in config.GlobalToolRMap.items():
@@ -740,8 +740,6 @@ def merge(opts, args, gui = None):
   #print 'Writing %s ...' % fullname
   fid = open(fullname, 'wt')
 
-  if totalarea == 0:
-    totalarea = 1
   print('-'*50)
   print("     Job Size : %f\" x %f\"" % (MaxXExtent-OriginX, MaxYExtent-OriginY))
   print("     Job Area : %.2f sq. in." % totalarea)
@@ -810,6 +808,6 @@ http://ruggedcircuits.com/gerbmerge
     usage()
 
   disclaimer(ack = ('--ack', '') in opts)
-  
+    
   sys.exit(merge(opts, args)) ## run germberge
 # vim: expandtab ts=2 sw=2 ai syntax=python

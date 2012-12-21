@@ -178,6 +178,9 @@ class Job:
     # to be combined.
     self.ExcellonDecimals = 0     # 0 means global value prevails
 
+  def __str__(self):
+    return self.name
+
   def width_in(self):
     "Return width in INCHES"
     return float(self.maxx-self.minx)*0.00001
@@ -1013,6 +1016,9 @@ class JobLayout:
   def canonicalize(self):       # Must return a JobLayout object as a list
     return [self]
 
+  def __str__(self):
+    return str(self.job)
+    
   def writeGerber(self, fid, layername):
     assert self.x is not None
     self.job.writeGerber(fid, layername, self.x, self.y)

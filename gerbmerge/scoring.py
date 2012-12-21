@@ -113,7 +113,7 @@ def mergeVLines(Lines):
 
   # First, make sure lines are sorted by starting Y ordinate and that all lines
   # proceed up.
-  Lines.sort(sortByY)
+  Lines = sorted(Lines, key=lambda line: line[1])
   for line in Lines:
     assert line[1] < line[3]
 
@@ -149,7 +149,7 @@ def mergeLines(Lines):
   # All lines extend up (vertical) and to the right (horizontal). First, do
   # simple merges. Sort all lines, which will order the lines with starting
   # points in increasing X order (i.e., to the right).
-  Lines.sort()
+  Lines = sorted(Lines)
 
   # Now sort the lines into horizontal lines and vertical lines. For each
   # ordinate, group all lines by that ordinate in a dictionary. Thus, all
@@ -275,7 +275,7 @@ def writeScoring(fid, Place, OriginX, OriginY, MaxXExtent, MaxYExtent):
     # Just so we don't get 3.75000000004 and 3.75000000009, we round to
     # 2.5 limits.
     x,y,X,Y = [round(val,5) for val in [x,y,X,Y]]
-
+    
     addHorizontalLine(Lines, OriginX, MaxXExtent, Y, extents)   # above job
     addVerticalLine(Lines, X, OriginY, MaxYExtent, extents)     # to the right of job
     addHorizontalLine(Lines, OriginX, MaxXExtent, y, extents)   # below job

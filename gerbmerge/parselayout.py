@@ -47,6 +47,10 @@ class Panel:                 # Meant to be subclassed as either a Row() or Col()
       width += job.width_in() + config.Config['xspacing']
     width -= config.Config['xspacing']
     return width
+    
+  def __str__(self):
+    "Pretty-prints this panel"
+    return str([str(x) for x in self.jobs])
 
   def maxwidths(self):
     "Return maximum width in inches of any one subpanel"
@@ -271,8 +275,14 @@ def parseLayoutFile(fname):
 
   # Build up the array of rows
   Rows = []
-  for rowspec in root.findall('row'):
-    Rows.append(parseRowSpec(rowspec))
+  for rowspec in root:
+    if rowspec.tag == "row":
+        newRow = parseRowSpec(rowspec)
+    elif rowspec.tag == "col":
+        newRow = parseColSpec(rowspec)
+    else:
+        raise RuntimeError("Invalid child of root element")
+    Rows.append(newRow)
 
   return Rows
 
