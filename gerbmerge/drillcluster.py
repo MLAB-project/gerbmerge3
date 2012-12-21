@@ -34,8 +34,7 @@ def cluster(drills, tolerance, debug = _DEBUG):
     debug_print("Clustering drill sizes ...", True)
 
     # Loop through all drill sizes
-    sizes = drills.keys()
-    sizes.sort()
+    sizes = sorted(drills.keys())
     for size in sizes:
         
         match = False
@@ -147,9 +146,9 @@ def debug_print(text, status = False, newLine = True):
     
     if _DEBUG or (status and _STATUS):
         if newLine:
-            print " ", text
+            print(" ", text)
         else:
-            print " ", text,
+            print(" ", text)
             
 def str_d(drills):
     """
@@ -180,8 +179,7 @@ def drillsToString(drills):
     """
     string = ""
     
-    drills = drills.items()
-    drills.sort()
+    drills = sorted(drills.items())
     for size, drill in drills:
         string += drill + " = " + str_d(size) + "\n  "
 
@@ -194,7 +192,7 @@ def drillsToString(drills):
 if __name__=="__main__":
   import random
   
-  print "  Clustering random drills..."
+  print("  Clustering random drills...")
 
   old = {}
   tool_num = 0
