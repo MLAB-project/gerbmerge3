@@ -209,7 +209,7 @@ def constructApertureTable(fileList):
 
     knownMacroNames = {}
 
-    fid = file(fname,'rt')
+    fid = open(fname,'rt')
     for line in fid:
       # Get rid of CR
       line = line.replace('\x0D', '')

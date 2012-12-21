@@ -148,7 +148,7 @@ def parseToolList(fname):
   TL = {}
 
   try:
-    fid = file(fname, 'rt')
+    fid = open(fname, 'rt')
   except Exception as detail:
     raise RuntimeError("Unable to open tool list file '%s':\n  %s" % (fname, str(detail)))
 
@@ -210,7 +210,7 @@ def parseConfigFile(fname, Config=Config, Jobs=Jobs):
   global DefaultToolList
 
   CP = configparser.ConfigParser()
-  CP.readfp(file(fname,'rt'))
+  CP.readfp(open(fname,'rt'))
 
   # First parse global options
   if CP.has_section('Options'):

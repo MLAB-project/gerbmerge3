@@ -497,7 +497,7 @@ def merge(opts, args, gui = None):
       fullname = 'merged.%s.ger' % lname
     OutputFiles.append(fullname)
     #print 'Writing %s ...' % fullname
-    fid = file(fullname, 'wt')
+    fid = open(fullname, 'wt')
     writeGerberHeader(fid)
     
     # Determine which apertures and macros are truly needed
@@ -600,7 +600,7 @@ def merge(opts, args, gui = None):
   if fullname and fullname.lower() != "none":
     OutputFiles.append(fullname)
     #print 'Writing %s ...' % fullname
-    fid = file(fullname, 'wt')
+    fid = open(fullname, 'wt')
     writeGerberHeader(fid)
 
     # Write width-1 aperture to file
@@ -625,7 +625,7 @@ def merge(opts, args, gui = None):
   if fullname and fullname.lower() != "none":
     OutputFiles.append(fullname)
     #print 'Writing %s ...' % fullname
-    fid = file(fullname, 'wt')
+    fid = open(fullname, 'wt')
     writeGerberHeader(fid)
 
     # Write width-1 aperture to file
@@ -674,7 +674,7 @@ def merge(opts, args, gui = None):
 
     OutputFiles.append(fullname)
     #print 'Writing %s ...' % fullname
-    fid = file(fullname, 'wt')
+    fid = open(fullname, 'wt')
     writeGerberHeader(fid)
     writeApertures(fid, {drawing_code1: None})
     fid.write('%s*\n' % drawing_code1)    # Choose drawing aperture
@@ -691,7 +691,7 @@ def merge(opts, args, gui = None):
     fullname = 'merged.drills.xln'
   OutputFiles.append(fullname)
   #print 'Writing %s ...' % fullname
-  fid = file(fullname, 'wt')
+  fid = open(fullname, 'wt')
 
   writeExcellonHeader(fid)
 
@@ -743,7 +743,7 @@ def merge(opts, args, gui = None):
     fullname = 'merged.toollist.drl'
   OutputFiles.append(fullname)
   #print 'Writing %s ...' % fullname
-  fid = file(fullname, 'wt')
+  fid = open(fullname, 'wt')
 
   print('-'*50)
   print("     Job Size : %f\" x %f\"" % (MaxXExtent-OriginX, MaxYExtent-OriginY))

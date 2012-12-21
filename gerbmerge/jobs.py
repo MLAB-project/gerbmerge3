@@ -252,7 +252,7 @@ class Job:
     RevGAT = config.buildRevDict(GAT)     # RevGAT[hash] = aperturename
     RevGAMT = config.buildRevDict(GAMT)   # RevGAMT[hash] = aperturemacroname
 
-    fid = file(fullname, 'rt')
+    fid = open(fullname, 'rt')
     currtool = None
 
     self.apxlat[layername] = {}
@@ -553,7 +553,7 @@ class Job:
     fid.close()
 
   def parseExcellon(self, fullname):
-    fid = file(fullname, 'rt')
+    fid = open(fullname, 'rt')
     currtool = None
     suppress_leading = True     # Suppress leading zeros by default, equivalent to 'INCH,TZ'
 

@@ -157,7 +157,7 @@ def writeUserText(fid, X, Y):
   if not fname: return
 
   try:
-    tfile = file(fname, 'rt')
+    tfile = open(fname, 'rt')
   except Exception as detail:
     raise RuntimeError("Could not open fabrication drawing text file '%s':\n  %s" % (fname,str(detail)))
 
