@@ -104,7 +104,7 @@ class ApertureMacroPrimitive:
       valids = None
 
     if valids is None:
-      raise RuntimeError, 'Undefined aperture macro primitive code %d' % code
+      raise RuntimeError("Undefined aperture macro primitive code %d" % code)
 
     # We expect exactly the number of fields required, except for macro
     # type 4 which is an outline and has a variable number of points.
@@ -117,18 +117,18 @@ class ApertureMacroPrimitive:
     #   - last field is rotation
     if self.code==4:
       if len(fields) < 2:
-        raise RuntimeError, 'Outline macro primitive has way too few fields'
+        raise RuntimeError("Outline macro primitive has way too few fields")
 
       try:
         N = int(fields[1])
       except:
-        raise RuntimeError, 'Outline macro primitive has non-integer number of points'
+        raise RuntimeError("Outline macro primitive has non-integer number of points")
 
       if len(fields) != (3+2*N):
-        raise RuntimeError, 'Outline macro primitive has %d fields...expecting %d fields' % (len(fields), 3+2*N)
+        raise RuntimeError("Outline macro primitive has %d fields...expecting %d fields" % (len(fields), 3+2*N))
     else:
       if len(fields) != len(valids):
-        raise RuntimeError, 'Macro primitive has %d fields...expecting %d fields' % (len(fields), len(valids))
+        raise RuntimeError("Macro primitive has %d fields...expecting %d fields" % (len(fields), len(valids)))
 
     # Convert each parameter on the input line to an entry in the self.parms
     # list, using either int() or float() conversion.
@@ -141,7 +141,7 @@ class ApertureMacroPrimitive:
       try:
         self.parms.append(converter(fields[parmix]))
       except:
-        raise RuntimeError, 'Aperture macro primitive parameter %d has incorrect type' % (parmix+1)
+        raise RuntimeError("Aperture macro primitive parameter %d has incorrect type" % (parmix+1))
 
   def setFromLine(self, line):      
     # Account for DOS line endings and get rid of line ending and '*' at the end
@@ -155,7 +155,7 @@ class ApertureMacroPrimitive:
       try:
         code = int(fields[0])
       except:
-        raise RuntimeError, 'Illegal aperture macro primitive code "%s"' % fields[0]
+        raise RuntimeError("Illegal aperture macro primitive code \"%s\"" % fields[0])
       self.setFromFields(code, fields[1:])
     except:
       print '='*20
@@ -269,7 +269,7 @@ def parseApertureMacro(s, fid):
 
       M.add(P)
     else:
-      raise RuntimeError, "Premature end-of-file while parsing aperture macro"
+      raise RuntimeError("Premature end-of-file while parsing aperture macro")
   else:
     return None
 
