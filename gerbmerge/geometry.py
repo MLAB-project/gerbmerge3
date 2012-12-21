@@ -13,10 +13,6 @@ http://ruggedcircuits.com/gerbmerge
 
 import math
 
-# Ensure all list elements are unique
-def uniqueify(L):
-  return {}.fromkeys(L).keys()
-
 # This function rounds an (X,Y) point to integer co-ordinates
 def roundPoint(pt):
   return (int(round(pt[0])),int(round(pt[1])))
@@ -147,6 +143,7 @@ def segmentXbox(pt1, pt2, llpt, urpt):
   # is inside the box and the other isn't, or when the segment intersects the
   # box in two places) and sometimes not (when the segment is "tangent" to
   # the box at the corner and the corner is the signle point of intersection).
+  # TODO: Look into if a `set` would be better to use for `L` and `corners` instead of a `list`
   L = []
   corners = []
 
@@ -194,8 +191,8 @@ def segmentXbox(pt1, pt2, llpt, urpt):
 
   # Ensure all points are unique. We may get a double hit at the corners
   # of the box.
-  L = uniqueify(L)
-  corners = uniqueify(corners)
+  L = list(set(L))
+  corners = list(set(corners))
 
   # If the total number of intersections len(L)+len(corners) is 2, the corner
   # is valid. If there is only a single corner, it's a tangent and invalid.
