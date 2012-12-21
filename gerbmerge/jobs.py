@@ -252,8 +252,6 @@ class Job:
     RevGAT = config.buildRevDict(GAT)     # RevGAT[hash] = aperturename
     RevGAMT = config.buildRevDict(GAMT)   # RevGAMT[hash] = aperturemacroname
 
-    #print 'Reading data from %s ...' % fullname
-
     fid = file(fullname, 'rt')
     currtool = None
 
@@ -324,9 +322,6 @@ class Job:
 
         hash = A.hash()
         if not RevGAT.has_key(hash):
-          #print line
-          #print self.apmxlat
-          #print RevGAT
           raise RuntimeError("File %s has aperture definition \"%s\" not in global aperture table." % (fullname, hash))
 
         # This says that all draw commands with this aperture code will
@@ -556,13 +551,8 @@ class Job:
     # end of for each line in file
 
     fid.close()
-    if 0:
-      print layername
-      print self.commands[layername]
 
   def parseExcellon(self, fullname):
-    #print 'Reading data from %s ...' % fullname
-
     fid = file(fullname, 'rt')
     currtool = None
     suppress_leading = True     # Suppress leading zeros by default, equivalent to 'INCH,TZ'
@@ -654,7 +644,6 @@ class Job:
             try:
               diam = config.DefaultToolList[currtool]
             except:
-              #print config.DefaultToolList
               raise RuntimeError("File %s uses tool code %s that is not defined in default tool list" % (fullname, currtool))
 
         self.xdiam[currtool] = diam
@@ -1136,7 +1125,6 @@ def rotateJob(job, degrees = 90, firstpass = True):
   """Create a new job from an existing one, rotating by specified degrees in 90 degree passes"""
   GAT = config.GAT
   GAMT = config.GAMT
-  ##print "rotating job:", job.name, degrees, firstpass
   if firstpass:
     if degrees == 270:
         J = Job(job.name+'*rotated270')
@@ -1260,11 +1248,6 @@ def rotateJob(job, degrees = 90, firstpass = True):
       else:
         J.commands[layername].append((newx,newy,d))
 
-    if 0:
-      print job.minx, job.miny, offset
-      print layername
-      print J.commands[layername]
-
   # Finally, rotate drills. Offset is in hundred-thousandths (2.5) while Excellon
   # data is in 2.4 format.
   for tool in job.xcommands.keys():
@@ -1284,5 +1267,4 @@ def rotateJob(job, degrees = 90, firstpass = True):
   if degrees > 0:
     return rotateJob(J, degrees, False)
   else:
-    ##print "rotated:", J.name
     return J
