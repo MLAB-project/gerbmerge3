@@ -60,8 +60,7 @@ config.PlacementFile = None
 GUI = None
 
 def usage():
-  print \
-"""
+  print("""
 Usage: gerbmerge [Options] configfile [layoutfile]
 
 Options:
@@ -94,7 +93,7 @@ the layout file (if any) is ignored.
 
 NOTE: The dimensions of each job are determined solely by the maximum extent of
 the board outline layer for each job.
-"""
+""")
   sys.exit(1)
 
 def writeGerberHeader22degrees(fid):
