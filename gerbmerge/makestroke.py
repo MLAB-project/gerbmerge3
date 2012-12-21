@@ -94,7 +94,7 @@ def writeChar(fid, c, X, Y, degrees, size = 10):
   try:
     glyph = strokes.StrokeMap[c]
   except:
-    raise RuntimeError, 'No glyph for character %s' % hex(ord(c))
+    raise RuntimeError("No glyph for character %s" % hex(ord(c)))
 
   writeGlyph(fid, glyph, X, Y, degrees, c, size)
 
