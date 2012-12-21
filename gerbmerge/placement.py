@@ -65,7 +65,7 @@ class Placement:
     try:
       fid = file(fname, 'rt')
     except:
-      print 'Unable to open placement file: "%s"' % fname
+      print("Unable to open placement file: \"%s\"" % fname)
       sys.exit(1)
 
     lines = fid.readlines()
@@ -76,7 +76,7 @@ class Placement:
 
       match = pat.match(line)
       if not match:
-        print 'Cannot interpret placement line in placement file:\n  %s' % line
+        print("Cannot interpret placement line in placement file:\n  %s" % line)
         sys.exit(1)
 
       jobname, X, Y = match.groups()
@@ -84,7 +84,7 @@ class Placement:
         X = float(X)
         Y = float(Y)
       except:
-        print 'Illegal (X,Y) co-ordinates in placement file:\n  %s' % line
+        print("Illegal (X,Y) co-ordinates in placement file:\n  %s" % line)
         sys.exit(1)
 
       rotated = 0
