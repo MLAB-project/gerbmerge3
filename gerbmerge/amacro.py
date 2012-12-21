@@ -324,7 +324,7 @@ if __name__=="__main__":
   MR = M.rotated()
 
   # Generate the Gerber so we can view it
-  fid = file('amacro.ger', 'wt')
+  fid = open('amacro.ger', 'wt')
   print(\
 """G75*
 G70*
