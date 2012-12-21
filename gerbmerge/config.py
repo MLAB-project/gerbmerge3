@@ -209,7 +209,7 @@ def parseToolList(fname):
 def parseConfigFile(fname, Config=Config, Jobs=Jobs):
   global DefaultToolList
 
-  CP = ConfigParser.ConfigParser()
+  CP = configparser.ConfigParser()
   CP.readfp(file(fname,'rt'))
 
   # First parse global options
