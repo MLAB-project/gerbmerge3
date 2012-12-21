@@ -316,18 +316,18 @@ class Job:
       match = apdef_pat.match(line)
       if match:
         if currtool:
-          raise RuntimeError, "File %s has an aperture definition that comes after drawing commands." % fullname
+          raise RuntimeError("File %s has an aperture definition that comes after drawing commands." % fullname)
 
         A = aptable.parseAperture(line, self.apmxlat[layername])
         if not A:
-          raise RuntimeError, "Unknown aperture definition in file %s" % fullname
+          raise RuntimeError("Unknown aperture definition in file %s" % fullname)
 
         hash = A.hash()
         if not RevGAT.has_key(hash):
           #print line
           #print self.apmxlat
           #print RevGAT
-          raise RuntimeError, 'File %s has aperture definition "%s" not in global aperture table.' % (fullname, hash)
+          raise RuntimeError("File %s has aperture definition \"%s\" not in global aperture table." % (fullname, hash))
 
         # This says that all draw commands with this aperture code will
         # be replaced by aperture self.apxlat[layername][code].
@@ -343,11 +343,11 @@ class Job:
       M = amacro.parseApertureMacro(line,fid)
       if M:
         if currtool:
-          raise RuntimeError, "File %s has an aperture macro definition that comes after drawing commands." % fullname
+          raise RuntimeError("File %s has an aperture macro definition that comes after drawing commands." % fullname)
 
         hash = M.hash()
         if not RevGAMT.has_key(hash):
-          raise RuntimeError, 'File %s has aperture macro definition not in global aperture macro table:\n%s' % (fullname, hash)
+          raise RuntimeError("File %s has aperture macro definition not in global aperture macro table:\n%s" % (fullname, hash))
 
         # This says that all aperture definition commands that reference this macro name
         # will be replaced by aperture macro name self.apmxlat[layername][macroname].
@@ -377,9 +377,9 @@ class Job:
               continue
 
             if item[0]=='T':      # omit trailing zeroes
-              raise RuntimeError, "Trailing zeroes not supported in RS274X files"
+              raise RuntimeError("Trailing zeroes not supported in RS274X files")
             if item[0]=='I':      # incremental co-ordinates
-              raise RuntimeError, "Incremental co-ordinates not supported in RS274X files"
+              raise RuntimeError("Incremental co-ordinates not supported in RS274X files")
 
             if item[0]=='N':      # Maximum digits for N* commands...ignore it
               continue
@@ -420,7 +420,7 @@ class Job:
               
             continue
 
-          raise RuntimeError, "G-Code 'G%02d' is not supported" % gcode
+          raise RuntimeError("G-Code 'G%02d' is not supported" % gcode)
 
         # See if this is a tool change (aperture change) command
         match = tool_pat.match(sub_line)
@@ -445,7 +445,7 @@ class Job:
 
           # Map it using our translation table
           if not self.apxlat[layername].has_key(currtool):
-            raise RuntimeError, 'File %s has tool change command "%s" with no corresponding translation' % (fullname, currtool)
+            raise RuntimeError("File %s has tool change command \"%s\" with no corresponding translation" % (fullname, currtool))
 
           currtool = self.apxlat[layername][currtool]
 
@@ -502,7 +502,7 @@ class Job:
             # It's also OK if we're in the middle of a G36 polygon fill as we're only defining
             # the polygon extents.
             if (d != 2) and (last_gmode != 36):
-              raise RuntimeError, 'File %s has draw command %s with no aperture chosen' % (fullname, sub_line)
+              raise RuntimeError("File %s has draw command %s with no aperture chosen" % (fullname, sub_line))
 
           # Save last_x/y BEFORE scaling to 2.5 format else subsequent single-ordinate
           # flashes (e.g., Y with no X) will be scaled twice!
@@ -549,7 +549,7 @@ class Job:
           if match:
             break
         else:
-          raise RuntimeError, 'File %s has uninterpretable line:\n  %s' % (fullname, line)
+          raise RuntimeError("File %s has uninterpretable line:\n  %s" % (fullname, line))
 
         sub_line = sub_line[match.end():]
       # end while still things to match on this line
@@ -621,14 +621,14 @@ class Job:
         try:
           diam = float(diam)
         except:
-          raise RuntimeError, "File %s has illegal tool diameter '%s'" % (fullname, diam)
+          raise RuntimeError("File %s has illegal tool diameter '%s'" % (fullname, diam))
 
         # Canonicalize tool number because Protel (of course) sometimes specifies it
         # as T01 and sometimes as T1. We canonicalize to T01.
         currtool = 'T%02d' % int(currtool[1:])
 
         if self.xdiam.has_key(currtool):
-          raise RuntimeError, "File %s defines tool %s more than once" % (fullname, currtool)
+          raise RuntimeError("File %s defines tool %s more than once" % (fullname, currtool))
         self.xdiam[currtool] = diam
         continue
 
@@ -649,13 +649,13 @@ class Job:
             try:
               diam = self.ToolList[currtool]
             except:
-              raise RuntimeError, "File %s uses tool code %s that is not defined in the job's tool list" % (fullname, currtool)
+              raise RuntimeError("File %s uses tool code %s that is not defined in the job's tool list" % (fullname, currtool))
           else:
             try:
               diam = config.DefaultToolList[currtool]
             except:
               #print config.DefaultToolList
-              raise RuntimeError, "File %s uses tool code %s that is not defined in default tool list" % (fullname, currtool)
+              raise RuntimeError("File %s uses tool code %s that is not defined in default tool list" % (fullname, currtool))
 
         self.xdiam[currtool] = diam
         continue
@@ -677,7 +677,7 @@ class Job:
           
       if match:
         if currtool is None:
-          raise RuntimeError, 'File %s has plunge command without previous tool selection' % fullname
+          raise RuntimeError("File %s has plunge command without previous tool selection" % fullname)
 
         try:
           self.xcommands[currtool].append((x,y))
@@ -693,7 +693,7 @@ class Job:
         if pat.match(line):
           break
       else:
-        raise RuntimeError, 'File %s has uninterpretable line:\n  %s' % (fullname, line)
+        raise RuntimeError("File %s has uninterpretable line:\n  %s" % (fullname, line))
 
   def hasLayer(self, layername):
     return self.commands.has_key(layername)
