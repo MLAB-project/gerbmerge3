@@ -158,9 +158,9 @@ class ApertureMacroPrimitive:
         raise RuntimeError("Illegal aperture macro primitive code \"%s\"" % fields[0])
       self.setFromFields(code, fields[1:])
     except:
-      print '='*20
-      print "==> ", line
-      print '='*20
+      print('='*20)
+      print("==> ", line)
+      print('='*20)
       raise
 
   def rotate(self):
@@ -325,24 +325,24 @@ if __name__=="__main__":
 
   # Generate the Gerber so we can view it
   fid = file('amacro.ger', 'wt')
-  print >> fid, \
+  print(fid, \
 """G75*
 G70*
 %OFA0B0*%
 %FSLAX24Y24*%
 %IPPOS*%
-%LPD*%"""
+%LPD*%""")
   M.writeDef(fid)
   MR.writeDef(fid)
-  print >> fid, \
+  print(fid, \
 """%ADD10TEST*%
 %ADD11TESTR*%
 D10*
 X010000Y010000D03*
 D11*
 X015000Y010000D03*
-M02*"""
+M02*""")
   fid.close()
 
-  print M
-  print MR
+  print(M)
+  print(MR)
