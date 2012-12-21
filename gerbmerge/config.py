@@ -235,11 +235,11 @@ def parseConfigFile(fname, Config=Config, Jobs=Jobs):
         pass   # Ignore DEFAULTS section keys
 
       elif opt in ('fabricationdrawing', 'outlinelayer'):
-        print '*'*73
-        print '\nThe FabricationDrawing and OutlineLayer configuration options have been'
-        print 'renamed as of GerbMerge version 1.0. Please consult the documentation for'
-        print 'a description of the new options, then modify your configuration file.\n'
-        print '*'*73
+        print('*'*73)
+        print('\nThe FabricationDrawing and OutlineLayer configuration options have been')
+        print('renamed as of GerbMerge version 1.0. Please consult the documentation for')
+        print('a description of the new options, then modify your configuration file.\n')
+        print('*'*73)
         sys.exit(1)
       else:
         raise RuntimeError("Unknown option '%s' in [Options] section of configuration file" % opt)
@@ -320,7 +320,7 @@ def parseConfigFile(fname, Config=Config, Jobs=Jobs):
     keylist = GAMT.keys()
     keylist.sort()
     for key in keylist:
-      print '%s' % GAMT[key]
+      print('%s' % GAMT[key])
     sys.exit(0)
 
   # Parse the tool list
@@ -344,7 +344,7 @@ def parseConfigFile(fname, Config=Config, Jobs=Jobs):
     if jobname=='MergeOutputFiles': continue
     if jobname=='GerbMergeGUI': continue
 
-    print 'Reading data from', jobname, '...'
+    print('Reading data from', jobname, '...')
 
     J = jobs.Job(jobname)
 
@@ -389,9 +389,9 @@ def parseConfigFile(fname, Config=Config, Jobs=Jobs):
       if errstr=='ERROR':
         do_abort=1
 
-      print '%s: Job %s is missing the following layers:' % (errstr, jobname)
+      print("%s: Job %s is missing the following layers:" % (errstr, jobname))
       for layername in LL.keys():
-        print '  %s' % layername
+        print("  %s" % layername)
 
     # Store the job in the global Jobs dictionary, keyed by job name
     Jobs[jobname] = J
@@ -401,14 +401,14 @@ def parseConfigFile(fname, Config=Config, Jobs=Jobs):
 
 if __name__=="__main__":
   CP = parseConfigFile(sys.argv[1])
-  print Config
+  print(Config)
   sys.exit(0)
 
   if 0:
     for key, val in CP.defaults().items():
-      print '%s: %s' % (key,val)
+      print("%s: %s" % (key,val))
 
     for section in CP.sections():
-      print '[%s]' % section
+      print("[%s]" % section)
       for opt in CP.options(section):
-        print '  %s=%s' % (opt, CP.get(section, opt))
+        print("  %s=%s" % (opt, CP.get(section, opt)))
