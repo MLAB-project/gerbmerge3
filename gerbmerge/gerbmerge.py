@@ -254,9 +254,9 @@ Any other key will exit the program.
 """)
   if ack:
     return
-  s = raw_input()
-  if s == 'y':
-    print()
+  s = input()
+  # Couldn't get `s == "y"` to work, but the following works correctly on python 3.2 on w64
+  if s[0] == "y"[0]:
     return
 
   print("\nExiting...")
