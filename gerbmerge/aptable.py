@@ -128,14 +128,6 @@ class Aperture:
 
   def __str__(self):
     return '%s: %s' % (self.code, self.hash())
-    #if 0:
-    #  if self.dimy:
-    #    return ('%s: %s (%.4f x %.4f)' % (self.code, self.apname, self.dimx, self.dimy))
-    #  else:
-    #    if self.apname in ('Macro'):
-    #      return ('%s: %s (%s)' % (self.code, self.apname, self.dimx))
-    #    else:
-    #      return ('%s: %s (%.4f)' % (self.code, self.apname, self.dimx))
 
   def hash(self):
     if self.dimy:

@@ -111,14 +111,6 @@ def writeString(fid, s, X, Y, degrees, size = 60.0):
   dX = int(round(math.cos(rad)*SpacingDX*(size / 10.0)))
   dY = int(round(math.sin(rad)*SpacingDX*(size / 10.0)))
 
-  if 0:
-    if dX < 0:
-      # Always print text left to right
-      dX = -dX
-      s = list(s)
-      s.reverse()
-      s = string.join(s, '')
-
   for char in s:
     writeChar(fid, char, posX, posY, degrees, size)
     posX += dX
