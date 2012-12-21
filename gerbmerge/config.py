@@ -160,7 +160,7 @@ def parseToolList(fname):
 
   try:
     fid = file(fname, 'rt')
-  except Exception, detail:
+  except Exception as detail:
     raise RuntimeError("Unable to open tool list file '%s':\n  %s" % (fname, str(detail)))
 
   pat_in  = re.compile(r'\s*(T\d+)\s+([0-9.]+)\s*in\s*')
