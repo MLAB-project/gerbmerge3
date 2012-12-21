@@ -201,7 +201,6 @@ def tile_search1(Jobs, X, Y):
   # square). Practically, these assumptions make no difference because the software
   # currently doesn't optimize for cases of repeated jobs.
   _PossiblePermutations = (2**len(Jobs))*factorial(len(Jobs))
-  #print "Possible permutations:", _PossiblePermutations
 
   print('='*70)
   print("Starting placement using exhaustive search.")

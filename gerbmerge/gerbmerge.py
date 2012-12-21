@@ -125,14 +125,14 @@ G70*
 writeGerberHeader = writeGerberHeader22degrees
 
 def writeApertureMacros(fid, usedDict):
-  keys = config.GAMT.keys()
+  keys = list(config.GAMT.keys())
   keys.sort()
   for key in keys:
     if key in usedDict:
       config.GAMT[key].writeDef(fid)
 
 def writeApertures(fid, usedDict):
-  keys = config.GAT.keys()
+  keys = list(config.GAT.keys())
   keys.sort()
   for key in keys:
     if key in usedDict:
@@ -345,7 +345,7 @@ def merge(opts, args, gui = None):
   config.parseConfigFile(args[0])
 
   # Force all X and Y coordinates positive by adding absolute value of minimum X and Y
-  for name, job in config.Jobs.iteritems():
+  for name, job in config.Jobs.items():
     min_x, min_y = job.mincoordinates()
     shift_x = shift_y = 0
     if min_x < 0: shift_x = abs(min_x)
@@ -496,7 +496,6 @@ def merge(opts, args, gui = None):
     except KeyError:
       fullname = 'merged.%s.ger' % lname
     OutputFiles.append(fullname)
-    #print 'Writing %s ...' % fullname
     fid = open(fullname, 'wt')
     writeGerberHeader(fid)
     
@@ -509,7 +508,7 @@ def merge(opts, args, gui = None):
       apmUsedDict.update(apmd)
 
     # Increase aperature sizes to match minimum feature dimension                         
-    if config.MinimumFeatureDimension.has_key(layername):
+    if layername in config.MinimumFeatureDimension:
     
       print("  Thickening", lname, "feature dimensions ...")
       
@@ -599,7 +598,6 @@ def merge(opts, args, gui = None):
   fullname = config.Config['outlinelayerfile']
   if fullname and fullname.lower() != "none":
     OutputFiles.append(fullname)
-    #print 'Writing %s ...' % fullname
     fid = open(fullname, 'wt')
     writeGerberHeader(fid)
 
@@ -624,7 +622,6 @@ def merge(opts, args, gui = None):
   fullname = config.Config['scoringfile']
   if fullname and fullname.lower() != "none":
     OutputFiles.append(fullname)
-    #print 'Writing %s ...' % fullname
     fid = open(fullname, 'wt')
     writeGerberHeader(fid)
 
@@ -648,7 +645,7 @@ def merge(opts, args, gui = None):
   # First construct global mapping of diameters to tool numbers
   for job in config.Jobs.values():
     for tool,diam in job.xdiam.items():
-      if config.GlobalToolRMap.has_key(diam):
+      if diam in config.GlobalToolRMap:
         continue
 
       toolNum += 1
@@ -664,7 +661,7 @@ def merge(opts, args, gui = None):
     config.GlobalToolMap[tool] = diam
 
   # Tools is just a list of tool names
-  Tools = config.GlobalToolMap.keys()
+  Tools = list(config.GlobalToolMap.keys())
   Tools.sort()   
 
   fullname = config.Config['fabricationdrawingfile']
@@ -673,7 +670,6 @@ def merge(opts, args, gui = None):
       raise RuntimeError("Only %d different tool sizes supported for fabrication drawing." % strokes.MaxNumDrillTools)
 
     OutputFiles.append(fullname)
-    #print 'Writing %s ...' % fullname
     fid = open(fullname, 'wt')
     writeGerberHeader(fid)
     writeApertures(fid, {drawing_code1: None})
@@ -690,7 +686,6 @@ def merge(opts, args, gui = None):
   except KeyError:
     fullname = 'merged.drills.xln'
   OutputFiles.append(fullname)
-  #print 'Writing %s ...' % fullname
   fid = open(fullname, 'wt')
 
   writeExcellonHeader(fid)
@@ -745,6 +740,8 @@ def merge(opts, args, gui = None):
   #print 'Writing %s ...' % fullname
   fid = open(fullname, 'wt')
 
+  if totalarea == 0:
+    totalarea = 1
   print('-'*50)
   print("     Job Size : %f\" x %f\"" % (MaxXExtent-OriginX, MaxYExtent-OriginY))
   print("     Job Area : %.2f sq. in." % totalarea)

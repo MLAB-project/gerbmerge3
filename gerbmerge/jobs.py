@@ -17,7 +17,6 @@ import re
 import string
 import builtins
 import copy
-import types
 
 import aptable
 import config
@@ -215,7 +214,7 @@ class Job:
         c = command[index]
         
         # Shift X and Y coordinate of command
-        if type(c) == types.TupleType:                      ## ensure that command is of type tuple
+        if isinstance(c, tuple):                      ## ensure that command is of type tuple
           command_list = list(c)                            ## convert tuple to list
           if  (type( command_list[0] ) == types.IntType) \
           and (type( command_list[1] ) == types.IntType):  ## ensure that first two elemenst are integers
@@ -298,7 +297,7 @@ class Job:
 
     for line in fid:
       # Get rid of CR characters (0x0D) and leading/trailing blanks
-      line = string.replace(line, '\x0D', '').strip()
+      line = line.replace('\x0D', '').strip()
 
       # Old location of format_pat search. Now moved down into the sub-line parse loop below.
 
@@ -321,7 +320,7 @@ class Job:
           raise RuntimeError("Unknown aperture definition in file %s" % fullname)
 
         hash = A.hash()
-        if not RevGAT.has_key(hash):
+        if hash not in RevGAT:
           raise RuntimeError("File %s has aperture definition \"%s\" not in global aperture table." % (fullname, hash))
 
         # This says that all draw commands with this aperture code will
@@ -341,7 +340,7 @@ class Job:
           raise RuntimeError("File %s has an aperture macro definition that comes after drawing commands." % fullname)
 
         hash = M.hash()
-        if not RevGAMT.has_key(hash):
+        if hash not in RevGAMT:
           raise RuntimeError("File %s has aperture macro definition not in global aperture macro table:\n%s" % (fullname, hash))
 
         # This says that all aperture definition commands that reference this macro name
@@ -439,7 +438,7 @@ class Job:
             continue
 
           # Map it using our translation table
-          if not self.apxlat[layername].has_key(currtool):
+          if currtool not in self.apxlat[layername]:
             raise RuntimeError("File %s has tool change command \"%s\" with no corresponding translation" % (fullname, currtool))
 
           currtool = self.apxlat[layername][currtool]
@@ -583,9 +582,9 @@ class Job:
         V.append(int(round(int(s)*divisor)))
       return tuple(V)
 
-    for line in fid.xreadlines():
+    for line in fid:
       # Get rid of CR characters
-      line = string.replace(line, '\x0D', '')
+      line = line.replace('\x0D', '')
 
       # Protel likes to embed comment lines beginning with ';'
       if line[0]==';':
@@ -617,7 +616,7 @@ class Job:
         # as T01 and sometimes as T1. We canonicalize to T01.
         currtool = 'T%02d' % int(currtool[1:])
 
-        if self.xdiam.has_key(currtool):
+        if currtool in self.xdiam:
           raise RuntimeError("File %s defines tool %s more than once" % (fullname, currtool))
         self.xdiam[currtool] = diam
         continue
@@ -685,7 +684,7 @@ class Job:
         raise RuntimeError("File %s has uninterpretable line:\n  %s" % (fullname, line))
 
   def hasLayer(self, layername):
-    return self.commands.has_key(layername)
+    return layername in self.commands
 
   def writeGerber(self, fid, layername, Xoff, Yoff):
     "Write out the data such that the lower-left corner of this job is at the given (X,Y) position, in inches"
@@ -707,7 +706,7 @@ class Job:
     # due to panelizing.
     fid.write('X%07dY%07dD02*\n' % (X, Y))
     for cmd in self.commands[layername]:
-      if type(cmd) is types.TupleType:
+      if isinstance(cmd, tuple):
         if len(cmd)==3:
           x, y, d = cmd
           fid.write('X%07dY%07dD%02d*\n' % (x+DX, y+DY, d))
@@ -758,7 +757,7 @@ class Job:
 
     # Boogie
     for ltool in ltools:
-      if self.xcommands.has_key(ltool):
+      if ltool in self.xcommands:
         for cmd in self.xcommands[ltool]:
           x, y = cmd
           fid.write(fmtstr % (x+DX, y+DY))
@@ -781,7 +780,7 @@ class Job:
     ltools = self.findTools(diameter)
 
     for ltool in ltools:
-      if self.xcommands.has_key(ltool):
+      if ltool in self.xcommands:
         for cmd in self.xcommands[ltool]:
           x, y = cmd
           makestroke.drawDrillHit(fid, 10*x+DX, 10*y+DY, toolNum)
@@ -791,7 +790,7 @@ class Job:
 
     GAT=config.GAT
 
-    if self.apertures.has_key(layername):
+    if layername in self.apertures:
       apdict = {}.fromkeys(self.apertures[layername])
       apmlist = [GAT[ap].dimx for ap in self.apertures[layername] if GAT[ap].apname=='Macro']
       apmdict = {}.fromkeys(apmlist)
@@ -820,7 +819,7 @@ class Job:
     lastAperture = None
 
     for cmd in self.commands[layername]:
-      if type(cmd) == types.TupleType:
+      if isinstance(cmd, tuple):
         # It is a data command: tuple (X, Y, D), all integers, or (X, Y, I, J, D), all integers.
         if len(cmd)==3:
           x, y, d = cmd
@@ -1203,7 +1202,7 @@ def rotateJob(job, degrees = 90, firstpass = True):
 
     for cmd in job.commands[layername]:
       # Is it a drawing command?
-      if type(cmd) is types.TupleType:
+      if isinstance(cmd, tuple):
         if len(cmd)==3:
           x, y, d = map(builtins.int, cmd)
           II=JJ=None

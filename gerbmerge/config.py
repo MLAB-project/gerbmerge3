@@ -186,7 +186,7 @@ def parseToolList(fname):
     # Canonicalize tool so that T1 becomes T01
     tool = 'T%02d' % int(tool[1:])
 
-    if TL.has_key(tool):
+    if tool in TL:
       raise RuntimeError("Tool '%s' defined more than once in tool list file '%s'" % (tool,fname))
 
     TL[tool]=size
@@ -216,11 +216,11 @@ def parseConfigFile(fname, Config=Config, Jobs=Jobs):
   if CP.has_section('Options'):
     for opt in CP.options('Options'):
       # Is it one we expect
-      if Config.has_key(opt):
+      if opt in Config:
         # Yup...override it
         Config[opt] = CP.get('Options', opt)
 
-      elif CP.defaults().has_key(opt):
+      elif opt in CP.defaults():
         pass   # Ignore DEFAULTS section keys
 
       elif opt in ('fabricationdrawing', 'outlinelayer'):
@@ -236,7 +236,7 @@ def parseConfigFile(fname, Config=Config, Jobs=Jobs):
     raise RuntimeError("Missing [Options] section in configuration file")
 
   # Ensure we got a tool list
-  if not Config.has_key('toollist'):
+  if 'toollist' not in Config:
     raise RuntimeError("INTERNAL ERROR: Missing tool list assignment in [Options] section")
 
   # Make integers integers, floats floats
@@ -371,7 +371,7 @@ def parseConfigFile(fname, Config=Config, Jobs=Jobs):
     # Emit warnings if some layers are missing
     LL = LayerList.copy()
     for layername in J.apxlat.keys():
-      assert LL.has_key(layername)
+      assert layername in LL
       del LL[layername]
 
     if LL:

@@ -228,7 +228,7 @@ def mergeLines(Lines):
   # or within each other. We will have to sort all horizontal lines by their
   # Y ordinates and group them according to Y ordinates that are close enough
   # to each other.
-  yvals = HLines.keys()
+  yvals = list(HLines.keys())
   clusters = clusterOrdinates(yvals)  # A list of clustered tuples containing yvals
 
   for cluster in clusters:
@@ -240,7 +240,7 @@ def mergeLines(Lines):
     # Y ordinate. Merge them together.
     NewHLines.extend(mergeHLines(clusterLines))
 
-  xvals = VLines.keys()
+  xvals = list(VLines.keys())
   clusters = clusterOrdinates(xvals)
   for cluster in clusters:
     clusterLines = []
@@ -283,9 +283,6 @@ def writeScoring(fid, Place, OriginX, OriginY, MaxXExtent, MaxYExtent):
 
   # Combine disparate lines into single lines
   Lines = mergeLines(Lines)
-
-  #for line in Lines:
-  #  print [round(x,3) for x in line]
 
   # Write 'em out
   for line in Lines:

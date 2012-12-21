@@ -274,12 +274,12 @@ def rectCenter(rect):
   dx = rectWidth(rect)
   dy = rectHeight(rect)
 
-  if dx & 1:    # Odd width: center is (left+right)/2 + 1/2
+  if int(dx) & 1:    # Odd width: center is (left+right)/2 + 1/2
     X = (rect[0] + rect[2] + 1)/2
   else:         # Even width: center is (left+right)/2
     X = (rect[0] + rect[2])/2
 
-  if dy & 1:
+  if int(dy) & 1:
     Y = (rect[1] + rect[3] + 1)/2
   else:
     Y = (rect[1] + rect[3])/2
