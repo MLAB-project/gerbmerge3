@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 """
-Regular expression, SimpleParse, ane message constants.
-
-Requires:
-  
-  - SimpleParse 2.1 or higher
-              http://simpleparse.sourceforge.net
-              
+Regular expression and message constants.              
 
 --------------------------------------------------------------------
 
