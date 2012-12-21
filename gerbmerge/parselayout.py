@@ -50,7 +50,7 @@ class Panel:                 # Meant to be subclassed as either a Row() or Col()
     
   def __str__(self):
     "Pretty-prints this panel"
-    return str([str(x) for x in self.jobs])
+    return self.__class__.__name__ + " " + str([str(x) for x in self.jobs])
 
   def maxwidths(self):
     "Return maximum width in inches of any one subpanel"
@@ -208,7 +208,7 @@ def parseColSpec(spec):
     if coljob.tag == 'board':
       jobs.addjob(parseJobSpec(coljob))
     elif coljob.tag == 'row':
-      jobs.addjob(parseColSpec(coljob))
+      jobs.addjob(parseRowSpec(coljob))
     else:
       raise RuntimeError("Unexpected element '%s' encountered while parsing jobs file" % coljob.tag)
 
@@ -283,6 +283,9 @@ def parseLayoutFile(fname):
     else:
         raise RuntimeError("Invalid child of root element")
     Rows.append(newRow)
+
+  for row in Rows:
+    print(row)
 
   return Rows
 
