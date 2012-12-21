@@ -325,23 +325,23 @@ if __name__=="__main__":
 
   # Generate the Gerber so we can view it
   fid = file('amacro.ger', 'wt')
-  print(fid, \
+  print(\
 """G75*
 G70*
 %OFA0B0*%
 %FSLAX24Y24*%
 %IPPOS*%
-%LPD*%""")
+%LPD*%""", file=fid)
   M.writeDef(fid)
   MR.writeDef(fid)
-  print(fid, \
+  print(\
 """%ADD10TEST*%
 %ADD11TESTR*%
 D10*
 X010000Y010000D03*
 D11*
 X015000Y010000D03*
-M02*""")
+M02*""", file=fid)
   fid.close()
 
   print(M)
