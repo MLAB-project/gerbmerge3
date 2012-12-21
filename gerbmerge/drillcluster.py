@@ -47,9 +47,6 @@ def cluster(drills, tolerance, debug = _DEBUG):
             mn = min(c)
             mx = max(c)
             
-            ##debug_print( "Validating " + str_d(size) + " in " + str_d(c) ) 
-            ##debug_print( "Possible cluster range = " + str_d(mx - 2 * tolerance) + " to " + str_d(mn + 2 * tolerance) )
-            
             if (size >= mx - 2 * tolerance) and (size <= mn + 2 * tolerance):
                
                debug_print( str_d(size) + " belongs with " + str_d(c) )
@@ -107,8 +104,6 @@ def remap(jobs, globalToolMap, debug = _DEBUG):
         new_commands = {}
         for tool, diam in job.xdiam.items():
         
-            ##debug_print("\n  Current tool: " + tool + " (" + str_d(diam) + ")")
-        
             # Search for best matching tool
             best_diam, best_tool = globalToolMap[0]          
 
@@ -116,17 +111,13 @@ def remap(jobs, globalToolMap, debug = _DEBUG):
                 if abs(glob_diam - diam) < abs(best_diam - diam):
                     best_tool = glob_tool
                     best_diam = glob_diam
-            ##debug_print("Best match: " + best_tool + " (" + str_d(best_diam) + ")")
             new_tools[best_tool] = best_diam
-            ##debug_print(best_tool + " will replace " + tool)
 
             # Append commands to existing commands if they exist
             if best_tool in new_commands:
-                ##debug_print( "Current commands: " + str( new_commands[best_tool] ) )
                 temp = new_commands[best_tool]
                 temp.extend( job.xcommands[tool] )
                 new_commands[best_tool] = temp
-                ##debug_print( "All commands: " + str( new_commands[best_tool] ) )
             else:
                 new_commands[best_tool] = job.xcommands[tool]
             

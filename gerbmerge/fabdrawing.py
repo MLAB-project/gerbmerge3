@@ -27,8 +27,6 @@ def writeDrillHits(fid, Place, Tools):
     except:
       raise RuntimeError("INTERNAL ERROR: Tool code %s not found in global tool list" % tool)
 
-    #for row in Layout:
-    #  row.writeDrillHits(fid, size, toolNumber)
     for job in Place.jobs:
       job.writeDrillHits(fid, size, toolNumber)
 
@@ -171,10 +169,6 @@ def writeUserText(fid, X, Y):
   for line in lines:
     # Get rid of CR
     line = line.replace('\x0D', '')
-
-    # Chop off \n
-    #if line[-1] in string.whitespace:
-    #  line = line[:-1]
 
     # Strip off trailing whitespace
     line = line.rstrip()

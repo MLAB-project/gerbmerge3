@@ -462,7 +462,6 @@ def merge(opts, args, gui = None):
     text_size = max(text_size, config.min_text_size)
     print("Using text size: {0} mils".format(text_size))
 
-    #pdb.set_trace()
     # by default, set stroke proportional to the size based on the ratio of the minimum stroke to the minimum size
     if not config.text_stroke:
       print("Computing text stroke based on text size...")
@@ -552,14 +551,6 @@ def merge(opts, args, gui = None):
     # Write only necessary macro and aperture definitions to Gerber file
     writeApertureMacros(fid, apmUsedDict)
     writeApertures(fid, apUsedDict)
-
-    #for row in Layout:
-    #  row.writeGerber(fid, layername)
-
-    #  # Do cut lines
-    #  if config.Config['cutlinelayers'] and (layername in config.Config['cutlinelayers']):
-    #    fid.write('%s*\n' % drawing_code_cut)    # Choose drawing aperture
-    #    row.writeCutLines(fid, drawing_code_cut, OriginX, OriginY, MaxXExtent, MaxYExtent)
 
     # Finally, write actual flash data
     for job in Place.jobs:
@@ -712,8 +703,6 @@ def merge(opts, args, gui = None):
 
   # Compute stats
   jobarea = 0.0
-  #for row in Layout:
-  #  jobarea += row.jobarea()
   for job in Place.jobs:
     jobarea += job.jobarea()
     
@@ -723,10 +712,6 @@ def merge(opts, args, gui = None):
   drillhits = 0
   for tool in Tools:
     ToolStats[tool]=0
-    #for row in Layout:
-    #  hits = row.drillhits(config.GlobalToolMap[tool])
-    #  ToolStats[tool] += hits
-    #  drillhits += hits
     for job in Place.jobs:
       hits = job.drillhits(config.GlobalToolMap[tool])
       ToolStats[tool] += hits
@@ -737,7 +722,6 @@ def merge(opts, args, gui = None):
   except KeyError:
     fullname = 'merged.toollist.drl'
   OutputFiles.append(fullname)
-  #print 'Writing %s ...' % fullname
   fid = open(fullname, 'wt')
 
   print('-'*50)
