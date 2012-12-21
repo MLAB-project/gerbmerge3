@@ -185,7 +185,7 @@ def findJob(jobname, rotated, Jobs=config.Jobs):
 
   return jobs.JobLayout(job)
 
-def parseJobSpec(spec, data):
+def parseJobSpec(spec):
   rotation = spec.get('rotate', default="0")
   if rotation == "true":
     rotation = 90
@@ -202,8 +202,7 @@ def parseColSpec(spec):
 
   for coljob in spec:
     if coljob.tag == 'board':
-      pass
-      #jobs.addjob(parseJobSpec(coljob))
+      jobs.addjob(parseJobSpec(coljob))
     elif coljob.tag == 'row':
       jobs.addjob(parseColSpec(coljob))
     else:
@@ -216,8 +215,7 @@ def parseRowSpec(spec):
 
   for rowjob in spec:
     if rowjob.tag == 'board':
-      pass
-      #jobs.addjob(parseJobSpec(rowjob))
+      jobs.addjob(parseJobSpec(rowjob))
     elif rowjob.tag == 'col':
       jobs.addjob(parseColSpec(rowjob))
     else:
