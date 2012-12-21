@@ -214,7 +214,6 @@ def constructApertureTable(fileList):
 
   AT = {}               # Aperture Table for this file
   for fname in fileList:
-    #print 'Reading apertures from %s ...' % fname
 
     knownMacroNames = {}
 
@@ -267,15 +266,6 @@ def constructApertureTable(fileList):
     val.code = key
     code += 1
 
-  if 0:
-    keylist = config.GAT.keys()
-    keylist.sort()
-    print 'Apertures'
-    print '========='
-    for key in keylist:
-      print '%s' % config.GAT[key]
-    sys.exit(0)
-
 def findHighestApertureCode(keys):
   "Find the highest integer value in a list of aperture codes: ['D10', 'D23', 'D35', ...]"
 
@@ -322,14 +312,14 @@ if __name__=="__main__":
 
   keylist = config.GAMT.keys()
   keylist.sort()
-  print 'Aperture Macros'
-  print '==============='
+  print('Aperture Macros')
+  print('===============')
   for key in keylist:
-    print '%s' % config.GAMT[key]
+    print('%s' % config.GAMT[key])
 
   keylist = config.GAT.keys()
   keylist.sort()
-  print 'Apertures'
-  print '========='
+  print('Apertures')
+  print('=========')
   for key in keylist:
-    print '%s' % config.GAT[key]
+    print('%s' % config.GAT[key])
