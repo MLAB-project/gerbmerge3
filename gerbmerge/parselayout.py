@@ -3,10 +3,10 @@
 Parse the job layout specification file.
 
 Requires:
-  
+
   - SimpleParse 2.1 or higher
               http://simpleparse.sourceforge.net
-              
+
 
 --------------------------------------------------------------------
 
@@ -19,31 +19,10 @@ http://ruggedcircuits.com/gerbmerge
 import sys
 import string
 
-from simpleparse.parser import Parser
+import xml.etree.ElementTree as ET
 
 import config
 import jobs
-
-declaration = r'''
-file         := (commentline/nullline/rowspec)+
-rowspec      := ts, 'Row', ws, '{'!, ts, comment?, '\n', rowjob+, ts, '}'!, ts, comment?, '\n'
-rowjob       := jobspec/colspec/commentline/nullline
-colspec      := ts, 'Col', ws, '{'!, ts, comment?, '\n', coljob+, ts, '}'!, ts, comment?, '\n'
-coljob       := jobspec/rowspec/commentline/nullline
-
-jobspec      := ts, (paneljobspec/basicjobspec), ts, comment?, '\n'
-basicjobspec := id, (rotation)?
-paneljobspec := 'Not yet implemented'
-#paneljobspec := int, [xX], int, ws, basicjobspec
-comment      := ([#;]/'//'), -'\n'*
-commentline  := ts, comment, '\n'
-nullline     := ts, '\n'
-rotation     := ws, 'Rotate', ('90'/'180'/'270')?
-ws := [ \t]+
-ts := [ \t]*
-id := [a-zA-Z0-9], [a-zA-Z0-9_-]*
-int := [0-9]+
-'''
 
 class Panel:                 # Meant to be subclassed as either a Row() or Col()
   def __init__(self):
@@ -94,7 +73,7 @@ class Panel:                 # Meant to be subclassed as either a Row() or Col()
   def writeGerber(self, fid, layername):
     for job in self.jobs:
       job.writeGerber(fid, layername)
-    
+
   def writeExcellon(self, fid, tool):
     for job in self.jobs:
       job.writeExcellon(fid, tool)
@@ -106,7 +85,7 @@ class Panel:                 # Meant to be subclassed as either a Row() or Col()
   def writeCutLines(self, fid, drawing_code, X1, Y1, X2, Y2):
     for job in self.jobs:
       job.writeCutLines(fid, drawing_code, X1, Y1, X2, Y2)
-    
+
   def drillhits(self, tool):
     hits = 0
     for job in self.jobs:
@@ -162,14 +141,14 @@ def canonicalizePanel(panel):
   for job in panel:
     L = L + job.canonicalize()
   return L
-  
+
 def findJob(jobname, rotated, Jobs=config.Jobs):
   """
     Find a job in config.Jobs, possibly rotating it
     If job not in config.Jobs add it for future reference
     Return found job
   """
-                                                                                    
+
   if rotated == 90:
     fullname = jobname + '*rotated90'
   elif rotated == 180:
@@ -178,18 +157,18 @@ def findJob(jobname, rotated, Jobs=config.Jobs):
     fullname = jobname + '*rotated270'
   else:
     fullname = jobname
-                         
+
   try:
     for existingjob in Jobs.keys():
       if existingjob.lower() == fullname.lower(): ## job names are case insensitive
-        job = Jobs[existingjob]                 
+        job = Jobs[existingjob]
         return jobs.JobLayout(job)
   except:
     pass
 
   # Perhaps we just don't have a rotated job yet
   if rotated:
-    try:      
+    try:
       for existingjob in Jobs.keys():
         if existingjob.lower() == jobname.lower(): ## job names are case insensitive
           job = Jobs[existingjob]
@@ -205,67 +184,42 @@ def findJob(jobname, rotated, Jobs=config.Jobs):
   return jobs.JobLayout(job)
 
 def parseJobSpec(spec, data):
-  for jobspec in spec:
-    if jobspec[0] in ('ts','comment'): continue
+  rotation = spec.get('rotate', default="0")
+  if rotation == "true":
+    rotation = 90
+  else:
+    try:
+      rotation = int(rotation)
+    except ValueError:
+      raise RuntimeError("Rotation must be specified as 'true' or multiples of 90.")
 
-    assert jobspec[0] in ('paneljobspec','basicjobspec')
-    if jobspec[0] == 'basicjobspec':
-      namefield = jobspec[3][0]
-      jobname = data[namefield[1]:namefield[2]]
+  return findJob(spec.get('name'), rotation)
 
-      if len(jobspec[3]) > 1:
-        rotationfield = jobspec[3][1]
-        rotation = data[ rotationfield[1] + 1: rotationfield[2] ]
-                
-        if (rotation == "Rotate") or (rotation == "Rotate90"):
-            rotated = 90
-        elif rotation == "Rotate180":
-            rotated = 180
-        elif rotation == "Rotate270":
-            rotated = 270
-        else:
-            raise RuntimeError("Unsupported rotation: %s" % rotation)
-
-      else:
-        rotated = 0
-
-      return findJob(jobname, rotated)
-    else:
-      raise RuntimeError("Matrix panels not yet supported")
-
-def parseColSpec(spec, data):
+def parseColSpec(spec):
   jobs = Col()
 
   for coljob in spec:
-    if coljob[0] in ('ts','ws','comment'): continue
-
-    assert coljob[0] == 'coljob'
-    job = coljob[3][0]
-    if job[0] in ('commentline','nullline'): continue
-    
-    assert job[0] in ('jobspec','rowspec')
-    if job[0] == 'jobspec':
-      jobs.addjob(parseJobSpec(job[3],data))
+    if coljob.tag == 'board':
+      pass
+      #jobs.addjob(parseJobSpec(coljob))
+    elif coljob.tag == 'row':
+      jobs.addjob(parseColSpec(coljob))
     else:
-      jobs.addjob(parseRowSpec(job[3],data))
+      raise RuntimeError("Unexpected element '%s' encountered while parsing jobs file" % coljob.tag)
 
   return jobs
 
-def parseRowSpec(spec, data):
+def parseRowSpec(spec):
   jobs = Row()
 
   for rowjob in spec:
-    if rowjob[0] in ('ts','ws','comment'): continue
-
-    assert rowjob[0] == 'rowjob'
-    job = rowjob[3][0]
-    if job[0] in ('commentline','nullline'): continue
-    
-    assert job[0] in ('jobspec','colspec')
-    if job[0] == 'jobspec':
-      jobs.addjob(parseJobSpec(job[3],data))
+    if rowjob.tag == 'board':
+      pass
+      #jobs.addjob(parseJobSpec(rowjob))
+    elif rowjob.tag == 'col':
+      jobs.addjob(parseColSpec(rowjob))
     else:
-      jobs.addjob(parseColSpec(job[3],data))
+      raise RuntimeError("Unexpected element '%s' encountered while parsing jobs file" % rowjob.tag)
 
   return jobs
 
@@ -283,14 +237,14 @@ def parseLayoutFile(fname):
      Each column consists of a list of either jobs or rows.
      These are recursive, so it can look like:
 
-        [ 
+        [
           Row([JobLayout(), Col([ Row([JobLayout(), JobLayout()]),
                                      JobLayout()       ]),         JobLayout() ]),   # That was row 0
           Row([JobLayout(), JobLayout()])                                            # That was row 1
         ]
 
      This is a panel with two rows. In the first row there is
-     a job, a column, and another job, from left to right. In the 
+     a job, a column, and another job, from left to right. In the
      second row there are two jobs, from left to right.
 
      The column in the first row has two jobs side by side, then
@@ -298,41 +252,36 @@ def parseLayoutFile(fname):
   """
 
   try:
-    fid = file(fname, 'rt')
+    file = open(fname, 'rt')
   except Exception as detail:
     raise RuntimeError("Unable to open layout file: %s\n  %s" % (fname, str(detail)))
 
-  data = fid.read()
-  fid.close()
-  parser = Parser(declaration, "file")
+  # Preprocess the XML jobs file removing lines that start with '#' as those're comment lines.
+  # They're not handled by the XML parser, so we remove them beforehand.
+  unparsedXml = ""
+  for line in file:
+    if line[0] != '#':
+      unparsedXml += line
 
-  # Replace all CR's in data with nothing, to convert DOS line endings
-  # to unix format (all LF's).
-  data = string.replace(data, '\x0D', '')
+  # Attempt to parse the jobs file
+  try:
+    root = ET.fromstring(unparsedXml)
+  except ET.ParseError as e:
+    raise RuntimeError("Layout file cannot be parsed. Error at %d, %d." % e.position)
 
-  tree = parser.parse(data)
-
-  # Last element of tree is number of characters parsed
-  if not tree[0]:
-    raise RuntimeError("Layout file cannot be parsed")
-
-  if tree[2] != len(data):
-    raise RuntimeError("Parse error at character %d in layout file" % tree[2])
-
+  # Build up the array of rows
   Rows = []
-  for rowspec in tree[1]:
-    if rowspec[0] in ('nullline', 'commentline'): continue
-    assert rowspec[0]=='rowspec'
-
-    Rows.append(parseRowSpec(rowspec[3], data))
+  for rowspec in root.findall('row'):
+    Rows.append(parseRowSpec(rowspec))
 
   return Rows
 
 if __name__=="__main__":
-  fid = file(sys.argv[1])
-  testdata = fid.read()
-  fid.close()
+    file = open(sys.argv[1])
+    unparsedXml = ""
+    for line in file:
+        if line[0] != '#':
+            unparsedXml += line
 
-  parser = Parser(declaration, "file")
-  import pprint
-  pprint.pprint(parser.parse(testdata))
+    xml = ET.fromstring(unparsedXml)
+    ET.dump(xml)
