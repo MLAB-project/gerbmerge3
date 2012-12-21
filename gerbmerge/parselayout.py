@@ -100,6 +100,7 @@ class Panel:                 # Meant to be subclassed as either a Row() or Col()
 
     return area
 
+# TODO: Add pretty-printing functionality
 class Row(Panel):
   def __init__(self):
     Panel.__init__(self)
@@ -118,6 +119,7 @@ class Row(Panel):
       job.setPosition(x,y)
       x += job.width_in() + config.Config['xspacing']
 
+# TODO: Add pretty-printing functionality
 class Col(Panel):
   def __init__(self):
     Panel.__init__(self)
