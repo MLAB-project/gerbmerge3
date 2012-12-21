@@ -19,8 +19,6 @@ http://ruggedcircuits.com/gerbmerge
 
 import re
 
-from simpleparse.parser import Parser
-
 DISCLAIMER = """
 ****************************************************
 *           R E A D    C A R E F U L L Y           *
