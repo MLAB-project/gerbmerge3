@@ -12,7 +12,7 @@ http://ruggedcircuits.com/gerbmerge
 """
 
 import sys
-import ConfigParser
+import configparser
 import re
 import string
 
