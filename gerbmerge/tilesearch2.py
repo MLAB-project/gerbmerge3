@@ -21,7 +21,7 @@ import gerbmerge
 
 _StartTime = 0.0           # Start time of tiling
 _CkpointTime = 0.0         # Next time to print stats
-_Placements = 0L           # Number of placements attempted
+_Placements = 0            # Number of placements attempted
 _TBestTiling = None        # Best tiling so far
 _TBestScore  = float(sys.maxint) # Smallest area so far
 
@@ -36,8 +36,7 @@ def printTilingStats():
     area = 999999.0
     utilization = 0.0
 
-  print "\r  %ld placements / Smallest area: %.1f sq. in. / Best utilization: %.1f%%" % \
-        (_Placements, area, utilization),
+  print("\r  %ld placements / Smallest area: %.1f sq. in. / Best utilization: %.1f%%" % (_Placements, area, utilization))
 
   if gerbmerge.GUI is not None:
     sys.stdout.flush()
@@ -122,26 +121,26 @@ def tile_search2(Jobs, X, Y):
 
   _StartTime = time.time()
   _CkpointTime = _StartTime + 3
-  _Placements = 0L
+  _Placements = 0
   _TBestTiling = None
   _TBestScore = float(sys.maxint)
 
-  print '='*70
-  print "Starting random placement trials. You must press Ctrl-C to"
-  print "stop the process and use the best placement so far."
-  print "Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs)*100)
+  print('='*70)
+  print("Starting random placement trials. You must press Ctrl-C to")
+  print("stop the process and use the best placement so far.")
+  print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs)*100))
 
   try:
     _tile_search2(Jobs, X, Y)
     printTilingStats()
-    print
+    print()
   except KeyboardInterrupt:
     printTilingStats()
-    print
-    print "Interrupted."
+    print()
+    print("Interrupted.")
 
   computeTime = time.time() - _StartTime
-  print "Computed %ld placements in %d seconds / %.1f placements/second" % (_Placements, computeTime, _Placements/computeTime)
-  print '='*70
+  print("Computed %ld placements in %d seconds / %.1f placements/second" % (_Placements, computeTime, _Placements/computeTime))
+  print('='*70)
 
   return _TBestTiling
