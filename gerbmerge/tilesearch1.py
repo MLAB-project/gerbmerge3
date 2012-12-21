@@ -23,7 +23,7 @@ _Placements = 0            # Number of placements attempted
 _PossiblePermutations = 0  # Number of different ways of ordering jobs
 _Permutations = 0          # Number of different job orderings already computed
 _TBestTiling = None        # Best tiling so far
-_TBestScore  = float(sys.maxint) # Smallest area so far
+_TBestScore  = float("inf") # Smallest area so far
 _PrintStats = 1            # Print statistics every 3 seconds
 
 def printTilingStats():
@@ -79,7 +79,7 @@ def _tile_search1(Jobs, TSoFar, firstAddPoint, cfg=config.Config):
   global _StartTime, _CkpointTime, _Placements, _TBestTiling, _TBestScore, _Permutations, _PrintStats
 
   if not TSoFar:
-    return (None, float(sys.maxint))
+    return (None, float("inf"))
 
   if not Jobs:
     # Update the best tiling and score. If the new tiling matches
@@ -186,7 +186,7 @@ def initialize(printStats=1):
   _Placements = 0
   _Permutations = 0
   _TBestTiling = None
-  _TBestScore = float(sys.maxint)
+  _TBestScore = float("inf")
 
 def tile_search1(Jobs, X, Y):
   """Wrapper around _tile_search1 to handle keyboard interrupt, etc."""

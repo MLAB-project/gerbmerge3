@@ -319,7 +319,7 @@ mirrored-L corner __  |      |
 
   def bounds(self):
     """Return 2-tuple ((minX, minY), (maxX, maxY)) of rectangular region defined by all jobs"""
-    minX = minY = float(sys.maxint)
+    minX = minY = float("inf")
     maxX = maxY = 0.0
 
     for bl,tr,job in self.jobs:
@@ -368,7 +368,7 @@ def maxUtilization(Jobs):
 # Utility function to compute the minimum dimension along any axis of all jobs.
 # Used to remove inlets.
 def minDimension(Jobs):
-  M = float(sys.maxint)
+  M = float("inf")
   for Xdim,Ydim,job,rjob in Jobs:
     M = min(M,Xdim)
     M = min(M,Ydim)

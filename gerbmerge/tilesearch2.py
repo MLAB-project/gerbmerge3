@@ -23,7 +23,7 @@ _StartTime = 0.0           # Start time of tiling
 _CkpointTime = 0.0         # Next time to print stats
 _Placements = 0            # Number of placements attempted
 _TBestTiling = None        # Best tiling so far
-_TBestScore  = float(sys.maxint) # Smallest area so far
+_TBestScore  = float("inf") # Smallest area so far
 
 def printTilingStats():
   global _CkpointTime
@@ -123,7 +123,7 @@ def tile_search2(Jobs, X, Y):
   _CkpointTime = _StartTime + 3
   _Placements = 0
   _TBestTiling = None
-  _TBestScore = float(sys.maxint)
+  _TBestScore = float("inf")
 
   print('='*70)
   print("Starting random placement trials. You must press Ctrl-C to")
