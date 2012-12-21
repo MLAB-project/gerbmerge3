@@ -144,10 +144,10 @@ def drawDrillHit(fid, X, Y, toolNum):
 
 if __name__=="__main__":
   import string
-  s = string.digits+string.letters+string.punctuation
+  s = string.digits+string.ascii_letters+string.punctuation
   #s = "The quick brown fox jumped over the lazy dog!"
   size = float(sys.argv[1]) if len(sys.argv) > 1 else 10
-  fid = file('test.ger','wt')
+  fid = open('test.ger','wt')
   fid.write("""G75*
 G70*
 %OFA0B0*%
