@@ -6,6 +6,7 @@ import os
 from distutils.core import setup
 import distutils.sysconfig
 
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "gerbmerge"))
 from gerbmerge.gerbmerge import VERSION_MAJOR, VERSION_MINOR
 
 if sys.version_info < (3,0,0):
