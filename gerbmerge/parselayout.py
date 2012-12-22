@@ -2,12 +2,6 @@
 """
 Parse the job layout specification file.
 
-Requires:
-
-  - SimpleParse 2.1 or higher
-              http://simpleparse.sourceforge.net
-
-
 --------------------------------------------------------------------
 
 This program is licensed under the GNU General Public License (GPL)
