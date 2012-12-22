@@ -30,7 +30,7 @@ def printTilingStats(placements, bestTiling):
     print("\r  %ld placements / Smallest area: %.1f sq. in. / Best utilization: %.1f%%" % (placements, area, utilization))
 
 class TileSearch:
-    def __init__(self, jobs, x, y, cfg=config.Config):
+    def __init__(self, jobs, x, y, cfg=config):
         # Track the last time a synchronization occured
         self.lastCheckTime = 0
 
@@ -61,12 +61,12 @@ class TileSearch:
         self.tiling = None
 
         # Store the x/y spacing configured for this tiling
-        self.xspacing = cfg['xspacing']
-        self.yspacing = cfg['yspacing']
+        self.xspacing = cfg.Config['xspacing']
+        self.yspacing = cfg.Config['yspacing']
 
         # Store some other configuration values
-        self.RandomSearchExhaustiveJobs = config.RandomSearchExhaustiveJobs
-        self.SearchTimeout = config.SearchTimeout
+        self.RandomSearchExhaustiveJobs = cfg.RandomSearchExhaustiveJobs
+        self.SearchTimeout = cfg.SearchTimeout
 
     def run(self):
         self.startTime = time.time()
