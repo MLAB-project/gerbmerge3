@@ -1,10 +1,10 @@
 all: merge1.xln merge2.xln
 
 merge1.xln:
-	gerbmerge layout1.cfg layout1.def
+	gerbmerge layout1.cfg layout1.xml
 
 merge2.xln:
-	gerbmerge layout2.cfg layout2.def
+	gerbmerge layout2.cfg layout2.xml
 
 view1:
 	gerbv merge1.* &
