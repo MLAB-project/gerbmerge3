@@ -305,13 +305,6 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
     aptable.constructApertureTable(apfiles)
     del apfiles
 
-    if 0:
-        keylist = GAMT.keys()
-        keylist.sort()
-        for key in keylist:
-            print('%s' % GAMT[key])
-        sys.exit(0)
-
     # Parse the tool list
     if Config['toollist']:
         DefaultToolList = parseToolList(Config['toollist'])
