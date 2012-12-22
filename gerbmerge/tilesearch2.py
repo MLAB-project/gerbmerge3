@@ -19,123 +19,142 @@ import tilesearch1
 
 import gerbmerge
 
-_StartTime = 0.0           # Start time of tiling
-_CkpointTime = 0.0         # Next time to print stats
-_Placements = 0            # Number of placements attempted
-_TBestTiling = None        # Best tiling so far
-_TBestScore  = float("inf") # Smallest area so far
-
 def printTilingStats(placements, bestTiling):
-  if bestTiling:
-    area = bestTiling.area()
-    utilization = bestTiling.usedArea() / area * 100.0
-  else:
-    area = 999999.0
-    utilization = 0.0
-
-  print("\r  %ld placements / Smallest area: %.1f sq. in. / Best utilization: %.1f%%" % (placements, area, utilization))
-
-def _tile_search2(Jobs, X, Y, cfg=config.Config):
-  global _CkpointTime, _Placements, _TBestTiling, _TBestScore
-
-  r = random.Random()
-  N = len(Jobs)
-
-  # M is the number of jobs that will be placed randomly.
-  # N-M is the number of jobs that will be searched exhaustively.
-  M = N - config.RandomSearchExhaustiveJobs
-  M = max(M,0)
-
-  xspacing = cfg['xspacing']
-  yspacing = cfg['yspacing']
-  
-  # Must escape with Ctrl-C
-  while 1:
-    T = tiling.Tiling(X,Y)
-    joborder = r.sample(range(N), N)
-
-    minInletSize = tiling.minDimension(Jobs)
-
-    for ix in joborder[:M]:
-      Xdim,Ydim,job,rjob = Jobs[ix]
-      
-      T.removeInlets(minInletSize)
-
-      if r.choice([0,1]):
-        addpoints = T.validAddPoints(Xdim+xspacing,Ydim+yspacing)
-        if not addpoints:
-          break
-
-        pt = r.choice(addpoints)
-        T.addJob(pt, Xdim+xspacing, Ydim+yspacing, job)
-      else:
-        addpoints = T.validAddPoints(Ydim+xspacing,Xdim+yspacing)
-        if not addpoints:
-          break
-
-        pt = r.choice(addpoints)
-        T.addJob(pt, Ydim+xspacing, Xdim+yspacing, rjob)
+    if bestTiling:
+        area = bestTiling.area()
+        utilization = bestTiling.usedArea() / area * 100.0
     else:
-      # Do exhaustive search on remaining jobs
-      if N-M:
-        remainingJobs = []
-        for ix in joborder[M:]:
-          remainingJobs.append(Jobs[ix])
+        area = 0.0
+        utilization = 0.0
 
-        tilesearch1.initialize(0)
-        tilesearch1._tile_search1(remainingJobs, T, 1)
-        T = tilesearch1.bestTiling()
+    print("\r  %ld placements / Smallest area: %.1f sq. in. / Best utilization: %.1f%%" % (placements, area, utilization))
 
-      if T:
-        score = T.area()
+class TileSearch:
+    def __init__(self, jobs, x, y, cfg=config.Config):
+        # Track the last time a synchronization occured
+        self.lastCheckTime = 0
 
-        if score < _TBestScore:
-          _TBestTiling,_TBestScore = T,score
-        elif score == _TBestScore:
-          if T.corners() < _TBestTiling.corners():
-            _TBestTiling,_TBestScore = T,score
+        # Determine how often this process should synchronize
+        # Each process is slightly offset at random to prevent
+        # contention.
+        self.syncPeriod = 3 + (random.random() - 0.5) / 5
 
-    _Placements += 1
-      
-    # If we've been at this for 3 seconds, print some status information
-    if time.time() > _CkpointTime + 3:
-      _CkpointTime += 3
-      printTilingStats(_Placements, _TBestTiling)
-      
-      # Check for timeout
-      if (config.SearchTimeout > 0) and ((time.time() - _StartTime) > config.SearchTimeout):
-        raise KeyboardInterrupt 
-        
-    gerbmerge.updateGUI("Performing automatic layout...")
-  
-  # end while 1
+        # Track the best tiling found so far.
+        self.bestTiling = None
+
+        # Track the best score found so far. We start with a maximally large
+        # value as lower are better
+        # This gets synchronized with the global best every `syncPeriod`
+        self.bestScore = float("inf")
+
+        # Track how many placements have been attempted
+        # This is only tracked per this process
+        self.placements = 0
+
+        # Store the total list of jobs to place
+        self.jobs = jobs
+
+        # Store the X and Y grid of the Tiling
+        # We also store a blank tiling to start
+        self.x = x
+        self.y = y
+        self.tiling = None
+
+        # Store the x/y spacing configured for this tiling
+        self.xspacing = cfg['xspacing']
+        self.yspacing = cfg['yspacing']
+
+        # Store some other configuration values
+        self.RandomSearchExhaustiveJobs = config.RandomSearchExhaustiveJobs
+        self.SearchTimeout = config.SearchTimeout
+
+    def run(self):
+        self.startTime = time.time()
+        self.lastCheckTime = time.time()
+        r = random.Random()
+        N = len(self.jobs)
+
+        # M is the number of jobs that will be placed randomly.
+        # N-M is the number of jobs that will be searched exhaustively.
+        M = N - self.RandomSearchExhaustiveJobs
+        M = max(M,0)
+
+        # Must escape with Ctrl-C
+        while 1:
+            currentTiling = tiling.Tiling(self.x, self.y)
+            joborder = r.sample(range(N), N)
+
+            minInletSize = tiling.minDimension(self.jobs)
+
+            for ix in joborder[:M]:
+                Xdim,Ydim,job,rjob = self.jobs[ix]
+
+                currentTiling.removeInlets(minInletSize)
+
+                if r.choice([0,1]):
+                    addpoints = currentTiling.validAddPoints(Xdim+self.xspacing, Ydim+self.yspacing)
+                    if not addpoints:
+                        break
+
+                    pt = r.choice(addpoints)
+                    currentTiling.addJob(pt, Xdim+self.xspacing, Ydim+self.yspacing, job)
+                else:
+                    addpoints = currentTiling.validAddPoints(Ydim+self.xspacing, Xdim+self.yspacing)
+                    if not addpoints:
+                        break
+
+                    pt = r.choice(addpoints)
+                    currentTiling.addJob(pt, Ydim+self.xspacing, Xdim+self.yspacing, rjob)
+            else:
+                # Do exhaustive search on remaining jobs
+                if N-M:
+                    remainingJobs = []
+                    for ix in joborder[M:]:
+                        remainingJobs.append(self.jobs[ix])
+
+                    tilesearch1.initialize(0)
+                    tilesearch1._tile_search1(remainingJobs, currentTiling, 1)
+                    newTiling = tilesearch1.bestTiling()
+
+                    if newTiling:
+                        score = newTiling.area()
+                    else:
+                        score = float("inf")
+
+                    if score < self.bestScore or (score == self.bestScore and newTiling.corners() < self.bestTiling.corners()):
+                        self.bestTiling = newTiling
+                        self.bestScore = score
+
+            self.placements += 1
+
+            # If we've been at this for one period, print some status information
+            if time.time() > self.lastCheckTime + self.syncPeriod:
+                self.lastCheckTime = time.time()
+                printTilingStats(self.placements, self.bestTiling)
+
+                # Check for timeout
+                if (self.SearchTimeout > 0) and ((time.time() - self.startTime) > self.SearchTimeout):
+                    raise KeyboardInterrupt
+
+        # end while 1
 
 def tile_search2(Jobs, X, Y):
-  """Wrapper around _tile_search2 to handle keyboard interrupt, etc."""
-  global _StartTime, _CkpointTime, _Placements, _TBestTiling, _TBestScore
+    """Wrapper around _tile_search2 to handle keyboard interrupt, etc."""
 
-  _StartTime = time.time()
-  _CkpointTime = _StartTime + 3
-  _Placements = 0
-  _TBestTiling = None
-  _TBestScore = float("inf")
+    print("="*70)
+    print("Starting random placement trials. You must press Ctrl-C to")
+    print("stop the process and use the best placement so far.")
+    print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs)*100))
 
-  print("="*70)
-  print("Starting random placement trials. You must press Ctrl-C to")
-  print("stop the process and use the best placement so far.")
-  print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs)*100))
+    try:
+        x = TileSearch(Jobs, X, Y)
+        x.run()
+    except KeyboardInterrupt:
+        printTilingStats(x.placements, x.bestTiling)
+        print("\nInterrupted.")
 
-  try:
-    _tile_search2(Jobs, X, Y)
-    printTilingStats(_Placements, _TBestTiling)
-    print()
-  except KeyboardInterrupt:
-    printTilingStats(_Placements, _TBestTiling)
-    print()
-    print("Interrupted.")
+    computeTime = time.time() - x.startTime
+    print("Computed %ld placements in %d seconds / %.1f placements/second" % (x.placements, computeTime, x.placements/computeTime))
+    print("="*70)
 
-  computeTime = time.time() - _StartTime
-  print("Computed %ld placements in %d seconds / %.1f placements/second" % (_Placements, computeTime, _Placements/computeTime))
-  print("="*70)
-
-  return _TBestTiling
+    return x.bestTiling
