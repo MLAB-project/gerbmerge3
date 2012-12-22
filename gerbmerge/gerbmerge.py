@@ -28,8 +28,6 @@ import os
 import getopt
 import re
 
-import pdb
-
 import aptable
 import jobs
 import config
