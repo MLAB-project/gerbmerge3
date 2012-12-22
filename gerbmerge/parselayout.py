@@ -227,7 +227,7 @@ def parseRowSpec(spec):
 
     return jobs
 
-def parseLayoutFile(fname):
+def parseLayoutFile(file):
     """config.Jobs is a dictionary of ('jobname', Job Object).
 
        The return value is a nested array. The primary dimension
@@ -254,11 +254,6 @@ def parseLayoutFile(fname):
        The column in the first row has two jobs side by side, then
        another one above them.
     """
-
-    try:
-        file = open(fname, 'rt')
-    except Exception as detail:
-        raise RuntimeError("Unable to open layout file: %s\n  %s" % (fname, str(detail)))
 
     # Preprocess the XML jobs file removing lines that start with '#' as those're comment lines.
     # They're not handled by the XML parser, so we remove them beforehand.

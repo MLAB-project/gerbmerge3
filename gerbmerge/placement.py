@@ -57,19 +57,13 @@ class Placement:
             fid.write('%s %.3f %.3f\n' % (job.job.name, job.x, job.y))
         fid.close()
 
-    def addFromFile(self, fname, Jobs):
+    def addFromFile(self, file, Jobs):
         """Read placement from a file, placed against jobs in Jobs list"""
         pat = re.compile(r'\s*(\S+)\s+(\S+)\s+(\S+)')
         comment = re.compile(r'\s*(?:#.+)?$')
 
-        try:
-            fid = open(fname, 'rt')
-        except:
-            print("Unable to open placement file: \"%s\"" % fname)
-            sys.exit(1)
-
-        lines = fid.readlines()
-        fid.close()
+        lines = file.readlines()
+        file.close()
 
         for line in lines:
             if comment.match(line): continue

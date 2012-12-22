@@ -206,11 +206,11 @@ def parseToolList(fname):
 #     table, GAT, and the global aperture macro table, GAMT
 #
 #   * read the tool list file and populate the DefaultToolList dictionary
-def parseConfigFile(fname, Config=Config, Jobs=Jobs):
+def parseConfigFile(fid, Config=Config, Jobs=Jobs):
     global DefaultToolList
 
     CP = configparser.ConfigParser()
-    CP.readfp(open(fname,'rt'))
+    CP.readfp(fid)
 
     # First parse global options
     if CP.has_section('Options'):

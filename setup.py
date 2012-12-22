@@ -9,9 +9,9 @@ import distutils.sysconfig
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "gerbmerge"))
 from gerbmerge.gerbmerge import VERSION_MAJOR, VERSION_MINOR
 
-if sys.version_info < (3,0,0):
+if sys.version_info < (3,2,0):
   print("*"*73)
-  print("GerbMerge version %d.%d requires Python 3.0 or higher" % (VERSION_MAJOR, VERSION_MINOR))
+  print("GerbMerge version %d.%d requires Python 3.2 or higher" % (VERSION_MAJOR, VERSION_MINOR))
   print("*"*73)
   sys.exit(1)
 

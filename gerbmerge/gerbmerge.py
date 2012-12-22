@@ -25,7 +25,7 @@ http://ruggedcircuits.com/gerbmerge
 
 import sys
 import os
-import getopt
+import argparse
 import re
 
 import aptable
@@ -56,43 +56,6 @@ config.PlacementFile = None
 
 # This is a handle to a GUI front end, if any, else None for command-line usage
 GUI = None
-
-def usage():
-    print("""
-  Usage: gerbmerge [Options] configfile [layoutfile]
-
-  Options:
-      -h, --help          -- This help summary
-      -v, --version       -- Program version and contact information
-      --random-search     -- Automatic placement using random search (default)
-      --full-search       -- Automatic placement using exhaustive search
-      --place-file=fn     -- Read placement from file
-      --rs-fsjobs=N       -- When using random search, exhaustively search N jobs
-                             for each random placement (default: N=2)
-      --search-timeout=T  -- When using random search, search for T seconds for best
-                             random placement (default: T=0, search until stopped)
-      --no-trim-gerber    -- Do not attempt to trim Gerber data to extents of board
-      --no-trim-excellon  -- Do not attempt to trim Excellon data to extents of board
-      --octagons=fmt      -- Generate octagons in two different styles depending on
-                             the value of 'fmt':
-
-                                fmt is 'rotate' :  0.0 rotation
-                                fmt is 'normal' : 22.5 rotation (default)
-      --ack               -- Pre-acknowledge the warning, so you don't have to wait for it.
-      --text=S            -- A string of text to print between boards in layout
-      --text-size=N       -- Size (height, in mils) of text, should probably be less than 'y spacing'
-      --text-stroke=N     -- Stroke width (in mils) of text (default 10)
-      --text-x            -- X position of text (if not given, default to inside space between jobs)
-      --text-y            -- Y position of text (if not given, default to inside space between jobs)
-
-  If a layout file is not specified, automatic placement is performed. If the
-  placement is read from a file, then no automatic placement is performed and
-  the layout file (if any) is ignored.
-
-  NOTE: The dimensions of each job are determined solely by the maximum extent of
-  the board outline layer for each job.
-  """)
-    sys.exit(1)
 
 def writeGerberHeader22degrees(fid):
     fid.write( \
@@ -290,57 +253,44 @@ def tile_jobs(Jobs):
 
     return tile
 
-def merge(opts, args, gui = None):
+def merge(opts, gui = None):
     writeGerberHeader = writeGerberHeader22degrees
 
     global GUI
     GUI = gui
 
-    for opt, arg in opts:
-        if opt in ('--octagons',):
-            if arg=='rotate':
-                writeGerberHeader = writeGerberHeader0degrees
-            elif arg=='normal':
-                writeGerberHeader = writeGerberHeader22degrees
-            else:
-                raise RuntimeError('Unknown octagon format')
-        elif opt in ('--random-search',):
-            config.AutoSearchType = RANDOM_SEARCH
-        elif opt in ('--full-search',):
-            config.AutoSearchType = EXHAUSTIVE_SEARCH
-        elif opt in ('--rs-fsjobs',):
-            config.RandomSearchExhaustiveJobs = int(arg)
-        elif opt in ('--search-timeout',):
-            config.SearchTimeout = int(arg)
-        elif opt in ('--place-file',):
-            config.AutoSearchType = FROM_FILE
-            config.PlacementFile = arg
-        elif opt in ('--no-trim-gerber',):
-            config.TrimGerber = 0
-        elif opt in ('--no-trim-excellon',):
-            config.TrimExcellon = 0
-        elif opt in ('--ack',):
-            pass
-        elif opt in ('--text',):
-            config.text = arg
-        elif opt in ('--text-size',):
-            config.text_size = int(arg)
-        elif opt in ('--text-stroke',):
-            config.text_stroke = int(arg)
-        elif opt in ('--text-x',):
-            config.text_x = int(arg)
-        elif opt in ('--text-y',):
-            config.text_y = int(arg)
-        else:
-            raise RuntimeError("Unknown option: %s" % opt)
+    if opts.octagons == 'rotate':
+        writeGerberHeader = writeGerberHeader0degrees
+    else:
+        writeGerberHeader = writeGerberHeader22degrees
 
-    if len(args) > 2 or len(args) < 1:
-        raise RuntimeError('Invalid number of arguments')
+    if opts.search == 'random':
+        config.AutoSearchType = RANDOM_SEARCH
+    else:
+        config.AutoSearchType = EXHAUSTIVE_SEARCH
+ 
+    config.RandomSearchExhaustiveJobs = opts.rs_esjobs
+    config.SearchTimeout = opts.search_timeout
+
+    if opts.place_file:
+        config.AutoSearchType = FROM_FILE
+        config.PlacementFile = opts.place_file
+
+    if opts.no_trim_gerber:
+        config.TrimGerber = 0
+    if opts.no_trim_excellon:
+        config.TrimExcellon = 0
+
+    config.text = opts.text
+    config.text_size = opts.text_size
+    config.text_stroke = opts.text_stroke
+    config.text_x = opts.text_x
+    config.text_y = opts.text_y
 
     # Load up the Jobs global dictionary, also filling out GAT, the
     # global aperture table and GAMT, the global aperture macro table.
     updateGUI("Reading job files...")
-    config.parseConfigFile(args[0])
+    config.parseConfigFile(opts.configfile)
 
     # Force all X and Y coordinates positive by adding absolute value of minimum X and Y
     for name, job in config.Jobs.items():
@@ -383,8 +333,8 @@ def merge(opts, args, gui = None):
     # is no layout file, do auto-layout.
     updateGUI("Performing layout...")
     print("Performing layout ...")
-    if len(args) > 1:
-        Layout = parselayout.parseLayoutFile(args[1])
+    if opts.layoutfile:
+        Layout = parselayout.parseLayoutFile(opts.layoutfile)
 
         # Do the layout, updating offsets for each component job.
         X = OriginX + config.Config['leftmargin']
@@ -762,34 +712,29 @@ def updateGUI(text = None):
         GUI.updateProgress(text)
 
 if __name__=="__main__":
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hv', ['help', 'version', 'octagons=', 'random-search', 'full-search', 'rs-fsjobs=', 'search-timeout=', 'place-file=', 'no-trim-gerber', 'no-trim-excellon', 'text=', 'text-size=', 'text-stroke=', 'text-x=', 'text-y=', 'ack'])
-    except getopt.GetoptError:
-        usage()
+    parser = argparse.ArgumentParser(description="Merge gerber files for individual boards into a single panel. Can follow\nmanual layouts or search for optimal arrangements.", epilog="If a layout file is not specified, automatic placement is performed. If the\nplacement is read from a file, then no automatic placement is performed and\nthe layout file (if any) is ignored.\n\nNOTE: The dimensions of each job are determined solely by the maximum extent\nof the board outline layer for each job.", formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('--search', choices=['random', 'exhaustive'], default='random', help="Specify search method for automatic layouts. Defaults to random.")
+    parser.add_argument('--place-file', type=argparse.FileType('r'), help="Specify a place file (output of previous searches)")
+    parser.add_argument('--version', action='version', version="%(prog)s "+str(VERSION_MAJOR)+"."+str(VERSION_MINOR))
+    parser.add_argument('--rs-esjobs', type=int, help="When using random search, exhaustively search N jobs for each random placement. Only matters when using random search. Defaults to 2.", metavar='N', default=2)
+    parser.add_argument('--search-timeout', type=int, help="When using random search, search for T seconds for best random placement. Without this option the search will continue until interrupted by user.", metavar='T', default=0)
+    parser.add_argument('--no-trim-gerber', action='store_true', help="Do not attempt to trim Gerber data to extents of board")
+    parser.add_argument('--no-trim-excellon', action='store_true', help="Do not attempt to trim Excellon  data to extents of board")
+    parser.add_argument('--octagons', choices=['rotate', 'normal'], default='normal', help="Generate octagons in two different styles depending on the argument. 'rotate' sets rotation to 0 while 'normal' rotates the octagons 22.5deg")
+    parser.add_argument('--ack', action='store_true', help="Automatically acknowledge disclaimer/warning")
+    parser.add_argument('--text', type=str, help="A string of text to print between boards in layout")
+    parser.add_argument('--text-size', type=int, metavar='N', help="Size (height in mils) of text. Should be less than 'y spacing' set in .cfg file")
+    parser.add_argument('--text-stroke', type=int, metavar='N', default=10, help="Stroke (width in mils) of text.")
+    parser.add_argument('--text-x', type=int, default=0, metavar='X', help="X position of text. Defaults to inside space between jobs")
+    parser.add_argument('--text-y', type=int, default=0, metavar='Y', help="Y position of text. Defaults to inside space between jobs")
+    parser.add_argument('configfile', type=argparse.FileType('r'), help=".cfg file setting configuration values for this panel")
+    parser.add_argument('layoutfile', type=argparse.FileType('r'), default=None, nargs='?', help=".xml file specifying a manual layout for this panel")
+    
+    args = parser.parse_args()
 
-    for opt, arg in opts:
-        if opt in ('-h', '--help'):
-            usage()
-        elif opt in ('-v', '--version'):
-            print("""
-      GerbMerge Version %d.%d  --  Combine multiple Gerber/Excellon files
+    # Display the disclaimer, skipping it if specified
+    disclaimer(args.ack)
 
-      This program is licensed under the GNU General Public License (GPL)
-      Version 3. See http://www.fsf.org for details of this license.
-
-      Rugged Circuits LLC
-      http://ruggedcircuits.com/gerbmerge
-      """ % (VERSION_MAJOR, VERSION_MINOR))
-            sys.exit(0)
-        elif opt in ('--octagons', '--random-search','--full-search','--rs-fsjobs','--place-file','--no-trim-gerber','--no-trim-excellon', '--search-timeout', '--ack', '--text', '--text-size', '--text-stroke', '--text-x', '--text-y'):
-            pass ## arguments are valid
-        else:
-            raise RuntimeError("Unknown option: %s" % opt)
-
-    if len(args) > 2 or len(args) < 1:
-        usage()
-
-    disclaimer(ack = ('--ack', '') in opts)
-
-    sys.exit(merge(opts, args)) ## run germberge
+    # Run gerbmerge
+    sys.exit(merge(args))
 # vim: expandtab ts=2 sw=2 ai syntax=python
