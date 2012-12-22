@@ -6,10 +6,10 @@ and text. Hexapod is the example board that comes with Eagle.
 Each project has CAM data generated from its associated *.cam file,
 hence proj1.cam and hexapod.cam were used to generate drawing data.
 
-The "layout1.cfg" and "layout1.def" files demonstrate how GerbMerge can
+The "layout1.cfg" and "layout1.xml" files demonstrate how GerbMerge can
 be used to panelize a single job, including rotation.
 
-The "layout2.cfg" and "layout2.def" files demonstrate panelizing
+The "layout2.cfg" and "layout2.xml" files demonstrate panelizing
 different jobs.
 
 The Makefile in this directory shows an example of how to invoke
@@ -19,7 +19,7 @@ for viewing the output files.
 
 The syntax for running GerbMerge is:
 
-    gerbmerge layout1.cfg layout1.def
+    gerbmerge layout1.cfg layout1.xml
 
 If you are running Linux and have installed the 'gerbv' Gerber previewer,
 you can view the results by typing:
