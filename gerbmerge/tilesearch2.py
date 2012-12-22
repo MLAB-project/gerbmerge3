@@ -25,21 +25,15 @@ _Placements = 0            # Number of placements attempted
 _TBestTiling = None        # Best tiling so far
 _TBestScore  = float("inf") # Smallest area so far
 
-def printTilingStats():
-  global _CkpointTime
-  _CkpointTime = time.time() + 3
-
-  if _TBestTiling:
-    area = _TBestTiling.area()
-    utilization = _TBestTiling.usedArea() / area * 100.0
+def printTilingStats(placements, bestTiling):
+  if bestTiling:
+    area = bestTiling.area()
+    utilization = bestTiling.usedArea() / area * 100.0
   else:
     area = 999999.0
     utilization = 0.0
 
-  print("\r  %ld placements / Smallest area: %.1f sq. in. / Best utilization: %.1f%%" % (_Placements, area, utilization))
-
-  if gerbmerge.GUI is not None:
-    sys.stdout.flush()
+  print("\r  %ld placements / Smallest area: %.1f sq. in. / Best utilization: %.1f%%" % (placements, area, utilization))
 
 def _tile_search2(Jobs, X, Y, cfg=config.Config):
   global _CkpointTime, _Placements, _TBestTiling, _TBestScore
@@ -104,8 +98,9 @@ def _tile_search2(Jobs, X, Y, cfg=config.Config):
     _Placements += 1
       
     # If we've been at this for 3 seconds, print some status information
-    if time.time() > _CkpointTime:
-      printTilingStats()
+    if time.time() > _CkpointTime + 3:
+      _CkpointTime += 3
+      printTilingStats(_Placements, _TBestTiling)
       
       # Check for timeout
       if (config.SearchTimeout > 0) and ((time.time() - _StartTime) > config.SearchTimeout):
@@ -125,22 +120,22 @@ def tile_search2(Jobs, X, Y):
   _TBestTiling = None
   _TBestScore = float("inf")
 
-  print('='*70)
+  print("="*70)
   print("Starting random placement trials. You must press Ctrl-C to")
   print("stop the process and use the best placement so far.")
   print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs)*100))
 
   try:
     _tile_search2(Jobs, X, Y)
-    printTilingStats()
+    printTilingStats(_Placements, _TBestTiling)
     print()
   except KeyboardInterrupt:
-    printTilingStats()
+    printTilingStats(_Placements, _TBestTiling)
     print()
     print("Interrupted.")
 
   computeTime = time.time() - _StartTime
   print("Computed %ld placements in %d seconds / %.1f placements/second" % (_Placements, computeTime, _Placements/computeTime))
-  print('='*70)
+  print("="*70)
 
   return _TBestTiling

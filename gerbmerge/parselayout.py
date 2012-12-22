@@ -284,9 +284,6 @@ def parseLayoutFile(fname):
         raise RuntimeError("Invalid child of root element")
     Rows.append(newRow)
 
-  for row in Rows:
-    print(row)
-
   return Rows
 
 if __name__=="__main__":
