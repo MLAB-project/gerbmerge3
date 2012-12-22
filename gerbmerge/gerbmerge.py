@@ -44,8 +44,8 @@ import util
 import scoring
 import drillcluster
 
-VERSION_MAJOR=1
-VERSION_MINOR=8
+VERSION_MAJOR=2
+VERSION_MINOR=0
 
 RANDOM_SEARCH = 1
 EXHAUSTIVE_SEARCH = 2

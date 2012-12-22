@@ -3,35 +3,22 @@ import sys
 import glob
 import os
 
-from distutils.core import setup, Extension
+from distutils.core import setup
 import distutils.sysconfig
 
 from gerbmerge.gerbmerge import VERSION_MAJOR, VERSION_MINOR
 
-if sys.version_info < (2,4,0):
-  print '*'*73
-  print 'GerbMerge version %d.%d requires Python 2.4 or higher' % (VERSION_MAJOR, VERSION_MINOR)
-  print '*'*73
+if sys.version_info < (3,0,0):
+  print("*"*73)
+  print("GerbMerge version %d.%d requires Python 3.0 or higher" % (VERSION_MAJOR, VERSION_MINOR))
+  print("*"*73)
   sys.exit(1)
-
-if 0:
-  for key,val in distutils.sysconfig.get_config_vars().items():
-    print key
-    print '***********************'
-    print '  ', val
-    print
-    print
-
-  sys.exit(0)
 
 SampleFiles = glob.glob('testdata/*')
 DocFiles = glob.glob('doc/*')
 AuxFiles = ['COPYING']
 
 if sys.platform == 'win32' or ('bdist_wininst' in sys.argv):
-  #DestLib = distutils.sysconfig.get_config_var('prefix')
-  #DestDir = os.path.join(DestLib, 'gerbmerge')
-  #BinDir = DestLib
   DestLib = '.'
   DestDir = os.path.join(DestLib, 'gerbmerge')
   BinFiles = ['misc/gerbmerge.bat']
@@ -61,9 +48,9 @@ printed circuit board layout files into a single job.
 
 To run the program, invoke the Python interpreter on the
 gerbmerge.py file. On Windows, if you installed GerbMerge in
-C:/Python24, for example, open a command window (DOS box)
+C:\Python32, for example, open a command window (DOS box)
 and type:
-    C:/Python24/gerbmerge.bat
+    C:\Python32\gerbmerge.bat
 
 For more details on installation or running GerbMerge, see the
 URL below.
@@ -81,7 +68,7 @@ URL below.
 )
 
 do_fix_perms = 0
-if sys.platform != "win32":
+if sys.platform != 'win32':
   for cmd in dist.commands:
    if cmd[:7]=='install':
     do_fix_perms = 1
@@ -90,37 +77,39 @@ if sys.platform != "win32":
 if do_fix_perms:
   # Ensure package files and misc/help files are world readable-searchable.
   # Shouldn't Distutils do this for us?
-  print 'Setting permissions on installed files...',
+  print("Setting permissions on installed files...")
   try:
+    CHMOD_755 = stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH
+    CHMOD_644 = stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH
     def fixperms(arg, dirname, names):
-      os.chmod(dirname, 0755)
+      os.chmod(dirname, CHMOD_755)
       for name in names:
         fullname = os.path.join(dirname, name)
         if os.access(fullname, os.X_OK):
-          os.chmod(fullname, 0755)
+          os.chmod(fullname, CHMOD_755)
         else:
-          os.chmod(fullname, 0644)
+          os.chmod(fullname, CHMOD_644)
 
     os.path.walk(DestDir, fixperms, 1)
     os.path.walk(os.path.join(DestLib, 'site-packages/gerbmerge'), fixperms, 1)
 
-    os.chmod(os.path.join(BinDir, 'gerbmerge'), 0755)
-    print 'done'
+    os.chmod(os.path.join(BinDir, 'gerbmerge'), CHMOD_755)
+    print("done")
   except:
-    print 'FAILED'
-    print
-    print '*** Please verify that the installed files have correct permissions. On'
-    print "*** systems without permission flags, you don't need to"
-    print '*** worry about it.' 
+    print("FAILED")
+    print()
+    print("*** Please verify that the installed files have correct permissions. On")
+    print("*** systems without permission flags, you don't need to")
+    print("*** worry about it.")
 
 for cmd in dist.commands:
   if cmd[:7]=='install':
-    print
-    print '******** Installation Complete ******** '
-    print
-    print 'Sample files and documentation have been installed in:'
-    print '   ', DestDir
-    print
-    print 'A shortcut to starting the program has been installed as:'
-    print '   ', os.path.join(BinDir, 'gerbmerge')
-    print
+    print()
+    print("******** Installation Complete ******** ")
+    print()
+    print("Sample files and documentation have been installed in:")
+    print("   ", DestDir)
+    print()
+    print("A shortcut to starting the program has been installed as:")
+    print("   ", os.path.join(BinDir, 'gerbmerge'))
+    print()
