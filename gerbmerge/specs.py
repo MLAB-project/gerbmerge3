@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Regular expression and message constants.              
+Regular expression and message constants.
 
 --------------------------------------------------------------------
 
@@ -48,51 +48,51 @@ DISCLAIMER = """
 #                                               "BI" = boolean as integer
 #
 #                                               THESE DATA TYPES ARE FIXED - CODE MUST CHANGE IF TYPES ARE ADDED/MODIFIED
-DEFAULT_OPTIONS = { 
+DEFAULT_OPTIONS = {
     # Spacing in horizontal direction
-    'xspacing':                  ('0.125',   "DP",   "XSpacing",                "1 XSPACING_HELP"), 
+    'xspacing':                  ('0.125',   "DP",   "XSpacing",                "1 XSPACING_HELP"),
     # Spacing in vertical direction
-    'yspacing':                  ('0.125',   "DP",   "YSpacing",                "2 YSPACING_HELP"), 
+    'yspacing':                  ('0.125',   "DP",   "YSpacing",                "2 YSPACING_HELP"),
     # X-Dimension maximum panel size (Olimex)
-    'panelwidth':                ('12.6',    "DP",   "PanelWidth",              "3 PANEL_WIDTH"),  
-    # Y-Dimension maximum panel size (Olimex) 
-    'panelheight':               ('7.8',     "DP",   "PanelHeight",             "4 PanelHeight"), 
-    # e.g., *toplayer,*bottomlayer  
+    'panelwidth':                ('12.6',    "DP",   "PanelWidth",              "3 PANEL_WIDTH"),
+    # Y-Dimension maximum panel size (Olimex)
+    'panelheight':               ('7.8',     "DP",   "PanelHeight",             "4 PanelHeight"),
+    # e.g., *toplayer,*bottomlayer
     'cropmarklayers':            (None,      "L",    "CropMarkLayers",          "5 CropMarkLayers"),
-    # Width (inches) of crop lines   
+    # Width (inches) of crop lines
     'cropmarkwidth':             ('0.01',    "DP",   "CropMarkWidth",           "6 CropMarkWidth"),
-    # as for cropmarklayers   
+    # as for cropmarklayers
     'cutlinelayers':             (None,      "L",    "CutLineLayers",           "7 CutLineLayers"),
-    # Width (inches) of cut lines   
+    # Width (inches) of cut lines
     'cutlinewidth':              ('0.01',    "DP",   "CutLineWidth",            "8 CutLineWidth"),
-    # Minimum dimension for selected layers   
+    # Minimum dimension for selected layers
     'minimumfeaturesize':        (None,      "S",    "MinimumFeatureSize",      "Use this option to automatically thicken features on particular layers.\nThis is intended for thickening silkscreen to some minimum width.\nThe value of this option must be a comma-separated list\nof layer names followed by minimum feature sizes (in inches) for that layer.\nComment this out to disable thickening. Example usage is:\n\nMinimumFeatureSize = *topsilkscreen,0.008,*bottomsilkscreen,0.008"),
-    # Name of file containing default tool list     
+    # Name of file containing default tool list
     'toollist':                  (None,      "PI",   "ToolList",                "10 ToolList"),
     # Tolerance for clustering drill sizes
     'drillclustertolerance':     ('.002',    "DP",    "DrillClusterTolerance",  "11 DrillClusterTolerance"),
-    # Set to 1 to allow multiple jobs to have non-matching layers   
+    # Set to 1 to allow multiple jobs to have non-matching layers
     'allowmissinglayers':        (0,         "BI",   "AllowMissingLayers",      "12 AllowMissingLayers"),
-    # Name of file to which to write fabrication drawing, or None  
-    'fabricationdrawingfile':    (None,      "PO",   "FabricationDrawingFile",  "13 FabricationDrawingFile"),  
+    # Name of file to which to write fabrication drawing, or None
+    'fabricationdrawingfile':    (None,      "PO",   "FabricationDrawingFile",  "13 FabricationDrawingFile"),
     # Name of file containing text to write to fab drawing
-    'fabricationdrawingtext':    (None,      "PI",   "FabricationDrawingText",  "14 FabricationDrawingText"), 
-    # Number of digits after the decimal point in input Excellon files 
+    'fabricationdrawingtext':    (None,      "PI",   "FabricationDrawingText",  "14 FabricationDrawingText"),
+    # Number of digits after the decimal point in input Excellon files
     'excellondecimals':          (4,         "IP",   "ExcellonDecimals",        "15 ExcellonDecimals"),
-    # Generate leading zeros in merged Excellon output file   
+    # Generate leading zeros in merged Excellon output file
     'excellonleadingzeros':      (0,         "IP",   "ExcellonLeadingZeros",    "16 ExcellonLeadingZeros"),
-    # Name of file to which to write simple box outline, or None   
-    'outlinelayerfile':          (None,      "PO",   "OutlineLayerFile",        "17 OutlineLayerFile"), 
-    # Name of file to which to write scoring data, or None 
+    # Name of file to which to write simple box outline, or None
+    'outlinelayerfile':          (None,      "PO",   "OutlineLayerFile",        "17 OutlineLayerFile"),
+    # Name of file to which to write scoring data, or None
     'scoringfile':               (None,      "PO",   "ScoringFile",             "18 ScoringFile"),
-    # Inches of extra room to leave on left side of panel for tooling  
-    'leftmargin':                (0.0,       "DP",   "LeftMargin",              "19 LeftMargin"), 
-    # Inches of extra room to leave on top side of panel for tooling  
-    'topmargin':                 (0.0,       "DP",   "TopMargin",               "20 TopMargin"),   
+    # Inches of extra room to leave on left side of panel for tooling
+    'leftmargin':                (0.0,       "DP",   "LeftMargin",              "19 LeftMargin"),
+    # Inches of extra room to leave on top side of panel for tooling
+    'topmargin':                 (0.0,       "DP",   "TopMargin",               "20 TopMargin"),
     # Inches of extra room to leave on right side of panel for tooling
-    'rightmargin':               (0.0,       "DP",   "RightMargin",             "21 RightMargin"),   
+    'rightmargin':               (0.0,       "DP",   "RightMargin",             "21 RightMargin"),
     # Inches of extra room to leave on bottom side of panel for tooling
-    'bottommargin':              (0.0,       "DP",   "BottomMargin",            "22 BottomMargin"),  
+    'bottommargin':              (0.0,       "DP",   "BottomMargin",            "22 BottomMargin"),
     # List of X,Y points at which to draw fiducials
     'fiducialpoints':            (None,      "S",    "FiducialPoints",          "23 FiducialPoints"),
 }
@@ -132,7 +132,7 @@ DEFAULT_LAYERS = [  "BoardOutline",
                     "BottomSoldermask",
                     "TopSolderPasteMask",
                     "BottomSolderPasteMask",
-                    "Drills"                    ]  
+                    "Drills"                    ]
 REQUIRED_LAYERS = ["BoardOutline", "Drills"]
 RESERVED_LAYER_NAMES = () ##add "mergeout", not implemented yet
 
@@ -142,7 +142,7 @@ RE_VALID_OUTPUT_NAME_MESSAGE = "Vaild Characters: a-z, A-Z, 0-9, underscores, hy
 REQUIRED_LAYERS_OUTPUT = ["BoardOutline", "ToolList", "Placement", "Drills"]
 
 # Default dictionary of layer names to file extensions
-FILE_EXTENSIONS = { "boardoutline":             "GBO",     
+FILE_EXTENSIONS = { "boardoutline":             "GBO",
                     "topcopper":                "GTL",
                     "bottomcopper":             "GBL",
                     "innerlayer2":              "G2",
@@ -165,5 +165,3 @@ NO_TRIM_GERBER      = "--no-trim-gerber"
 NO_TRIM_EXCELLON    = "--no-trim-excellon"
 ROTATED_OCTAGONS    = "--octagons=rotate"
 SEARCH_TIMEOUT      = "--search-timeout="
-                  
-

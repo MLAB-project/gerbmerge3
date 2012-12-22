@@ -39,7 +39,7 @@ Config = {
    'excellondecimals': 4,            # Number of digits after the decimal point in input Excellon files
    'excellonleadingzeros': 0,        # Generate leading zeros in merged Excellon output file
    'outlinelayerfile': None,         # Name of file to which to write simple box outline, or None
-   'outlinelayers': None,	     # e.g., *toplayer, *bottomlayer
+   'outlinelayers': None,            # e.g., *toplayer, *bottomlayer
    'scoringfile': None,              # Name of file to which to write scoring data, or None
    'leftmargin': 0,                  # Inches of extra room to leave on left side of panel for tooling
    'topmargin': 0,                   # Inches of extra room to leave on top side of panel for tooling
@@ -53,15 +53,15 @@ Config = {
 # these are for special text, printed on every layer
 text          = None
 text_size     = None # mils, must be enough less than Yspacing that there isn't overlap
-                     # if not specified, deduce based on Yspacing and other variables 
-	             # (cutline width, etc.)
+                     # if not specified, deduce based on Yspacing and other variables
+                     # (cutline width, etc.)
 text_stroke   = None # mils, deduce based on text_size
 text_rotation = None # degrees
 text_x        = None # if not specified, put it in the first cutline area
 text_y        = None # if not specified, put it in the first cutline area
 
 min_text_stroke =  6 # mils, this is the minimum at SeeedStudio
-min_text_size   = 32 # mils, this is the minimum at SeeedStudio 
+min_text_size   = 32 # mils, this is the minimum at SeeedStudio
 
 # This dictionary is indexed by lowercase layer name and has as values a file
 # name to use for the output.
@@ -108,7 +108,7 @@ TrimGerber = 1
 TrimExcellon = 1
 
 # This configuration option determines the minimum size of feature dimensions for
-# each layer. It is a dictionary indexed by layer name (e.g. '*topsilkscreen') and 
+# each layer. It is a dictionary indexed by layer name (e.g. '*topsilkscreen') and
 # has a floating point number as the value (in inches).
 MinimumFeatureDimension = {}
 
@@ -121,78 +121,78 @@ SearchTimeout = 0
 # Construct the reverse-GAT/GAMT translation table, keyed by aperture/aperture macro
 # hash string. The value is the aperture code (e.g., 'D10') or macro name (e.g., 'M5').
 def buildRevDict(D):
-  RevD = {}
-  for key,val in D.items():
-    RevD[val.hash()] = key
-  return RevD
+    RevD = {}
+    for key,val in D.items():
+        RevD[val.hash()] = key
+    return RevD
 
 def parseStringList(L):
-  """Parse something like '*toplayer, *bottomlayer' into a list of names
-     without quotes, spaces, etc."""
+    """Parse something like '*toplayer, *bottomlayer' into a list of names
+       without quotes, spaces, etc."""
 
-  # This pattern matches quotes at the beginning and end...quotes must match
-  quotepat = re.compile(r'^([' "'" '"' r']?)([^\1]*)\1$')
-  delimitpat = re.compile(r'[ \t]*[,;][ \t]*')
+    # This pattern matches quotes at the beginning and end...quotes must match
+    quotepat = re.compile(r'^([' "'" '"' r']?)([^\1]*)\1$')
+    delimitpat = re.compile(r'[ \t]*[,;][ \t]*')
 
-  match = quotepat.match(L)
-  if match:
-    L = match.group(2)
+    match = quotepat.match(L)
+    if match:
+        L = match.group(2)
 
-  return delimitpat.split(L)
+    return delimitpat.split(L)
 
 # Parse an Excellon tool list file of the form
 #
 #   T01 0.035in
 #   T02 0.042in
-def parseToolList(fname):  
-  TL = {}
-
-  try:
-    fid = open(fname, 'rt')
-  except Exception as detail:
-    raise RuntimeError("Unable to open tool list file '%s':\n  %s" % (fname, str(detail)))
-
-  pat_in  = re.compile(r'\s*(T\d+)\s+([0-9.]+)\s*in\s*')
-  pat_mm  = re.compile(r'\s*(T\d+)\s+([0-9.]+)\s*mm\s*')
-  pat_mil = re.compile(r'\s*(T\d+)\s+([0-9.]+)\s*(?:mil)?')
-  for line in fid.xreadlines():
-    line = string.strip(line)
-    if (not line) or (line[0] in ('#', ';')): continue
-
-    mm = 0
-    mil = 0
-    match = pat_in.match(line)
-    if not match:
-      mm = 1
-      match = pat_mm.match(line)
-      if not match:
-        mil = 1
-        match = pat_mil.match(line)
-        if not match:
-          continue
-
-    tool, size = match.groups()
+def parseToolList(fname):
+    TL = {}
 
     try:
-      size = float(size)
-    except:
-      raise RuntimeError("Tool size in file '%s' is not a valid floating-point number:\n  %s" % (fname,line))
+        fid = open(fname, 'rt')
+    except Exception as detail:
+        raise RuntimeError("Unable to open tool list file '%s':\n  %s" % (fname, str(detail)))
 
-    if mil:
-      size = size*0.001  # Convert mil to inches
-    elif mm:    
-      size = size/25.4   # Convert mm to inches
+    pat_in  = re.compile(r'\s*(T\d+)\s+([0-9.]+)\s*in\s*')
+    pat_mm  = re.compile(r'\s*(T\d+)\s+([0-9.]+)\s*mm\s*')
+    pat_mil = re.compile(r'\s*(T\d+)\s+([0-9.]+)\s*(?:mil)?')
+    for line in fid.xreadlines():
+        line = string.strip(line)
+        if (not line) or (line[0] in ('#', ';')): continue
 
-    # Canonicalize tool so that T1 becomes T01
-    tool = 'T%02d' % int(tool[1:])
+        mm = 0
+        mil = 0
+        match = pat_in.match(line)
+        if not match:
+            mm = 1
+            match = pat_mm.match(line)
+            if not match:
+                mil = 1
+                match = pat_mil.match(line)
+                if not match:
+                    continue
 
-    if tool in TL:
-      raise RuntimeError("Tool '%s' defined more than once in tool list file '%s'" % (tool,fname))
+        tool, size = match.groups()
 
-    TL[tool]=size
-  fid.close()
+        try:
+            size = float(size)
+        except:
+            raise RuntimeError("Tool size in file '%s' is not a valid floating-point number:\n  %s" % (fname,line))
 
-  return TL
+        if mil:
+            size = size*0.001  # Convert mil to inches
+        elif mm:
+            size = size/25.4   # Convert mm to inches
+
+        # Canonicalize tool so that T1 becomes T01
+        tool = 'T%02d' % int(tool[1:])
+
+        if tool in TL:
+            raise RuntimeError("Tool '%s' defined more than once in tool list file '%s'" % (tool,fname))
+
+        TL[tool]=size
+    fid.close()
+
+    return TL
 
 # This function parses the job configuration file and does
 # everything needed to:
@@ -207,188 +207,188 @@ def parseToolList(fname):
 #
 #   * read the tool list file and populate the DefaultToolList dictionary
 def parseConfigFile(fname, Config=Config, Jobs=Jobs):
-  global DefaultToolList
+    global DefaultToolList
 
-  CP = configparser.ConfigParser()
-  CP.readfp(open(fname,'rt'))
+    CP = configparser.ConfigParser()
+    CP.readfp(open(fname,'rt'))
 
-  # First parse global options
-  if CP.has_section('Options'):
-    for opt in CP.options('Options'):
-      # Is it one we expect
-      if opt in Config:
-        # Yup...override it
-        Config[opt] = CP.get('Options', opt)
+    # First parse global options
+    if CP.has_section('Options'):
+        for opt in CP.options('Options'):
+            # Is it one we expect
+            if opt in Config:
+                # Yup...override it
+                Config[opt] = CP.get('Options', opt)
 
-      elif opt in CP.defaults():
-        pass   # Ignore DEFAULTS section keys
+            elif opt in CP.defaults():
+                pass   # Ignore DEFAULTS section keys
 
-      elif opt in ('fabricationdrawing', 'outlinelayer'):
-        print('*'*73)
-        print('\nThe FabricationDrawing and OutlineLayer configuration options have been')
-        print('renamed as of GerbMerge version 1.0. Please consult the documentation for')
-        print('a description of the new options, then modify your configuration file.\n')
-        print('*'*73)
-        sys.exit(1)
-      else:
-        raise RuntimeError("Unknown option '%s' in [Options] section of configuration file" % opt)
-  else:
-    raise RuntimeError("Missing [Options] section in configuration file")
+            elif opt in ('fabricationdrawing', 'outlinelayer'):
+                print('*'*73)
+                print('\nThe FabricationDrawing and OutlineLayer configuration options have been')
+                print('renamed as of GerbMerge version 1.0. Please consult the documentation for')
+                print('a description of the new options, then modify your configuration file.\n')
+                print('*'*73)
+                sys.exit(1)
+            else:
+                raise RuntimeError("Unknown option '%s' in [Options] section of configuration file" % opt)
+    else:
+        raise RuntimeError("Missing [Options] section in configuration file")
 
-  # Ensure we got a tool list
-  if 'toollist' not in Config:
-    raise RuntimeError("INTERNAL ERROR: Missing tool list assignment in [Options] section")
+    # Ensure we got a tool list
+    if 'toollist' not in Config:
+        raise RuntimeError("INTERNAL ERROR: Missing tool list assignment in [Options] section")
 
-  # Make integers integers, floats floats
-  for key,val in Config.items():
-    try:
-      val = int(val)
-      Config[key]=val
-    except:
-      try:
-        val = float(val)
-        Config[key]=val
-      except:
-        pass
-
-  # Process lists of strings
-  if Config['cutlinelayers']:
-    Config['cutlinelayers'] = parseStringList(Config['cutlinelayers'])
-  if Config['cropmarklayers']:
-    Config['cropmarklayers'] = parseStringList(Config['cropmarklayers'])
-  if Config['outlinelayers']:
-    Config['outlinelayers'] = parseStringList(Config['outlinelayers'])
-
-  # Process list of minimum feature dimensions
-  if Config['minimumfeaturesize']:
-    temp = Config['minimumfeaturesize'].split(",")
-    try:
-      for index in range(0, len(temp), 2):
-        MinimumFeatureDimension[ temp[index] ] = float( temp[index + 1] )
-    except:
-      raise RuntimeError("Illegal configuration string:" + Config['minimumfeaturesize'])
-
-  # Process MergeOutputFiles section to set output file names
-  if CP.has_section('MergeOutputFiles'):
-    for opt in CP.options('MergeOutputFiles'):
-      # Each option is a layer name and the output file for this name
-      if opt[0]=='*' or opt in ('boardoutline', 'drills', 'placement', 'toollist'):
-        MergeOutputFiles[opt] = CP.get('MergeOutputFiles', opt)
-
-  # Now, we go through all jobs and collect Gerber layers
-  # so we can construct the Global Aperture Table.
-  apfiles = []
-
-  for jobname in CP.sections():
-    if jobname=='Options': continue
-    if jobname=='MergeOutputFiles': continue
-    if jobname=='GerbMergeGUI': continue
-
-    # Ensure all jobs have a board outline
-    if not CP.has_option(jobname, 'boardoutline'):
-      raise RuntimeError("Job '%s' does not have a board outline specified" % jobname)
-    
-    if not CP.has_option(jobname, 'drills'):
-      raise RuntimeError("Job '%s' does not have a drills layer specified" % jobname)
-
-    for layername in CP.options(jobname):
-      if layername[0]=='*' or layername=='boardoutline':
-        fname = CP.get(jobname, layername)
-        apfiles.append(fname)
-
-        if layername[0]=='*':
-          LayerList[layername]=1
-
-  # Now construct global aperture tables, GAT and GAMT. This step actually
-  # reads in the jobs for aperture data but doesn't store Gerber
-  # data yet.
-  aptable.constructApertureTable(apfiles)
-  del apfiles
-
-  if 0:
-    keylist = GAMT.keys()
-    keylist.sort()
-    for key in keylist:
-      print('%s' % GAMT[key])
-    sys.exit(0)
-
-  # Parse the tool list
-  if Config['toollist']:
-    DefaultToolList = parseToolList(Config['toollist'])
-
-  # Now get jobs. Each job implies layer names, and we
-  # expect consistency in layer names from one job to the
-  # next. Two reserved layer names, however, are
-  # BoardOutline and Drills.
-
-  Jobs.clear()
-
-  do_abort = 0
-  errstr = 'ERROR'
-  if Config['allowmissinglayers']:
-    errstr = 'WARNING'
-
-  for jobname in CP.sections():
-    if jobname=='Options': continue
-    if jobname=='MergeOutputFiles': continue
-    if jobname=='GerbMergeGUI': continue
-
-    print('Reading data from', jobname, '...')
-
-    J = jobs.Job(jobname)
-
-    # Parse the job settings, like tool list, first, since we are not
-    # guaranteed to have ConfigParser return the layers in the same order that
-    # the user wrote them, and we may get Gerber files before we get a tool
-    # list! Same thing goes for ExcellonDecimals. We need to know what this is
-    # before parsing any Excellon files.
-    for layername in CP.options(jobname):
-      fname = CP.get(jobname, layername)
-
-      if layername == 'toollist':
-        J.ToolList = parseToolList(fname)
-      elif layername=='excellondecimals':
+    # Make integers integers, floats floats
+    for key,val in Config.items():
         try:
-          J.ExcellonDecimals = int(fname)
+            val = int(val)
+            Config[key]=val
         except:
-          raise RuntimeError("Excellon decimals '%s' in config file is not a valid integer" % fname)
-      elif layername=='repeat':
+            try:
+                val = float(val)
+                Config[key]=val
+            except:
+                pass
+
+    # Process lists of strings
+    if Config['cutlinelayers']:
+        Config['cutlinelayers'] = parseStringList(Config['cutlinelayers'])
+    if Config['cropmarklayers']:
+        Config['cropmarklayers'] = parseStringList(Config['cropmarklayers'])
+    if Config['outlinelayers']:
+        Config['outlinelayers'] = parseStringList(Config['outlinelayers'])
+
+    # Process list of minimum feature dimensions
+    if Config['minimumfeaturesize']:
+        temp = Config['minimumfeaturesize'].split(",")
         try:
-          J.Repeat = int(fname)
+            for index in range(0, len(temp), 2):
+                MinimumFeatureDimension[ temp[index] ] = float( temp[index + 1] )
         except:
-          raise RuntimeError("Repeat count '%s' in config file is not a valid integer" % fname)
+            raise RuntimeError("Illegal configuration string:" + Config['minimumfeaturesize'])
 
-    for layername in CP.options(jobname):
-      fname = CP.get(jobname, layername)
+    # Process MergeOutputFiles section to set output file names
+    if CP.has_section('MergeOutputFiles'):
+        for opt in CP.options('MergeOutputFiles'):
+            # Each option is a layer name and the output file for this name
+            if opt[0]=='*' or opt in ('boardoutline', 'drills', 'placement', 'toollist'):
+                MergeOutputFiles[opt] = CP.get('MergeOutputFiles', opt)
 
-      if layername=='boardoutline':
-        J.parseGerber(fname, layername, updateExtents=1)
-      elif layername[0]=='*':
-        J.parseGerber(fname, layername, updateExtents=0)
-      elif layername=='drills':
-        J.parseExcellon(fname)
+    # Now, we go through all jobs and collect Gerber layers
+    # so we can construct the Global Aperture Table.
+    apfiles = []
 
-    # Emit warnings if some layers are missing
-    LL = LayerList.copy()
-    for layername in J.apxlat.keys():
-      assert layername in LL
-      del LL[layername]
+    for jobname in CP.sections():
+        if jobname=='Options': continue
+        if jobname=='MergeOutputFiles': continue
+        if jobname=='GerbMergeGUI': continue
 
-    if LL:
-      if errstr=='ERROR':
-        do_abort=1
+        # Ensure all jobs have a board outline
+        if not CP.has_option(jobname, 'boardoutline'):
+            raise RuntimeError("Job '%s' does not have a board outline specified" % jobname)
 
-      print("%s: Job %s is missing the following layers:" % (errstr, jobname))
-      for layername in LL.keys():
-        print("  %s" % layername)
+        if not CP.has_option(jobname, 'drills'):
+            raise RuntimeError("Job '%s' does not have a drills layer specified" % jobname)
 
-    # Store the job in the global Jobs dictionary, keyed by job name
-    Jobs[jobname] = J
+        for layername in CP.options(jobname):
+            if layername[0]=='*' or layername=='boardoutline':
+                fname = CP.get(jobname, layername)
+                apfiles.append(fname)
 
-  if do_abort:
-    raise RuntimeError("Exiting since jobs are missing layers. Set AllowMissingLayers=1\nto override.")
+                if layername[0]=='*':
+                    LayerList[layername]=1
+
+    # Now construct global aperture tables, GAT and GAMT. This step actually
+    # reads in the jobs for aperture data but doesn't store Gerber
+    # data yet.
+    aptable.constructApertureTable(apfiles)
+    del apfiles
+
+    if 0:
+        keylist = GAMT.keys()
+        keylist.sort()
+        for key in keylist:
+            print('%s' % GAMT[key])
+        sys.exit(0)
+
+    # Parse the tool list
+    if Config['toollist']:
+        DefaultToolList = parseToolList(Config['toollist'])
+
+    # Now get jobs. Each job implies layer names, and we
+    # expect consistency in layer names from one job to the
+    # next. Two reserved layer names, however, are
+    # BoardOutline and Drills.
+
+    Jobs.clear()
+
+    do_abort = 0
+    errstr = 'ERROR'
+    if Config['allowmissinglayers']:
+        errstr = 'WARNING'
+
+    for jobname in CP.sections():
+        if jobname=='Options': continue
+        if jobname=='MergeOutputFiles': continue
+        if jobname=='GerbMergeGUI': continue
+
+        print('Reading data from', jobname, '...')
+
+        J = jobs.Job(jobname)
+
+        # Parse the job settings, like tool list, first, since we are not
+        # guaranteed to have ConfigParser return the layers in the same order that
+        # the user wrote them, and we may get Gerber files before we get a tool
+        # list! Same thing goes for ExcellonDecimals. We need to know what this is
+        # before parsing any Excellon files.
+        for layername in CP.options(jobname):
+            fname = CP.get(jobname, layername)
+
+            if layername == 'toollist':
+                J.ToolList = parseToolList(fname)
+            elif layername=='excellondecimals':
+                try:
+                    J.ExcellonDecimals = int(fname)
+                except:
+                    raise RuntimeError("Excellon decimals '%s' in config file is not a valid integer" % fname)
+            elif layername=='repeat':
+                try:
+                    J.Repeat = int(fname)
+                except:
+                    raise RuntimeError("Repeat count '%s' in config file is not a valid integer" % fname)
+
+        for layername in CP.options(jobname):
+            fname = CP.get(jobname, layername)
+
+            if layername=='boardoutline':
+                J.parseGerber(fname, layername, updateExtents=1)
+            elif layername[0]=='*':
+                J.parseGerber(fname, layername, updateExtents=0)
+            elif layername=='drills':
+                J.parseExcellon(fname)
+
+        # Emit warnings if some layers are missing
+        LL = LayerList.copy()
+        for layername in J.apxlat.keys():
+            assert layername in LL
+            del LL[layername]
+
+        if LL:
+            if errstr=='ERROR':
+                do_abort=1
+
+            print("%s: Job %s is missing the following layers:" % (errstr, jobname))
+            for layername in LL.keys():
+                print("  %s" % layername)
+
+        # Store the job in the global Jobs dictionary, keyed by job name
+        Jobs[jobname] = J
+
+    if do_abort:
+        raise RuntimeError("Exiting since jobs are missing layers. Set AllowMissingLayers=1\nto override.")
 
 if __name__=="__main__":
-  CP = parseConfigFile(sys.argv[1])
-  print(Config)
-  sys.exit(0)
+    CP = parseConfigFile(sys.argv[1])
+    print(Config)
+    sys.exit(0)
