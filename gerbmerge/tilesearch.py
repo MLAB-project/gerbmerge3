@@ -56,13 +56,13 @@ class TileSearch:
         # Store the total list of jobs to place
         self.jobs = jobs
 
-        # Store the X and Y grid of the Tiling
-        # We also store a blank tiling to start
-        self.baseTiling = tiling.Tiling(x, y)
-
         # Store the x/y spacing configured for this tiling
         self.xspacing = cfg.Config['xspacing']
         self.yspacing = cfg.Config['yspacing']
+
+        # Store the X and Y grid of the Tiling
+        # We also store a blank tiling to start
+        self.baseTiling = tiling.Tiling(x, y, self.xspacing, self.yspacing)
 
         # Store some other configuration values
         self.RandomSearchExhaustiveJobs = cfg.RandomSearchExhaustiveJobs
@@ -260,7 +260,7 @@ def tile_search2(Jobs, X, Y):
     print("="*70)
     print("Starting random placement trials. You must press Ctrl-C to")
     print("stop the process and use the best placement so far.")
-    print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs)*100))
+    print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs,config.Config['xspacing'],config.Config['yspacing'])*100))
 
     try:
         x = TileSearch(Jobs, X, Y)
@@ -294,10 +294,10 @@ def tile_search1(Jobs, X, Y):
     else:
         print("don't hold your breath.")
     print("Press Ctrl-C to stop and use the best placement so far.")
-    print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs)*100))
+    print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs,config.Config['xspacing'],config.Config['yspacing'])*100))
 
     try:
-        x.ExhaustiveSearch(Jobs, tiling.Tiling(X,Y), True)
+        x.ExhaustiveSearch(Jobs, tiling.Tiling(X,Y,config.Config['xspacing'],config.Config['yspacing']), True)
         print()
     except KeyboardInterrupt:
         print(x)

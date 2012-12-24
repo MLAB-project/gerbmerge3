@@ -21,7 +21,6 @@ http://ruggedcircuits.com/gerbmerge
 import sys
 import math
 
-import config
 import jobs
 
 # Helper functions to determine if points are right-of, left-of, above, and
@@ -40,18 +39,22 @@ def below(p1,p2):
     return p1[1]<p2[1] and p1[0]==p2[0]
 
 class Tiling:
-    def __init__(self, Xmax, Ymax):
+    def __init__(self, Xmax, Ymax, xspacing, yspacing):
+        # Store the interjob spacing
+        self.xspacing = xspacing
+        self.yspacing = yspacing
+    
         # Make maximum dimensions bigger by inter-job spacing so that
         # we allow jobs (which are seated at the lower left of their cells)
         # to just fit on the panel, and not disqualify them because their
         # spacing area slightly exceeds the panel edge.
-        self.xmax = Xmax + config.Config['xspacing']
-        self.ymax = Ymax + config.Config['yspacing']
+        self.xmax = Xmax + self.xspacing
+        self.ymax = Ymax + self.yspacing
 
         self.points = [(0,Ymax), (0,0), (Xmax,0)]    # List of (X,Y) co-ordinates
         self.jobs = []   # List of 3-tuples: ((Xbl,Ybl),(Xtr,Ytr),Job) where
                          # (Xbl,Ybl) is bottom left, (Xtr,Ytr) is top-right of the cell.
-                         # The actual job has dimensions (Xtr-Xbl-Config['xspacing'],Ytr-Ybl-Config['yspacing'])
+                         # The actual job has dimensions (Xtr-Xbl-xspacing],Ytr-Ybl-yspacing)
                          # and is located at the lower-left of the cell.
 
     def canonicalize(self, OriginX, OriginY):
@@ -68,7 +71,7 @@ class Tiling:
         return len(self.points)-2
 
     def clone(self):
-        T = Tiling(self.xmax-config.Config['xspacing'], self.ymax-config.Config['yspacing'])
+        T = Tiling(self.xmax-self.xspacing, self.ymax-self.yspacing, self.xspacing, self.yspacing)
         T.points = self.points[:]
         T.jobs = self.jobs[:]
         return T
@@ -94,7 +97,7 @@ class Tiling:
             fid.write("%s@(%.1f,%.1f) " % (Job.name,bl[0],bl[1]))
         fid.write('\n')
 
-    def isOverlap(self, ix, X, Y, cfg=config.Config):
+    def isOverlap(self, ix, X, Y):
         """Determines if a new job with actual dimensions X-by-Y located at self.points[ix]
            overlaps any existing job or exceeds the boundaries of the panel.
 
@@ -278,7 +281,7 @@ class Tiling:
             else:
                 done = 1
 
-    def addLJob(self, ix, X, Y, Job, cfg=config.Config):
+    def addLJob(self, ix, X, Y, Job):
         """Add a job to the tiling at L-point self.points[ix] with actual dimensions X-by-Y.
         The job is added with its lower-left corner at the point. The existing point
         is removed from the tiling and new points are added at the top-left, top-right
@@ -292,7 +295,7 @@ class Tiling:
 
         self.mergePoints(ix-1)
 
-    def addMirrorLJob(self, ix, X, Y, Job, cfg=config.Config):
+    def addMirrorLJob(self, ix, X, Y, Job):
         """Add a job to the tiling at mirror-L-point self.points[ix] with dimensions X-by-Y.
         The job is added with its lower-right corner at the point. The existing point
         is removed from the tiling and new points are added at the bottom-left, top-left
@@ -328,7 +331,7 @@ class Tiling:
             minY = min(minY,bl[1])
             maxY = max(maxY,tr[1])
 
-        return ( (minX,minY), (maxX-config.Config['xspacing'], maxY-config.Config['yspacing']) )
+        return ( (minX,minY), (maxX-self.xspacing, maxY-self.yspacing) )
 
     def area(self):
         """Return area of rectangular region defined by all jobs."""
@@ -348,10 +351,7 @@ class Tiling:
 
 # Function to estimate the maximum possible utilization given a list of jobs.
 # Jobs list is 4-tuple (Xdim,Ydim,job,rjob).
-def maxUtilization(Jobs):
-    xspacing = config.Config['xspacing']
-    yspacing = config.Config['yspacing']
-
+def maxUtilization(Jobs, xspacing, yspacing):
     usedArea = totalArea = 0.0
     for Xdim,Ydim,job,rjob in Jobs:
         usedArea += job.jobarea()
