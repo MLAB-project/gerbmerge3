@@ -17,8 +17,6 @@ from math import factorial
 import config
 import tiling
 
-import gerbmerge
-
 class TileSearch:
     def __init__(self, jobs, x, y, cfg=config):
         # Start the start-time counter. Since this is in Init() and not in *Search(),
