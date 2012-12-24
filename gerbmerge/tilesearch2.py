@@ -68,7 +68,7 @@ class TileSearch:
 
         return "\r  %ld placements / Smallest area: %.1f sq. in. / Best utilization: %.1f%%" % (self.placements, area, utilization)
 
-    def run(self):
+    def RandomSearch(self):
         self.startTime = time.time()
         self.lastCheckTime = time.time()
         r = random.Random()
@@ -148,7 +148,7 @@ def tile_search2(Jobs, X, Y):
 
     try:
         x = TileSearch(Jobs, X, Y)
-        x.run()
+        x.RandomSearch()
     except KeyboardInterrupt:
         print(x)
         print("\nInterrupted.")
