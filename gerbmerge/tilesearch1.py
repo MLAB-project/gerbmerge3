@@ -40,8 +40,8 @@ def printTilingStats():
 
     percent = 100.0*_Permutations/_PossiblePermutations
 
-    print("\r  %5.2f%% complete / %ld/%ld Perm/Place / Smallest area: %.1f sq. in. / Best utilization: %.1f%%" % \
-          (percent, _Permutations, _Placements, area, utilization))
+    print("\r  %5.2f%% complete | %d placements | %d/%d Permutations checked / Smallest area: %.1f sq. in. | Best utilization: %.1f%%" % \
+          (percent, _Placements, _Permutations, _PossiblePermutations, area, utilization))
 
     if gerbmerge.GUI is not None:
         sys.stdout.flush()
