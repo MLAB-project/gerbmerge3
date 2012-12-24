@@ -11,6 +11,7 @@ http://ruggedcircuits.com/gerbmerge
 
 import sys
 import time
+import math
 
 import config
 import tiling
@@ -169,16 +170,6 @@ def _tile_search1(Jobs, TSoFar, firstAddPoint, cfg=config.Config):
 
     # end for each job in job list
 
-def factorial(N):
-    if (N <= 1): return 1
-
-    prod = long(N)
-    while (N > 2):
-        N -= 1
-        prod *= N
-
-    return prod
-
 def initialize(printStats=1):
     global _StartTime, _CkpointTime, _Placements, _TBestTiling, _TBestScore, _Permutations, _PossiblePermutations, _PrintStats
 
@@ -200,7 +191,7 @@ def tile_search1(Jobs, X, Y):
     # This is assuming all jobs are unique and each job has a rotation (i.e., is not
     # square). Practically, these assumptions make no difference because the software
     # currently doesn't optimize for cases of repeated jobs.
-    _PossiblePermutations = (2**len(Jobs))*factorial(len(Jobs))
+    _PossiblePermutations = (2**len(Jobs))*math.factorial(len(Jobs))
 
     print('='*70)
     print("Starting placement using exhaustive search.")
