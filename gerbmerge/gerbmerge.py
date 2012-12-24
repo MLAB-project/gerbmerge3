@@ -36,8 +36,7 @@ import fabdrawing
 import makestroke
 import strokes
 import tiling
-import tilesearch1
-import tilesearch2
+import tilesearch
 import placement
 import schwartz
 import util
@@ -244,9 +243,9 @@ def tile_jobs(Jobs):
 
     PX,PY = config.Config['panelwidth'],config.Config['panelheight']
     if config.AutoSearchType==RANDOM_SEARCH:
-        tile = tilesearch2.tile_search2(L, PX, PY)
+        tile = tilesearch.tile_search2(L, PX, PY)
     else:
-        tile = tilesearch1.tile_search1(L, PX, PY)
+        tile = tilesearch.tile_search1(L, PX, PY)
 
     if not tile:
         raise RuntimeError('Panel size %.2f"x%.2f" is too small to hold jobs' % (PX,PY))
