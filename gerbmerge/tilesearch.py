@@ -60,9 +60,7 @@ class TileSearch:
 
         # Store the X and Y grid of the Tiling
         # We also store a blank tiling to start
-        self.x = x
-        self.y = y
-        self.tiling = None
+        self.baseTiling = tiling.Tiling(x, y)
 
         # Store the x/y spacing configured for this tiling
         self.xspacing = cfg.Config['xspacing']
@@ -102,7 +100,7 @@ class TileSearch:
 
         # Must escape with Ctrl-C
         while 1:
-            currentTiling = tiling.Tiling(self.x, self.y)
+            currentTiling = self.baseTiling.clone()
             joborder = r.sample(range(N), N)
 
             minInletSize = tiling.minDimension(self.jobs)
@@ -128,7 +126,7 @@ class TileSearch:
                     currentTiling.addJob(pt, Ydim+self.xspacing, Xdim+self.yspacing, rjob)
             else:
                 # Do exhaustive search on remaining jobs
-                if N-M: # TODO: Merge into else: above
+                if N-M:
                     remainingJobs = []
                     for ix in joborder[M:]:
                         remainingJobs.append(self.jobs[ix])
