@@ -14,11 +14,10 @@ import time
 import random
 from math import factorial
 
-import config
 import tiling
 
 class TileSearch:
-    def __init__(self, jobs, x, y, cfg=config):
+    def __init__(self, jobs, x, y, xspacing, yspacing, exhaustiveSearchJobs, searchTimeout):
         # Start the start-time counter. Since this is in Init() and not in *Search(),
         # it will be a little off, but that shouldn't be a problem.
         self.startTime = time.time()
@@ -57,16 +56,16 @@ class TileSearch:
         self.jobs = jobs
 
         # Store the x/y spacing configured for this tiling
-        self.xspacing = cfg.Config['xspacing']
-        self.yspacing = cfg.Config['yspacing']
+        self.xspacing = xspacing
+        self.yspacing = yspacing
 
         # Store the X and Y grid of the Tiling
         # We also store a blank tiling to start
         self.baseTiling = tiling.Tiling(x, y, self.xspacing, self.yspacing)
 
         # Store some other configuration values
-        self.RandomSearchExhaustiveJobs = cfg.RandomSearchExhaustiveJobs
-        self.SearchTimeout = cfg.SearchTimeout
+        self.RandomSearchExhaustiveJobs = exhaustiveSearchJobs
+        self.SearchTimeout = searchTimeout
 
     def __str__(self):
         if self.bestTiling:
@@ -254,16 +253,16 @@ class TileSearch:
                 if (self.SearchTimeout > 0) and ((time.time() - self.startTime) > self.SearchTimeout):
                     raise KeyboardInterrupt
 
-def tile_search2(Jobs, X, Y):
+def tile_search2(Jobs, X, Y, xspacing, yspacing, exhaustiveSearchJobs, searchTimeout):
     """Wrapper around _tile_search2 to handle keyboard interrupt, etc."""
 
     print("="*70)
     print("Starting random placement trials. You must press Ctrl-C to")
     print("stop the process and use the best placement so far.")
-    print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs,config.Config['xspacing'],config.Config['yspacing'])*100))
+    print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs,xspacing,yspacing)*100))
 
     try:
-        x = TileSearch(Jobs, X, Y)
+        x = TileSearch(Jobs, X, Y, xspacing, yspacing, exhaustiveSearchJobs, searchTimeout)
         x.RandomSearch()
     except KeyboardInterrupt:
         print(x)
@@ -275,10 +274,10 @@ def tile_search2(Jobs, X, Y):
 
     return x.bestTiling
 
-def tile_search1(Jobs, X, Y):
+def tile_search1(Jobs, X, Y, xspacing, yspacing, searchTimeout):
     """Wrapper around _tile_search1 to handle keyboard interrupt, etc."""
     
-    x = TileSearch(Jobs, X, Y)
+    x = TileSearch(Jobs, X, Y, xspacing, yspacing, 0, searchTimeout)
 
     print('='*70)
     print("Starting placement using exhaustive search.")
@@ -294,10 +293,10 @@ def tile_search1(Jobs, X, Y):
     else:
         print("don't hold your breath.")
     print("Press Ctrl-C to stop and use the best placement so far.")
-    print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs,config.Config['xspacing'],config.Config['yspacing'])*100))
+    print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs,xspacing,yspacing)*100))
 
     try:
-        x.ExhaustiveSearch(Jobs, tiling.Tiling(X,Y,config.Config['xspacing'],config.Config['yspacing']), True)
+        x.ExhaustiveSearch(Jobs, tiling.Tiling(X,Y,xspacing,yspacing), True)
         print()
     except KeyboardInterrupt:
         print(x)

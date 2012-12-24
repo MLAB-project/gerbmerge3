@@ -243,9 +243,9 @@ def tile_jobs(Jobs):
 
     PX,PY = config.Config['panelwidth'],config.Config['panelheight']
     if config.AutoSearchType==RANDOM_SEARCH:
-        tile = tilesearch.tile_search2(L, PX, PY)
+        tile = tilesearch.tile_search2(L, PX, PY, config.Config['xspacing'], config.Config['yspacing'], config.RandomSearchExhaustiveJobs, config.SearchTimeout)
     else:
-        tile = tilesearch.tile_search1(L, PX, PY)
+        tile = tilesearch.tile_search1(L, PX, PY, config.Config['xspacing'], config.Config['yspacing'], config.SearchTimeout)
 
     if not tile:
         raise RuntimeError('Panel size %.2f"x%.2f" is too small to hold jobs' % (PX,PY))
