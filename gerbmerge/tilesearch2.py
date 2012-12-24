@@ -19,16 +19,6 @@ import tilesearch1
 
 import gerbmerge
 
-def printTilingStats(placements, bestTiling):
-    if bestTiling:
-        area = bestTiling.area()
-        utilization = bestTiling.usedArea() / area * 100.0
-    else:
-        area = 0.0
-        utilization = 0.0
-
-    print("\r  %ld placements / Smallest area: %.1f sq. in. / Best utilization: %.1f%%" % (placements, area, utilization))
-
 class TileSearch:
     def __init__(self, jobs, x, y, cfg=config):
         # Track the last time a synchronization occured
@@ -67,6 +57,16 @@ class TileSearch:
         # Store some other configuration values
         self.RandomSearchExhaustiveJobs = cfg.RandomSearchExhaustiveJobs
         self.SearchTimeout = cfg.SearchTimeout
+
+    def __str__(self):
+        if self.bestTiling:
+            area = self.bestTiling.area()
+            utilization = self.bestTiling.usedArea() / area * 100.0
+        else:
+            area = float("inf")
+            utilization = 0.0
+
+        return "\r  %ld placements / Smallest area: %.1f sq. in. / Best utilization: %.1f%%" % (self.placements, area, utilization)
 
     def run(self):
         self.startTime = time.time()
@@ -130,7 +130,7 @@ class TileSearch:
             # If we've been at this for one period, print some status information
             if time.time() > self.lastCheckTime + self.syncPeriod:
                 self.lastCheckTime = time.time()
-                printTilingStats(self.placements, self.bestTiling)
+                print(self)
 
                 # Check for timeout
                 if (self.SearchTimeout > 0) and ((time.time() - self.startTime) > self.SearchTimeout):
@@ -150,7 +150,7 @@ def tile_search2(Jobs, X, Y):
         x = TileSearch(Jobs, X, Y)
         x.run()
     except KeyboardInterrupt:
-        printTilingStats(x.placements, x.bestTiling)
+        print(x)
         print("\nInterrupted.")
 
     computeTime = time.time() - x.startTime
