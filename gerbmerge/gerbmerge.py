@@ -336,12 +336,15 @@ def merge(opts, gui = None):
         Layout = parselayout.parseLayoutFile(opts.layoutfile)
 
         # Do the layout, updating offsets for each component job.
+        # This only needs to be done for relative layouts, which don't
+        # have Row objects which is why that check is done.
         X = OriginX + config.Config['leftmargin']
         Y = OriginY + config.Config['bottommargin']
 
         for row in Layout:
-            row.setPosition(X, Y)
-            Y += row.height_in() + config.Config['yspacing']
+            if type(row) is parselayout.Row:
+                row.setPosition(X, Y)
+                Y += row.height_in() + config.Config['yspacing']
 
         # Construct a canonical placement from the layout
         Place = placement.Placement()

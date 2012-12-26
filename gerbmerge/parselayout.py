@@ -12,6 +12,7 @@ http://ruggedcircuits.com/gerbmerge
 """
 import sys
 import string
+from math import isnan
 
 import xml.etree.ElementTree as ET
 
@@ -184,6 +185,7 @@ def findJob(jobname, rotated, Jobs=config.Jobs):
     return jobs.JobLayout(job)
 
 def parseJobSpec(spec):
+    # Determine rotation for this job
     rotation = spec.get('rotate', 0)
     if rotation == "true":
         rotation = 90
@@ -193,7 +195,18 @@ def parseJobSpec(spec):
         except ValueError:
             raise RuntimeError("Rotation must be specified as 'true' or multiples of 90.")
 
-    return findJob(spec.get('name'), rotation)
+    # Grab any positional information
+    try:
+        x = float(spec.get('x', 'nan'))
+        y = float(spec.get('y', 'nan'))
+    except TypeError as e:
+        raise RuntimeError("Illegal (x,y) coordinates in placement file:\n %s" % e.line)
+
+    # Now prepare the job
+    job = findJob(spec.get('name'), rotation)
+    if not isnan(x) and not isnan(y):
+        job.setPosition(x,y)
+    return job
 
 def parseColSpec(spec):
     jobs = Col()
@@ -265,14 +278,16 @@ def parseLayoutFile(file):
     # Build up the array of rows
     Rows = []
     for rowspec in root:
-        if rowspec.tag == "row":
+        if rowspec.tag == 'row':
             newRow = parseRowSpec(rowspec)
-        elif rowspec.tag == "col":
+        elif rowspec.tag == 'col':
             newRow = parseColSpec(rowspec)
+        elif rowspec.tag == 'board':
+            newRow = parseJobSpec(rowspec)
         else:
             raise RuntimeError("Invalid child of root element")
         Rows.append(newRow)
-
+        
     return Rows
 
 if __name__=="__main__":
