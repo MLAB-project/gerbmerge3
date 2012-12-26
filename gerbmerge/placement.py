@@ -59,6 +59,7 @@ class Placement:
         for job in self.jobs:
             board = newpanel.createElement('board')
             splitname = job.job.name.split('*rotated')
+            print(splitname)
             board.setAttribute('name', splitname[0])
             if len(splitname) == 2:
                 board.setAttribute('rotate', splitname[1])
@@ -83,7 +84,10 @@ class Placement:
         for element in xml:
             if element.tag == 'board':
                 jobname = element.get('name', None)
-                rotate = element.get('rotate', 0)
+                try:
+                    rotate = int(element.get('rotate', 0))
+                except e:
+                    raise RuntimeError("Illegal rotation amount. Should be multiple of 90.")
 
                 try:
                     x = float(element.get('x', 0.0))
