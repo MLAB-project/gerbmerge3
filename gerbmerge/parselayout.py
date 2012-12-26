@@ -184,7 +184,7 @@ def findJob(jobname, rotated, Jobs=config.Jobs):
     return jobs.JobLayout(job)
 
 def parseJobSpec(spec):
-    rotation = spec.get('rotate', default="0")
+    rotation = spec.get('rotate', 0)
     if rotation == "true":
         rotation = 90
     else:
