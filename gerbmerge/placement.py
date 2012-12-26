@@ -33,7 +33,8 @@ class Placement:
         #
         # Positions of jobs have already been set (we're assuming)
         # prior to calling this function.
-        self.jobs = self.jobs + parselayout.canonicalizePanel(Layout)
+        for job in Layout:
+            self.jobs += job.canonicalize()
 
     def addFromTiling(self, T, OriginX, OriginY):
         # T is a Tiling. Calling its canonicalize() method will construct

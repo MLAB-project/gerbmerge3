@@ -137,12 +137,6 @@ class Col(Panel):
             job.setPosition(x,y)
             y += job.height_in() + config.Config['yspacing']
 
-def canonicalizePanel(panel):
-    L = []
-    for job in panel:
-        L = L + job.canonicalize()
-    return L
-
 def findJob(jobname, rotated, Jobs=config.Jobs):
     """
       Find a job in config.Jobs, possibly rotating it
