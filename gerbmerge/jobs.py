@@ -1010,28 +1010,28 @@ class Job:
 class JobLayout:
     def __init__(self, job):
         self.job = job
-        self.x = None
-        self.y = None
+        self.x = float('nan')
+        self.y = float('nan')
 
     def canonicalize(self):       # Must return a JobLayout object as a list
         return [self]
 
     def __str__(self):
-        return str(self.job)
+        return "JobLayout(%s,x=%f,y=%f)" % (str(self.job), self.x, self.y)
 
     def writeGerber(self, fid, layername):
-        assert self.x is not None
+        assert self.x
         self.job.writeGerber(fid, layername, self.x, self.y)
 
     def aperturesAndMacros(self, layername):
         return self.job.aperturesAndMacros(layername)
 
     def writeExcellon(self, fid, diameter):
-        assert self.x is not None
+        assert self.x
         self.job.writeExcellon(fid, diameter, self.x, self.y)
 
     def writeDrillHits(self, fid, diameter, toolNum):
-        assert self.x is not None
+        assert self.x
         self.job.writeDrillHits(fid, diameter, toolNum, self.x, self.y)
 
     def writeCutLines(self, fid, drawing_code, X1, Y1, X2, Y2):

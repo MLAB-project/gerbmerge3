@@ -59,7 +59,6 @@ class Placement:
         for job in self.jobs:
             board = newpanel.createElement('board')
             splitname = job.job.name.split('*rotated')
-            print(splitname)
             board.setAttribute('name', splitname[0])
             if len(splitname) == 2:
                 board.setAttribute('rotate', splitname[1])
