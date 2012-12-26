@@ -15,6 +15,7 @@ http://ruggedcircuits.com/gerbmerge
 
 import sys
 import re
+from xml.dom.minidom import getDOMImplementation
 
 import parselayout
 import jobs
@@ -51,10 +52,20 @@ class Placement:
         return (maxX,maxY)
 
     def write(self, fname):
-        """Write placement to a file"""
-        fid = open(fname, 'wt')
+        """Write placement to an XML file of a form similar to that used for the layout files."""
+        impl = getDOMImplementation()
+        newpanel = impl.createDocument(None, 'panel', None)
         for job in self.jobs:
-            fid.write('%s %.3f %.3f\n' % (job.job.name, job.x, job.y))
+            board = newpanel.createElement('board')
+            splitname = job.job.name.split('*rotated')
+            board.setAttribute('name', splitname[0])
+            if len(splitname) == 2:
+                board.setAttribute('rotation', splitname[1])
+            board.setAttribute('x', str(job.x))
+            board.setAttribute('y', str(job.y))
+            newpanel.documentElement.appendChild(board)
+        fid = open(fname, 'wt')
+        newpanel.writexml(fid, addindent='\t', newl='\n')
         fid.close()
 
     def addFromFile(self, file, Jobs):

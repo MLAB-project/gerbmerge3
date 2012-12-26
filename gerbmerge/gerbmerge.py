@@ -371,7 +371,7 @@ def merge(opts, gui = None):
     try:
         fullname = config.MergeOutputFiles['placement']
     except KeyError:
-        fullname = 'merged.placement.txt'
+        fullname = 'merged.placement.xml'
     Place.write(fullname)
     OutputFiles.append(fullname)
 

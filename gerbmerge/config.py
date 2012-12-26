@@ -68,7 +68,7 @@ min_text_size   = 32 # mils, this is the minimum at SeeedStudio
 MergeOutputFiles = {
   'boardoutline': 'merged.boardoutline.ger',
   'drills':       'merged.drills.xln',
-  'placement':    'merged.placement.txt',
+  'placement':    'merged.placement.xml',
   'toollist':     'merged.toollist.drl'
   }
 
