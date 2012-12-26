@@ -48,10 +48,8 @@ VERSION_MINOR=0
 
 RANDOM_SEARCH = 1
 EXHAUSTIVE_SEARCH = 2
-FROM_FILE = 3
 config.AutoSearchType = RANDOM_SEARCH
 config.RandomSearchExhaustiveJobs = 2
-config.PlacementFile = None
 
 # This is a handle to a GUI front end, if any, else None for command-line usage
 GUI = None
@@ -271,10 +269,6 @@ def merge(opts, gui = None):
     config.RandomSearchExhaustiveJobs = opts.rs_esjobs
     config.SearchTimeout = opts.search_timeout
 
-    if opts.place_file:
-        config.AutoSearchType = FROM_FILE
-        config.PlacementFile = opts.place_file
-
     if opts.no_trim_gerber:
         config.TrimGerber = 0
     if opts.no_trim_excellon:
@@ -351,10 +345,6 @@ def merge(opts, gui = None):
         Place.addFromLayout(Layout)
 
         del Layout
-
-    elif config.AutoSearchType == FROM_FILE:
-        Place = placement.Placement()
-        Place.addFromFile(config.PlacementFile, config.Jobs)
     else:
         # Do an automatic layout based on our tiling algorithm.
         tile = tile_jobs(config.Jobs.values())
@@ -716,7 +706,6 @@ def updateGUI(text = None):
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description="Merge gerber files for individual boards into a single panel. Can follow\nmanual layouts or search for optimal arrangements.", epilog="If a layout file is not specified, automatic placement is performed. If the\nplacement is read from a file, then no automatic placement is performed and\nthe layout file (if any) is ignored.\n\nNOTE: The dimensions of each job are determined solely by the maximum extent\nof the board outline layer for each job.", formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--search', choices=['random', 'exhaustive'], default='random', help="Specify search method for automatic layouts. Defaults to random.")
-    parser.add_argument('--place-file', help="Specify a place file (output of previous searches)")
     parser.add_argument('--version', action='version', version="%(prog)s "+str(VERSION_MAJOR)+"."+str(VERSION_MINOR))
     parser.add_argument('--rs-esjobs', type=int, help="When using random search, exhaustively search N jobs for each random placement. Only matters when using random search. Defaults to 2.", metavar='N', default=2)
     parser.add_argument('--search-timeout', type=int, help="When using random search, search for T seconds for best random placement. Without this option the search will continue until interrupted by user.", metavar='T', default=0)
