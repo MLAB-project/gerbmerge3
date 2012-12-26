@@ -16,6 +16,7 @@ http://ruggedcircuits.com/gerbmerge
 import sys
 import re
 from xml.dom.minidom import getDOMImplementation
+import xml.etree.ElementTree as ET
 
 import parselayout
 import jobs
@@ -60,7 +61,7 @@ class Placement:
             splitname = job.job.name.split('*rotated')
             board.setAttribute('name', splitname[0])
             if len(splitname) == 2:
-                board.setAttribute('rotation', splitname[1])
+                board.setAttribute('rotate', splitname[1])
             board.setAttribute('x', str(job.x))
             board.setAttribute('y', str(job.y))
             newpanel.documentElement.appendChild(board)
@@ -69,44 +70,27 @@ class Placement:
         fid.close()
 
     def addFromFile(self, file, Jobs):
-        """Read placement from a file, placed against jobs in Jobs list"""
-        pat = re.compile(r'\s*(\S+)\s+(\S+)\s+(\S+)')
-        comment = re.compile(r'\s*(?:#.+)?$')
-
-        lines = file.readlines()
+        """Read placement from a placement XML file, placed against jobs in Jobs list"""
+        file = open(file)
+        unparsedXml = ""
+        for line in file:
+            if line[0] != '#':
+                unparsedXml += line
         file.close()
 
-        for line in lines:
-            if comment.match(line): continue
+        xml = ET.fromstring(unparsedXml)
 
-            match = pat.match(line)
-            if not match:
-                print("Cannot interpret placement line in placement file:\n  %s" % line)
-                sys.exit(1)
+        for element in xml:
+            if element.tag == 'board':
+                jobname = element.get('name', None)
+                rotate = element.get('rotate', 0)
 
-            jobname, X, Y = match.groups()
-            try:
-                X = float(X)
-                Y = float(Y)
-            except:
-                print("Illegal (X,Y) co-ordinates in placement file:\n  %s" % line)
-                sys.exit(1)
+                try:
+                    x = float(element.get('x', 0.0))
+                    y = float(element.get('y', 0.0))
+                except e:
+                    raise RuntimeError("Illegal (x,y) coordinates in placement file:\n %s" % e.line)
 
-            rotated = 0
-            if len(jobname) > 8:
-                if jobname[-8:] == '*rotated':
-                    rotated = 90
-                    jobname = jobname[:-8]
-                elif jobname[-10:] == '*rotated90':
-                    rotated = 90
-                    jobname = jobname[:-10]
-                elif jobname[-11:] == '*rotated180':
-                    rotated = 180
-                    jobname = jobname[:-11]
-                elif jobname[-11:] == '*rotated270':
-                    rotated = 270
-                    jobname = jobname[:-11]
-
-            addjob = parselayout.findJob(jobname, rotated, Jobs)
-            addjob.setPosition(X,Y)
-            self.jobs.append(addjob)
+                addjob = parselayout.findJob(jobname, rotate, Jobs)
+                addjob.setPosition(x,y)
+                self.jobs.append(addjob)

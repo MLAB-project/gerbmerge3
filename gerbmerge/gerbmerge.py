@@ -713,7 +713,7 @@ def updateGUI(text = None):
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description="Merge gerber files for individual boards into a single panel. Can follow\nmanual layouts or search for optimal arrangements.", epilog="If a layout file is not specified, automatic placement is performed. If the\nplacement is read from a file, then no automatic placement is performed and\nthe layout file (if any) is ignored.\n\nNOTE: The dimensions of each job are determined solely by the maximum extent\nof the board outline layer for each job.", formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--search', choices=['random', 'exhaustive'], default='random', help="Specify search method for automatic layouts. Defaults to random.")
-    parser.add_argument('--place-file', type=argparse.FileType('r'), help="Specify a place file (output of previous searches)")
+    parser.add_argument('--place-file', help="Specify a place file (output of previous searches)")
     parser.add_argument('--version', action='version', version="%(prog)s "+str(VERSION_MAJOR)+"."+str(VERSION_MINOR))
     parser.add_argument('--rs-esjobs', type=int, help="When using random search, exhaustively search N jobs for each random placement. Only matters when using random search. Defaults to 2.", metavar='N', default=2)
     parser.add_argument('--search-timeout', type=int, help="When using random search, search for T seconds for best random placement. Without this option the search will continue until interrupted by user.", metavar='T', default=0)
