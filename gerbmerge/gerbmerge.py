@@ -31,7 +31,6 @@ import re
 import aptable
 import jobs
 import config
-import parselayout
 import fabdrawing
 import makestroke
 import strokes
@@ -327,24 +326,9 @@ def merge(opts, gui = None):
     updateGUI("Performing layout...")
     print("Performing layout ...")
     if opts.layoutfile:
-        Layout = parselayout.parseLayoutFile(opts.layoutfile)
-
-        # Do the layout, updating offsets for each component job.
-        # This only needs to be done for relative layouts, which don't
-        # have Row objects which is why that check is done.
-        X = OriginX + config.Config['leftmargin']
-        Y = OriginY + config.Config['bottommargin']
-
-        for row in Layout:
-            if type(row) is parselayout.Row:
-                row.setPosition(X, Y)
-                Y += row.height_in() + config.Config['yspacing']
-
-        # Construct a canonical placement from the layout
+        # Construct a canonical placement from the manual layout (relative or absolute)
         Place = placement.Placement()
-        Place.addFromLayout(Layout)
-
-        del Layout
+        Place.addFromFile(opts.layoutfile, OriginX + config.Config['leftmargin'], OriginY + config.Config['bottommargin'])
     else:
         # Do an automatic layout based on our tiling algorithm.
         tile = tile_jobs(config.Jobs.values())

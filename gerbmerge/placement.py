@@ -17,30 +17,61 @@ import sys
 import re
 from xml.dom.minidom import getDOMImplementation
 import xml.etree.ElementTree as ET
+from math import isnan
 
-import parselayout
 import jobs
+import config
 
 class Placement:
     def __init__(self):
-        self.jobs = []    # A list of JobLayout objects
+        self.jobs = []
 
-    def addFromLayout(self, Layout):
-        # Layout is a recursive list of JobLayout items. At the end
-        # of each tree there is a JobLayout object which has a 'job'
-        # member, which is what we're looking for. Fortunately, the
-        # canonicalize() function flattens the tree.
-        #
-        # Positions of jobs have already been set (we're assuming)
-        # prior to calling this function.
-        for job in Layout:
-            self.jobs += job.canonicalize()
-
-    def addFromTiling(self, T, OriginX, OriginY):
-        # T is a Tiling. Calling its canonicalize() method will construct
+    def addFromTiling(self, t, OriginX, OriginY):
+        # t is a Tiling. Calling its canonicalize() method will construct
         # a list of JobLayout objects and set the (X,Y) position of each
         # object.
-        self.jobs = self.jobs + T.canonicalize(OriginX,OriginY)
+        self.jobs = self.jobs + t.canonicalize(OriginX,OriginY)
+
+    def addFromFile(self, file, OriginX, OriginY):
+        # Preprocess the XML jobs file removing lines that start with '#' as those're comment lines.
+        # They're not handled by the XML parser, so we remove them beforehand.
+        unparsedXml = ""
+        for line in file:
+            if line[0] != '#':
+                unparsedXml += line
+
+        # Attempt to parse the jobs file
+        try:
+            root = ET.fromstring(unparsedXml)
+        except ET.ParseError as e:
+            raise RuntimeError("Layout file cannot be parsed. Error at %d, %d." % e.position)
+
+        # Build up the array of rows
+        rows = []
+        for rowspec in root:
+            if rowspec.tag == 'row':
+                newRow = parseRowSpec(rowspec, config.Jobs)
+            elif rowspec.tag == 'col':
+                newRow = parseColSpec(rowspec, config.Jobs)
+            elif rowspec.tag == 'board':
+                newRow = parseJobSpec(rowspec, config.Jobs)
+            else:
+                raise RuntimeError("Invalid child of root element")
+            rows.append(newRow)
+
+        # Do the layout, updating offsets for each component job.
+        # This only needs to be done for relative layouts, which don't
+        # have Row objects which is why that check is done.
+        x = OriginX + config.Config['leftmargin']
+        y = OriginY + config.Config['bottommargin']
+        for row in rows:
+            if type(row) is Row:
+                row.setPosition(x, y)
+                y += row.height_in() + config.Config['yspacing']
+        
+        # Finally store a flattened list of jobs in this Placement
+        for row in rows:
+            self.jobs += row.canonicalize()
 
     def extents(self):
         """Return the maximum X and Y value over all jobs"""
@@ -70,31 +101,170 @@ class Placement:
         newpanel.writexml(fid, addindent='\t', newl='\n')
         fid.close()
 
-    def addFromFile(self, file, Jobs):
-        """Read placement from a placement XML file, placed against jobs in Jobs list"""
-        file = open(file)
-        unparsedXml = ""
-        for line in file:
-            if line[0] != '#':
-                unparsedXml += line
-        file.close()
+class Panel:                 # Meant to be subclassed as either a Row() or Col()
+    def __init__(self):
+        self.x = None
+        self.y = None
+        self.jobs = []           # List (left-to-right or bottom-to-top) of JobLayout() or Row()/Col() objects
 
-        xml = ET.fromstring(unparsedXml)
+    def canonicalize(self):    # Return plain list of JobLayout objects at the roots of all trees
+        L = []
+        for job in self.jobs:
+            L = L + job.canonicalize()
+        return L
 
-        for element in xml:
-            if element.tag == 'board':
-                jobname = element.get('name', None)
-                try:
-                    rotate = int(element.get('rotate', 0))
-                except e:
-                    raise RuntimeError("Illegal rotation amount. Should be multiple of 90.")
+    def addjob(self, job):     # Either a JobLayout class or Panel (sub)class
+        assert isinstance(job, Panel) or isinstance(job, jobs.JobLayout)
+        self.jobs.append(job)
 
-                try:
-                    x = float(element.get('x', 0.0))
-                    y = float(element.get('y', 0.0))
-                except e:
-                    raise RuntimeError("Illegal (x,y) coordinates in placement file:\n %s" % e.line)
+    def addwidths(self):
+        "Return width in inches"
+        width = 0.0
+        for job in self.jobs:
+            width += job.width_in() + config.Config['xspacing']
+        width -= config.Config['xspacing']
+        return width
 
-                addjob = parselayout.findJob(jobname, rotate, Jobs)
-                addjob.setPosition(x,y)
-                self.jobs.append(addjob)
+    def __str__(self):
+        "Pretty-prints this panel"
+        return self.__class__.__name__ + " " + str([str(x) for x in self.jobs])
+
+    def maxwidths(self):
+        "Return maximum width in inches of any one subpanel"
+        width = 0.0
+        for job in self.jobs:
+            width = max(width,job.width_in())
+        return width
+
+    def addheights(self):
+        "Return height in inches"
+        height = 0.0
+        for job in self.jobs:
+            height += job.height_in() + config.Config['yspacing']
+        height -= config.Config['yspacing']
+        return height
+
+    def maxheights(self):
+        "Return maximum height in inches of any one subpanel"
+        height = 0.0
+        for job in self.jobs:
+            height = max(height,job.height_in())
+        return height
+
+    def writeGerber(self, fid, layername):
+        for job in self.jobs:
+            job.writeGerber(fid, layername)
+
+    def writeExcellon(self, fid, tool):
+        for job in self.jobs:
+            job.writeExcellon(fid, tool)
+
+    def writeDrillHits(self, fid, tool, toolNum):
+        for job in self.jobs:
+            job.writeDrillHits(fid, tool, toolNum)
+
+    def writeCutLines(self, fid, drawing_code, X1, Y1, X2, Y2):
+        for job in self.jobs:
+            job.writeCutLines(fid, drawing_code, X1, Y1, X2, Y2)
+
+    def drillhits(self, tool):
+        hits = 0
+        for job in self.jobs:
+            hits += job.drillhits(tool)
+
+        return hits
+
+    def jobarea(self):
+        area = 0.0
+        for job in self.jobs:
+            area += job.jobarea()
+
+        return area
+
+# TODO: Add pretty-printing functionality
+class Row(Panel):
+    def __init__(self):
+        Panel.__init__(self)
+        self.LR = 1   # Horizontal arrangement
+
+    def width_in(self):
+        return self.addwidths()
+
+    def height_in(self):
+        return self.maxheights()
+
+    def setPosition(self, x, y):   # In inches
+        self.x = x
+        self.y = y
+        for job in self.jobs:
+            job.setPosition(x,y)
+            x += job.width_in() + config.Config['xspacing']
+
+# TODO: Add pretty-printing functionality
+class Col(Panel):
+    def __init__(self):
+        Panel.__init__(self)
+        self.LR = 0   # Vertical arrangement
+
+    def width_in(self):
+        return self.maxwidths()
+
+    def height_in(self):
+        return self.addheights()
+
+    def setPosition(self, x, y):   # In inches
+        self.x = x
+        self.y = y
+        for job in self.jobs:
+            job.setPosition(x,y)
+            y += job.height_in() + config.Config['yspacing']
+
+def parseJobSpec(spec, globalJobs):
+    # Determine rotation for this job
+    rotation = spec.get('rotate', 0)
+    if rotation == "true":
+        rotation = 90
+    else:
+        try:
+            rotation = int(rotation)
+        except ValueError:
+            raise RuntimeError("Rotation must be specified as 'true' or multiples of 90.")
+
+    # Grab any positional information
+    try:
+        x = float(spec.get('x', 'nan'))
+        y = float(spec.get('y', 'nan'))
+    except TypeError as e:
+        raise RuntimeError("Illegal (x,y) coordinates in placement file:\n %s" % e.line)
+
+    # Now prepare the job
+    job = jobs.findJob(spec.get('name'), rotation, globalJobs)
+    if not isnan(x) and not isnan(y):
+        job.setPosition(x,y)
+    return job
+
+def parseColSpec(spec, globalJobs):
+    jobs = Col()
+
+    for coljob in spec:
+        if coljob.tag == 'board':
+            jobs.addjob(parseJobSpec(coljob, globalJobs))
+        elif coljob.tag == 'row':
+            jobs.addjob(parseRowSpec(coljob, globalJobs))
+        else:
+            raise RuntimeError("Unexpected element '%s' encountered while parsing jobs file" % coljob.tag)
+
+    return jobs
+
+def parseRowSpec(spec, globalJobs):
+    jobs = Row()
+
+    for rowjob in spec:
+        if rowjob.tag == 'board':
+            jobs.addjob(parseJobSpec(rowjob, globalJobs))
+        elif rowjob.tag == 'col':
+            jobs.addjob(parseColSpec(rowjob, globalJobs))
+        else:
+            raise RuntimeError("Unexpected element '%s' encountered while parsing jobs file" % rowjob.tag)
+
+    return jobs

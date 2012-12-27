@@ -1273,3 +1273,30 @@ def rotateJob(job, degrees = 90, firstpass = True):
         return rotateJob(J, degrees, False)
     else:
         return J
+
+def findJob(jobname, rotated, Jobs):
+    """
+      Find a job in config.Jobs, possibly rotating it
+      If job not in config.Jobs add it for future reference
+      Return found job
+    """
+    if rotated == 90:
+        fullname = jobname + '*rotated90'
+    elif rotated == 180:
+        fullname = jobname + '*rotated180'
+    elif rotated == 270:
+        fullname = jobname + '*rotated270'
+    else:
+        fullname = jobname
+
+    try:
+        job = Jobs[existingjob]
+    except:
+        try:
+            job = Jobs[jobname]
+            job = rotateJob(job, rotated)
+            Jobs[fullname] = job
+        except:
+            raise RuntimeError("Job name '%s' not found" % jobname)
+    
+    return JobLayout(job)
