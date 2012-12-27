@@ -222,13 +222,10 @@ class Col(Panel):
 def parseJobSpec(spec, globalJobs):
     # Determine rotation for this job
     rotation = spec.get('rotate', 0)
-    if rotation == "true":
-        rotation = 90
-    else:
-        try:
-            rotation = int(rotation)
-        except ValueError:
-            raise RuntimeError("Rotation must be specified as 'true' or multiples of 90.")
+    try:
+        rotation = int(rotation)
+    except ValueError:
+        raise RuntimeError("Rotation must be specified in degrees as one of [0, 90, 180, 270].")
 
     # Grab any positional information
     try:

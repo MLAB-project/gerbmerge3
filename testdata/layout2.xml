@@ -34,16 +34,16 @@
 	  <board name="Hexapod" />
 	  <col> <!-- Could also write this as two separate 1x3 columns -->
 		<row> <!-- First 1x2 row -->
-			<board name="Proj1" rotate="true" />
-			<board name="Proj1" rotate="true" />
+			<board name="Proj1" rotate="90" />
+			<board name="Proj1" rotate="90" />
 		</row>
 		<row> <!-- Second 1x2 row above first one -->
-			<board name="Proj1" rotate="true" />
-			<board name="Proj1" rotate="true" />
+			<board name="Proj1" rotate="90" />
+			<board name="Proj1" rotate="90" />
 		</row>
 		<row> <!-- Third 1x2 row above second row -->
-			<board name="Proj1" rotate="true" />
-			<board name="Proj1" rotate="true" />
+			<board name="Proj1" rotate="90" />
+			<board name="Proj1" rotate="90" />
 		</row>
 	  </col> <!-- End of column -->
 	</row> <!-- End of first row -->

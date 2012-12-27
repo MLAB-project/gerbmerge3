@@ -13,6 +13,6 @@
     <board name="Proj1" rotate="90" />
     <board name="Proj1" rotate="180" />
     <board name="Proj1" rotate="270" />
-    <board name="Proj1" rotate="true" />
+    <board name="Proj1" rotate="0" />
   </col>
 </panel>
