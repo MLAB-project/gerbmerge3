@@ -93,7 +93,7 @@ class Placement:
             splitname = job.job.name.split('*rotated')
             board.setAttribute('name', splitname[0])
             if len(splitname) == 2:
-                board.setAttribute('rotate', splitname[1])
+                board.setAttribute('rotation', splitname[1])
             board.setAttribute('x', str(job.x))
             board.setAttribute('y', str(job.y))
             newpanel.documentElement.appendChild(board)
@@ -221,7 +221,7 @@ class Col(Panel):
 
 def parseJobSpec(spec, globalJobs):
     # Determine rotation for this job
-    rotation = spec.get('rotate', 0)
+    rotation = spec.get('rotation', 0)
     try:
         rotation = int(rotation)
     except ValueError:

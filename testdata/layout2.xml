@@ -30,20 +30,20 @@
 #     +--------------------------------+----+-------+-------+
 
 <panel>
-	<row> <!-- First row has the hexapod and 2x3 panel of rotated Proj1 jobs -->
+	<row> <!-- First row has the hexapod and 2x3 panel of rotationd Proj1 jobs -->
 	  <board name="Hexapod" />
 	  <col> <!-- Could also write this as two separate 1x3 columns -->
 		<row> <!-- First 1x2 row -->
-			<board name="Proj1" rotate="90" />
-			<board name="Proj1" rotate="90" />
+			<board name="Proj1" rotation="90" />
+			<board name="Proj1" rotation="90" />
 		</row>
 		<row> <!-- Second 1x2 row above first one -->
-			<board name="Proj1" rotate="90" />
-			<board name="Proj1" rotate="90" />
+			<board name="Proj1" rotation="90" />
+			<board name="Proj1" rotation="90" />
 		</row>
 		<row> <!-- Third 1x2 row above second row -->
-			<board name="Proj1" rotate="90" />
-			<board name="Proj1" rotate="90" />
+			<board name="Proj1" rotation="90" />
+			<board name="Proj1" rotation="90" />
 		</row>
 	  </col> <!-- End of column -->
 	</row> <!-- End of first row -->

@@ -1,6 +1,6 @@
 # This example simply takes the small Proj1 board and panelizes
 # it in a 2x4 array. To demonstrate rotation, the second column
-# consists of rotated jobs. You wouldn't really do it this way,
+# consists of rotationd jobs. You wouldn't really do it this way,
 # of course, as it wastes space.
 <panel>
   <col>
@@ -10,9 +10,9 @@
     <board name="Proj1" />
   </col>
   <col>
-    <board name="Proj1" rotate="90" />
-    <board name="Proj1" rotate="180" />
-    <board name="Proj1" rotate="270" />
-    <board name="Proj1" rotate="0" />
+    <board name="Proj1" rotation="90" />
+    <board name="Proj1" rotation="180" />
+    <board name="Proj1" rotation="270" />
+    <board name="Proj1" rotation="0" />
   </col>
 </panel>
