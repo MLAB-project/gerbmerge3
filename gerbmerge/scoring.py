@@ -9,7 +9,6 @@ Rugged Circuits LLC
 http://ruggedcircuits.com/gerbmerge
 """
 
-import config
 import util
 import makestroke
 
@@ -257,12 +256,12 @@ def mergeLines(Lines):
 
 # Main entry point. Gerber file has already been opened, header written
 # out, 1mil tool selected.
-def writeScoring(fid, Place, OriginX, OriginY, MaxXExtent, MaxYExtent):
+def writeScoring(fid, Place, OriginX, OriginY, MaxXExtent, MaxYExtent, xspacing, yspacing):
     # For each job, write out 4 score lines, above, to the right, below, and
     # to the left. After we collect all potential scoring lines, we worry
     # about merging, etc.
-    dx = config.Config['xspacing']/2.0
-    dy = config.Config['yspacing']/2.0
+    dx = xspacing/2.0
+    dy = yspacing/2.0
     extents = (OriginX, OriginY, MaxXExtent, MaxYExtent)
 
     Lines = []

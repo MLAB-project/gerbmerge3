@@ -548,7 +548,7 @@ def merge(opts, gui = None):
         fid.write('D10*\n')
 
         # Draw the scoring lines
-        scoring.writeScoring(fid, Place, OriginX, OriginY, MaxXExtent, MaxYExtent)
+        scoring.writeScoring(fid, Place, OriginX, OriginY, MaxXExtent, MaxYExtent, config.Config['xspacing'], config.Config['yspacing'])
 
         writeGerberFooter(fid)
         fid.close()
