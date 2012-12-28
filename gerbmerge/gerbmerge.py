@@ -41,6 +41,8 @@ import schwartz
 import util
 import scoring
 import drillcluster
+import gerber
+import excellon
 
 VERSION_MAJOR=2
 VERSION_MINOR=0
@@ -52,135 +54,6 @@ config.RandomSearchExhaustiveJobs = 2
 
 # This is a handle to a GUI front end, if any, else None for command-line usage
 GUI = None
-
-def writeGerberHeader22degrees(fid):
-    fid.write( \
-  """G75*
-  G70*
-  %OFA0B0*%
-  %FSLAX25Y25*%
-  %IPPOS*%
-  %LPD*%
-  %AMOC8*
-  5,1,8,0,0,1.08239X$1,22.5*
-  %
-  """)
-
-def writeGerberHeader0degrees(fid):
-    fid.write( \
-  """G75*
-  G70*
-  %OFA0B0*%
-  %FSLAX25Y25*%
-  %IPPOS*%
-  %LPD*%
-  %AMOC8*
-  5,1,8,0,0,1.08239X$1,0.0*
-  %
-  """)
-
-writeGerberHeader = writeGerberHeader22degrees
-
-def writeApertureMacros(fid, usedDict):
-    keys = list(config.GAMT.keys())
-    keys.sort()
-    for key in keys:
-        if key in usedDict:
-            config.GAMT[key].writeDef(fid)
-
-def writeApertures(fid, usedDict):
-    keys = list(config.GAT.keys())
-    keys.sort()
-    for key in keys:
-        if key in usedDict:
-            config.GAT[key].writeDef(fid)
-
-def writeGerberFooter(fid):
-    fid.write('M02*\n')
-
-def writeExcellonHeader(fid):
-    fid.write('%\n')
-
-def writeExcellonFooter(fid):
-    fid.write('M30\n')
-
-def writeExcellonTool(fid, tool, size):
-    fid.write('%sC%f\n' % (tool, size))
-
-def writeFiducials(fid, drawcode, OriginX, OriginY, MaxXExtent, MaxYExtent):
-    """Place fiducials at arbitrary points. The FiducialPoints list in the config specifies
-    sets of X,Y co-ordinates. Positive values of X/Y represent offsets from the lower left
-    of the panel. Negative values of X/Y represent offsets from the top right. So:
-           FiducialPoints = 0.125,0.125,-0.125,-0.125
-    means to put a fiducial 0.125,0.125 from the lower left and 0.125,0.125 from the top right"""
-    fid.write('%s*\n' % drawcode)    # Choose drawing aperture
-
-    fList = config.Config['fiducialpoints'].split(',')
-    for i in range(0, len(fList), 2):
-        x,y = float(fList[i]), float(fList[i+1])
-        if x>=0:
-            x += OriginX
-        else:
-            x = MaxXExtent + x
-        if y>=0:
-            y += OriginX
-        else:
-            y = MaxYExtent + y
-        fid.write('X%07dY%07dD03*\n' % (util.in2gerb(x), util.in2gerb(y)))
-
-def writeOutline(fid, OriginX, OriginY, MaxXExtent, MaxYExtent):
-    # Write width-1 aperture to file
-    AP = aptable.Aperture(aptable.Circle, 'D10', 0.001)
-    AP.writeDef(fid)
-
-    # Choose drawing aperture D10
-    fid.write('D10*\n')
-
-    # Draw the rectangle
-    fid.write('X%07dY%07dD02*\n' % (util.in2gerb(OriginX), util.in2gerb(OriginY)))        # Bottom-left
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(OriginX), util.in2gerb(MaxYExtent)))     # Top-left
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(MaxXExtent), util.in2gerb(MaxYExtent)))  # Top-right
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(MaxXExtent), util.in2gerb(OriginY)))     # Bottom-right
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(OriginX), util.in2gerb(OriginY)))        # Bottom-left
-
-
-def writeCropMarks(fid, drawing_code, OriginX, OriginY, MaxXExtent, MaxYExtent):
-    """Add corner crop marks on the given layer"""
-
-    # Draw 125mil lines at each corner, with line edge right up against
-    # panel border. This means the center of the line is D/2 offset
-    # from the panel border, where D is the drawing line diameter.
-    fid.write('%s*\n' % drawing_code)    # Choose drawing aperture
-
-    offset = config.GAT[drawing_code].dimx/2.0
-
-    # Lower-left
-    x = OriginX + offset
-    y = OriginY + offset
-    fid.write('X%07dY%07dD02*\n' % (util.in2gerb(x+0.125), util.in2gerb(y+0.000)))
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x+0.000), util.in2gerb(y+0.000)))
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x+0.000), util.in2gerb(y+0.125)))
-
-    # Lower-right
-    x = MaxXExtent - offset
-    y = OriginY + offset
-    fid.write('X%07dY%07dD02*\n' % (util.in2gerb(x+0.000), util.in2gerb(y+0.125)))
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x+0.000), util.in2gerb(y+0.000)))
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x-0.125), util.in2gerb(y+0.000)))
-
-    # Upper-right
-    x = MaxXExtent - offset
-    y = MaxYExtent - offset
-    fid.write('X%07dY%07dD02*\n' % (util.in2gerb(x-0.125), util.in2gerb(y+0.000)))
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x+0.000), util.in2gerb(y+0.000)))
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x+0.000), util.in2gerb(y-0.125)))
-
-    # Upper-left
-    x = OriginX + offset
-    y = MaxYExtent - offset
-    fid.write('X%07dY%07dD02*\n' % (util.in2gerb(x+0.000), util.in2gerb(y-0.125)))
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x+0.000), util.in2gerb(y+0.000)))
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x+0.125), util.in2gerb(y+0.000)))
 
 def disclaimer(ack = False):
     print("""
@@ -251,15 +124,13 @@ def tile_jobs(Jobs):
     return tile
 
 def merge(opts, gui = None):
-    writeGerberHeader = writeGerberHeader22degrees
-
     global GUI
     GUI = gui
 
     if opts.octagons == 'rotate':
-        writeGerberHeader = writeGerberHeader0degrees
+        writeGerberHeader = gerber.writeHeader0degrees
     else:
-        writeGerberHeader = writeGerberHeader22degrees
+        writeGerberHeader = gerber.writeHeader22degrees
 
     if opts.search == 'random':
         config.AutoSearchType = RANDOM_SEARCH
@@ -474,8 +345,8 @@ def merge(opts, gui = None):
             apUsedDict[drawing_code_text] = None
 
         # Write only necessary macro and aperture definitions to Gerber file
-        writeApertureMacros(fid, apmUsedDict)
-        writeApertures(fid, apUsedDict)
+        gerber.writeApertureMacros(fid, apmUsedDict)
+        gerber.writeApertures(fid, apUsedDict)
 
         # Finally, write actual flash data
         for job in Place.jobs:
@@ -489,15 +360,15 @@ def merge(opts, gui = None):
 
         if config.Config['cropmarklayers']:
             if layername in config.Config['cropmarklayers']:
-                writeCropMarks(fid, drawing_code_crop, OriginX, OriginY, MaxXExtent, MaxYExtent)
+                gerber.writeCropMarks(fid, drawing_code_crop, OriginX, OriginY, MaxXExtent, MaxYExtent)
 
         if config.Config['fiducialpoints']:
             if ((layername=='*toplayer') or (layername=='*bottomlayer')):
-                writeFiducials(fid, drawing_code_fiducial_copper, OriginX, OriginY, MaxXExtent, MaxYExtent)
+                gerber.writeFiducials(fid, drawing_code_fiducial_copper, OriginX, OriginY, MaxXExtent, MaxYExtent)
             elif ((layername=='*topsoldermask') or (layername=='*bottomsoldermask')):
-                writeFiducials(fid, drawing_code_fiducial_soldermask, OriginX, OriginY, MaxXExtent, MaxYExtent)
+                gerber.writeFiducials(fid, drawing_code_fiducial_soldermask, OriginX, OriginY, MaxXExtent, MaxYExtent)
         if config.Config['outlinelayers'] and (layername in config.Config['outlinelayers']):
-            writeOutline(fid, OriginX, OriginY, MaxXExtent, MaxYExtent)
+            gerber.writeOutline(fid, OriginX, OriginY, MaxXExtent, MaxYExtent)
 
         if config.text:
             Y += row.height_in() + config.Config['yspacing']
@@ -506,7 +377,7 @@ def merge(opts, gui = None):
             y = config.text_y if config.text_y else util.in2mil(OriginY + config.Config['bottommargin'] + Place.jobs[0].height_in()) + y_offset # convert inches to mils
             fid.write('%s*\n' % drawing_code_text)    # Choose drawing aperture
             makestroke.writeString(fid, config.text, int(util.mil2gerb(x)), int(util.mil2gerb(y)), 0, int(text_size))
-        writeGerberFooter(fid)
+        gerber.writeFooter(fid)
 
         fid.close()
 
@@ -531,7 +402,7 @@ def merge(opts, gui = None):
         fid.write('X%07dY%07dD01*\n' % (util.in2gerb(MaxXExtent), util.in2gerb(OriginY)))     # Bottom-right
         fid.write('X%07dY%07dD01*\n' % (util.in2gerb(OriginX), util.in2gerb(OriginY)))        # Bottom-left
 
-        writeGerberFooter(fid)
+        gerber.writeFooter(fid)
         fid.close()
 
     # Write scoring layer if selected
@@ -551,7 +422,7 @@ def merge(opts, gui = None):
         # Draw the scoring lines
         scoring.writeScoring(fid, Place, OriginX, OriginY, MaxXExtent, MaxYExtent, config.Config['xspacing'], config.Config['yspacing'])
 
-        writeGerberFooter(fid)
+        gerber.writeFooter(fid)
         fid.close()
 
     # Get a list of all tools used by merging keys from each job's dictionary
@@ -588,12 +459,12 @@ def merge(opts, gui = None):
         OutputFiles.append(fullname)
         fid = open(fullname, 'wt')
         writeGerberHeader(fid)
-        writeApertures(fid, {drawing_code1: None})
+        gerber.writeApertures(fid, {drawing_code1: None})
         fid.write('%s*\n' % drawing_code1)    # Choose drawing aperture
 
         fabdrawing.writeFabDrawing(fid, Place, Tools, OriginX, OriginY, MaxXExtent, MaxYExtent)
 
-        writeGerberFooter(fid)
+        gerber.writeFooter(fid)
         fid.close()
 
     # Finally, print out the Excellon
@@ -604,7 +475,7 @@ def merge(opts, gui = None):
     OutputFiles.append(fullname)
     fid = open(fullname, 'wt')
 
-    writeExcellonHeader(fid)
+    excellon.writeheader(fid)
 
     # Ensure each one of our tools is represented in the tool list specified
     # by the user.
@@ -614,14 +485,12 @@ def merge(opts, gui = None):
         except:
             raise RuntimeError("INTERNAL ERROR: Tool code %s not found in global tool map" % tool)
 
-        writeExcellonTool(fid, tool, size)
+        excellon.writetool(fid, tool, size)
 
-        #for row in Layout:
-        #  row.writeExcellon(fid, size)
         for job in Place.jobs:
             job.writeExcellon(fid, size)
 
-    writeExcellonFooter(fid)
+    excellon.writefooter(fid)
     fid.close()
 
     updateGUI("Closing files...")
