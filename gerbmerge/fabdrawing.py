@@ -103,12 +103,12 @@ def writeDimensionArrow(fid, OriginX, OriginY, MaxXExtent, MaxYExtent):
     dimspace = util.in2gerb(dimspace)
 
     # Draw an arrow above the board, on the left side and right side
-    makestroke.drawDimensionArrow(fid, x, Y+dimspace, makestroke.FacingLeft)
-    makestroke.drawDimensionArrow(fid, X, Y+dimspace, makestroke.FacingRight)
+    makestroke.drawDimensionArrow(fid, x, Y+dimspace, makestroke.FACING_LEFT)
+    makestroke.drawDimensionArrow(fid, X, Y+dimspace, makestroke.FACING_RIGHT)
 
     # Draw arrows to the right of the board, at top and bottom
-    makestroke.drawDimensionArrow(fid, X+dimspace, Y, makestroke.FacingUp)
-    makestroke.drawDimensionArrow(fid, X+dimspace, y, makestroke.FacingDown)
+    makestroke.drawDimensionArrow(fid, X+dimspace, Y, makestroke.FACING_UP)
+    makestroke.drawDimensionArrow(fid, X+dimspace, y, makestroke.FACING_DOWN)
 
     # Now draw the text. First, horizontal text above the board.
     s = '%.3f"' % (MaxXExtent - OriginX)

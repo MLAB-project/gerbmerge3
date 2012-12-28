@@ -16,32 +16,32 @@ import strokes
 
 # Define percentage of cell height and width to determine
 # intercharacter spacing
-SpacingX = 1.20
-SpacingY = 1.20
+SPACING_X = 1.20
+SPACING_Y = 1.20
 
 # Arrow dimensions
-BarLength       = 1500 # Length of dimension line
-ArrowWidth      = 750  # How broad the arrow is
-ArrowLength     = 750  # How far back from dimension line it is
-ArrowStemLength = 1250 # How long the arrow stem extends from center point
+BAR_LENGTH        = 1500 # Length of dimension line
+ARROW_WIDTH       = 750  # How broad the arrow is
+ARROW_LENGTH      = 750  # How far back from dimension line it is
+ARROW_STEM_LENGTH = 1250 # How long the arrow stem extends from center point
 
 #################################################################
 
 # Arrow directions
-FacingLeft=0    # 0 degrees
-FacingDown=1    # 90 degrees counterclockwise
-FacingRight=2   # 180 degrees
-FacingUp=3    # 270 degrees
+FACING_LEFT  = 0   # 0 degrees
+FACING_DOWN  = 1   # 90 degrees counterclockwise
+FACING_RIGHT = 2   # 180 degrees
+FACING_UP    = 3   # 270 degrees
 
-SpacingDX = 10*int(round(strokes.MaxWidth*SpacingX))
-SpacingDY = 10*int(round(strokes.MaxHeight*SpacingY))
+SPACING_DX = 10*int(round(strokes.MaxWidth*SPACING_X))
+SPACING_DY = 10*int(round(strokes.MaxHeight*SPACING_Y))
 
 RotatedGlyphs={}
 
 # Default arrow glyph is at 0 degrees rotation, facing left
-ArrowGlyph = [ [(0,-BarLength/2), (0, BarLength/2)],
-               [(ArrowLength,ArrowWidth/2), (0,0), (ArrowLength,-ArrowWidth/2)],
-               [(0,0), (ArrowStemLength,0)]
+ArrowGlyph = [ [(0,-BAR_LENGTH/2), (0, BAR_LENGTH/2)],
+               [(ARROW_LENGTH,ARROW_WIDTH/2), (0,0), (ARROW_LENGTH,-ARROW_WIDTH/2)],
+               [(0,0), (ARROW_STEM_LENGTH,0)]
              ]
 
 def rotateGlyph(glyph, degrees, glyphName):
@@ -108,8 +108,8 @@ def writeString(fid, s, X, Y, degrees, size = 60.0):
     # convert mils to whatever goofy unit they use
     size = size * 1/6.0
     # divide by 10 to get offset of size right
-    dX = int(round(math.cos(rad)*SpacingDX*(size / 10.0)))
-    dY = int(round(math.sin(rad)*SpacingDX*(size / 10.0)))
+    dX = int(round(math.cos(rad)*SPACING_DX*(size / 10.0)))
+    dY = int(round(math.sin(rad)*SPACING_DX*(size / 10.0)))
 
     for char in s:
         writeChar(fid, char, posX, posY, degrees, size)
@@ -124,7 +124,7 @@ def boundingBox(s, X1, Y1):
     if not s:
         return (X1, Y1), (X1, Y1)
 
-    X2 = X1 + (len(s)-1)*SpacingDX + 10*strokes.MaxWidth
+    X2 = X1 + (len(s)-1)*SPACING_DX + 10*strokes.MaxWidth
     Y2 = Y1 + 10*strokes.MaxHeight  # Not including descenders
     return (X1, Y1), (X2, Y2)
 
@@ -155,10 +155,10 @@ if __name__=="__main__":
 
     writeString(fid, s, 0, 0, 0, 10)
     writeString(fid, s, 0, 20000, 0, size)
-    drawDimensionArrow(fid, 0, 5000, FacingLeft)
-    drawDimensionArrow(fid, 5000, 5000, FacingRight)
-    drawDimensionArrow(fid, 0, 10000, FacingUp)
-    drawDimensionArrow(fid, 5000, 10000, FacingDown)
+    drawDimensionArrow(fid, 0, 5000, FACING_LEFT)
+    drawDimensionArrow(fid, 5000, 5000, FACING_RIGHT)
+    drawDimensionArrow(fid, 0, 10000, FACING_UP)
+    drawDimensionArrow(fid, 5000, 10000, FACING_DOWN)
 
     for diam in range(0,strokes.MaxNumDrillTools):
         writeGlyph(fid, strokes.DrillStrokeList[diam], diam*1250, 15000, 0, "%02d" % diam)
