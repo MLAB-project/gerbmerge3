@@ -196,6 +196,7 @@ def disclaimer(ack = False):
   * Windows:                                         *
   *          - GC-Prevue <http://www.graphicode.com> *
   *          - ViewMate  <http://www.pentalogix.com> *
+  *          - gerbv <http://gerbv.sourceforge.net>  *
   *                                                  *
   * Linux:                                           *
   *          - gerbv <http://gerbv.sourceforge.net>  *
