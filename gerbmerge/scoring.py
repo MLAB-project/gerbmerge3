@@ -12,6 +12,7 @@ http://ruggedcircuits.com/gerbmerge
 import util
 import makestroke
 
+
 # Add a horizontal line if its within the extents of the panel. Also, trim
 # start and/or end points to the extents.
 def addHorizontalLine(Lines, x1, x2, y, extents):
@@ -22,6 +23,7 @@ def addHorizontalLine(Lines, x1, x2, y, extents):
         # Now trim endpoints to be greater than extents[0] and below extents[2]
         line = (max(extents[0], x1), y, min(extents[2], x2), y)
         Lines.append(line)
+
 
 # Add a vertical line if its within the extents of the panel. Also, trim
 # start and/or end points to the extents.
@@ -34,11 +36,14 @@ def addVerticalLine(Lines, x, y1, y2, extents):
         line = (x, max(extents[1], y1), x, min(extents[3], y2))
         Lines.append(line)
 
+
 def isHorizontal(line):
-    return line[1]==line[3]
+    return line[1] == line[3]
+
 
 def isVertical(line):
-    return line[0]==line[2]
+    return line[0] == line[2]
+
 
 def clusterOrdinates(values):
     """Create a list of tuples where each tuple is a variable-length list of items
@@ -63,6 +68,7 @@ def clusterOrdinates(values):
         L.append(currCluster)
 
     return L
+
 
 def mergeHLines(Lines):
     """Lines is a list of 4-tuples (lines) that have nearly the same Y ordinate and are to be
@@ -92,8 +98,8 @@ def mergeHLines(Lines):
         else:
             # If the line to examine starts to the left of (within 0.002") the end
             # of the current line, extend the current line.
-            if line[0] <= currLine[2]+0.002:
-                currLine = (currLine[0], yavg, max(line[2],currLine[2]), yavg)
+            if line[0] <= currLine[2] + 0.002:
+                currLine = (currLine[0], yavg, max(line[2], currLine[2]), yavg)
             else:
                 NewLines.append(currLine)
                 currLine = line
@@ -102,9 +108,11 @@ def mergeHLines(Lines):
 
     return NewLines
 
-def sortByY(A,B):
+
+def sortByY(A, B):
     "Helper function to sort two lines (4-tuples) by their starting Y ordinate"
     return cmp(A[1], B[1])
+
 
 def mergeVLines(Lines):
     """Lines is a list of 4-tuples (lines) that have nearly the same X ordinate and are to be
@@ -134,8 +142,8 @@ def mergeVLines(Lines):
         else:
             # If the line to examine starts below (within 0.002") the end
             # of the current line, extend the current line.
-            if line[1] <= currLine[3]+0.002:
-                currLine = (xavg, currLine[1], xavg, max(line[3],currLine[3]))
+            if line[1] <= currLine[3] + 0.002:
+                currLine = (xavg, currLine[1], xavg, max(line[3], currLine[3]))
             else:
                 NewLines.append(currLine)
                 currLine = line
@@ -143,6 +151,7 @@ def mergeVLines(Lines):
     NewLines.append(currLine)
 
     return NewLines
+
 
 def mergeLines(Lines):
     # All lines extend up (vertical) and to the right (horizontal). First, do
@@ -176,7 +185,7 @@ def mergeLines(Lines):
 
     # Extend horizontal lines
     NewHLines = {}
-    for yval,lines in HLines.items():
+    for yval, lines in HLines.items():
         # yval is the Y ordinate of this group of lines. lines is the set of all
         # lines with this Y ordinate.
         NewHLines[yval] = []
@@ -198,7 +207,7 @@ def mergeLines(Lines):
 
     # Extend vertical lines
     NewVLines = {}
-    for xval,lines in VLines.items():
+    for xval, lines in VLines.items():
         # xval is the X ordinate of this group of lines. lines is the set of all
         # lines with this X ordinate.
         NewVLines[xval] = []
@@ -254,14 +263,15 @@ def mergeLines(Lines):
 
     return Lines
 
+
 # Main entry point. Gerber file has already been opened, header written
 # out, 1mil tool selected.
 def writeScoring(fid, Place, OriginX, OriginY, MaxXExtent, MaxYExtent, xspacing, yspacing):
     # For each job, write out 4 score lines, above, to the right, below, and
     # to the left. After we collect all potential scoring lines, we worry
     # about merging, etc.
-    dx = xspacing/2.0
-    dy = yspacing/2.0
+    dx = xspacing / 2.0
+    dy = yspacing / 2.0
     extents = (OriginX, OriginY, MaxXExtent, MaxYExtent)
 
     Lines = []
@@ -273,7 +283,7 @@ def writeScoring(fid, Place, OriginX, OriginY, MaxXExtent, MaxYExtent, xspacing,
 
         # Just so we don't get 3.75000000004 and 3.75000000009, we round to
         # 2.5 limits.
-        x,y,X,Y = [round(val,5) for val in [x,y,X,Y]]
+        x, y, X, Y = [round(val, 5) for val in [x, y, X, Y]]
 
         addHorizontalLine(Lines, OriginX, MaxXExtent, Y, extents)   # above job
         addVerticalLine(Lines, X, OriginY, MaxYExtent, extents)     # to the right of job
@@ -285,7 +295,7 @@ def writeScoring(fid, Place, OriginX, OriginY, MaxXExtent, MaxYExtent, xspacing,
 
     # Write 'em out
     for line in Lines:
-        makestroke.drawPolyline(fid, [(util.in2gerb(line[0]),util.in2gerb(line[1])), \
-                                      (util.in2gerb(line[2]),util.in2gerb(line[3]))], 0, 0)
+        makestroke.drawPolyline(fid, [(util.in2gerb(line[0]), util.in2gerb(line[1])),
+                                      (util.in2gerb(line[2]), util.in2gerb(line[3]))], 0, 0)
 
 # vim: expandtab ts=2 sw=2 ai syntax=python
