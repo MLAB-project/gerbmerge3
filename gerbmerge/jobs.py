@@ -39,56 +39,57 @@ import util
 apdef_pat = re.compile(r'^%AD(D\d+)([^*$]+)\*%$')     # Aperture definition
 apmdef_pat = re.compile(r'^%AM([^*$]+)\*$')           # Aperture macro definition
 comment_pat = re.compile(r'G0?4[^*]*\*')              # Comment (GerbTool comment omits the 0)
-tool_pat  = re.compile(r'(D\d+)\*')                   # Aperture selection
+tool_pat = re.compile(r'(D\d+)\*')                   # Aperture selection
 gcode_pat = re.compile(r'G(\d{1,2})\*?')              # G-codes
 drawXY_pat = re.compile(r'X([+-]?\d+)Y([+-]?\d+)D0?([123])\*')  # Drawing command
-drawX_pat  = re.compile(r'X([+-]?\d+)D0?([123])\*')        # Drawing command, Y is implied
-drawY_pat  = re.compile(r'Y([+-]?\d+)D0?([123])\*')        # Drawing command, X is implied
+drawX_pat = re.compile(r'X([+-]?\d+)D0?([123])\*')        # Drawing command, Y is implied
+drawY_pat = re.compile(r'Y([+-]?\d+)D0?([123])\*')        # Drawing command, X is implied
 format_pat = re.compile(r'%FS(L|T)?(A|I)(N\d+)?(X\d\d)(Y\d\d)\*%')  # Format statement
 layerpol_pat = re.compile(r'^%LP[CD]\*%')             # Layer polarity (D=dark, C=clear)
 
 # Circular interpolation drawing commands (from Protel)
 cdrawXY_pat = re.compile(r'X([+-]?\d+)Y([+-]?\d+)I([+-]?\d+)J([+-]?\d+)D0?([123])\*')
-cdrawX_pat  = re.compile(r'X([+-]?\d+)I([+-]?\d+)J([+-]?\d+)D0?([123])\*')  # Y is implied
-cdrawY_pat  = re.compile(r'Y([+-]?\d+)I([+-]?\d+)J([+-]?\d+)D0?([123])\*')  # X is implied
+cdrawX_pat = re.compile(r'X([+-]?\d+)I([+-]?\d+)J([+-]?\d+)D0?([123])\*')  # Y is implied
+cdrawY_pat = re.compile(r'Y([+-]?\d+)I([+-]?\d+)J([+-]?\d+)D0?([123])\*')  # X is implied
 
-IgnoreList = ( \
-  # These are for Eagle, and RS274X files in general
-  re.compile(r'^%OFA0B0\*%$'),
-  re.compile(r'^%IPPOS\*%'),
-  re.compile(r'^%AMOC8\*$'),                         # Eagle's octagon defined by macro with a $1 parameter
-  re.compile(r'^5,1,8,0,0,1\.08239X\$1,22\.5\*$'),   # Eagle's octagon, 22.5 degree rotation
-  re.compile(r'^5,1,8,0,0,1\.08239X\$1,0\.0\*$'),    # Eagle's octagon, 0.0 degree rotation
-  re.compile(r'^\*?%$'),
-  re.compile(r'^M0?2\*$'),
+IgnoreList = (
+    # These are for Eagle, and RS274X files in general
+    re.compile(r'^%OFA0B0\*%$'),
+    re.compile(r'^%IPPOS\*%'),
+    re.compile(r'^%AMOC8\*$'),                         # Eagle's octagon defined by macro with a $1 parameter
+    re.compile(r'^5,1,8,0,0,1\.08239X\$1,22\.5\*$'),   # Eagle's octagon, 22.5 degree rotation
+    re.compile(r'^5,1,8,0,0,1\.08239X\$1,0\.0\*$'),    # Eagle's octagon, 0.0 degree rotation
+    re.compile(r'^\*?%$'),
+    re.compile(r'^M0?2\*$'),
 
-  # These additional ones are for Orcad Layout, PCB, Protel, etc.
-  re.compile(r'\*'),            # Empty statement
-  re.compile(r'^%IN.*\*%'),
-  re.compile(r'^%ICAS\*%'),      # Not in RS274X spec.
-  re.compile(r'^%MOIN\*%'),
-  re.compile(r'^%ASAXBY\*%'),
-  re.compile(r'^%AD\*%'),        # GerbTool empty aperture definition
-  re.compile(r'^%LN.*\*%')       # Layer name
-  )
+    # These additional ones are for Orcad Layout, PCB, Protel, etc.
+    re.compile(r'\*'),            # Empty statement
+    re.compile(r'^%IN.*\*%'),
+    re.compile(r'^%ICAS\*%'),      # Not in RS274X spec.
+    re.compile(r'^%MOIN\*%'),
+    re.compile(r'^%ASAXBY\*%'),
+    re.compile(r'^%AD\*%'),        # GerbTool empty aperture definition
+    re.compile(r'^%LN.*\*%')       # Layer name
+)
 
 # Patterns for Excellon interpretation
-xtool_pat = re.compile(r'^(T\d+)$')           # Tool selection
-xydraw_pat = re.compile(r'^X([+-]?\d+)Y([+-]?\d+)$')    # Plunge command
-xdraw_pat = re.compile(r'^X([+-]?\d+)$')    # Plunge command, repeat last Y value
-ydraw_pat = re.compile(r'^Y([+-]?\d+)$')    # Plunge command, repeat last X value
-xtdef_pat = re.compile(r'^(T\d+)(?:F\d+)?(?:S\d+)?C([0-9.]+)$') # Tool+diameter definition with optional
-                                                                # feed/speed (for Protel)
-xtdef2_pat = re.compile(r'^(T\d+)C([0-9.]+)(?:F\d+)?(?:S\d+)?$') # Tool+diameter definition with optional
-                                                                # feed/speed at the end (for OrCAD)
-xzsup_pat = re.compile(r'^INCH,([LT])Z$')      # Leading/trailing zeros INCLUDED
+xtool_pat = re.compile(r'^(T\d+)$')                               # Tool selection
+xydraw_pat = re.compile(r'^X([+-]?\d+)Y([+-]?\d+)$')              # Plunge command
+xdraw_pat = re.compile(r'^X([+-]?\d+)$')                          # Plunge command, repeat last Y value
+ydraw_pat = re.compile(r'^Y([+-]?\d+)$')                          # Plunge command, repeat last X value
+xtdef_pat = re.compile(r'^(T\d+)(?:F\d+)?(?:S\d+)?C([0-9.]+)$')   # Tool+diameter definition with optional
+                                                                  # feed/speed (for Protel)
+xtdef2_pat = re.compile(r'^(T\d+)C([0-9.]+)(?:F\d+)?(?:S\d+)?$')  # Tool+diameter definition with optional
+                                                                  # feed/speed at the end (for OrCAD)
+xzsup_pat = re.compile(r'^INCH,([LT])Z$')                         # Leading/trailing zeros INCLUDED
 
-XIgnoreList = ( \
-  re.compile(r'^%$'),
-  re.compile(r'^M30$'),   # End of job
-  re.compile(r'^M48$'),   # Program header to first %
-  re.compile(r'^M72$')    # Inches
-  )
+XIgnoreList = (
+    re.compile(r'^%$'),
+    re.compile(r'^M30$'),   # End of job
+    re.compile(r'^M48$'),   # Program header to first %
+    re.compile(r'^M72$')    # Inches
+)
+
 
 # A Job is a single input board. It is expected to have:
 #    - a board outline file in RS274X format
@@ -97,7 +98,6 @@ XIgnoreList = ( \
 #
 # The board outline and Excellon filenames must be given separately.
 # The board outline file determines the extents of the job.
-
 class Job:
     def __init__(self, name):
         self.name = name
@@ -193,7 +193,7 @@ class Job:
         return self.width_in()*self.height_in()
 
     def maxdimension(self):
-        return max(self.width_in(),self.height_in())
+        return max(self.width_in(), self.height_in())
 
     def mincoordinates(self):
         "Return minimum X and Y coordinate"
@@ -213,38 +213,36 @@ class Job:
         for layer, command in self.commands.iteritems():
 
             # Loop through each command in each layer
-            for index in range( len(command) ):
+            for index in range(len(command)):
                 c = command[index]
 
                 # Shift X and Y coordinate of command
-                if isinstance(c, tuple):                      ## ensure that command is of type tuple
-                    command_list = list(c)                            ## convert tuple to list
-                    if  (type( command_list[0] ) == types.IntType) \
-                    and (type( command_list[1] ) == types.IntType):  ## ensure that first two elemenst are integers
+                if isinstance(c, tuple):                      # ensure that command is of type tuple
+                    command_list = list(c)                            # convert tuple to list
+                    if (isinstance(command_list[0]), Int) and (isinstance(command_list[1]), Int):  # ensure that first two elemenst are integers
                         command_list[0] += x_shift
                         command_list[1] += y_shift
-                    command[index] = tuple(command_list)              ## convert list back to tuple
+                    command[index] = tuple(command_list)              # convert list back to tuple
 
-            self.commands[layer] = command                        ## set modified command
+            self.commands[layer] = command                        # set modified command
 
         # Shift all excellon commands
         for tool, command in self.xcommands.iteritems():
 
             # Loop through each command in each layer
-            for index in range( len(command) ):
+            for index in range(len(command)):
                 c = command[index]
 
                 # Shift X and Y coordinate of command
-                command_list = list(c)                              ## convert tuple to list
-                if ( type( command_list[0] ) == types.IntType ) \
-                and ( type( command_list[1] ) == types.IntType ):  ## ensure that first two elemenst are integers
+                command_list = list(c)                              # convert tuple to list
+                if (isinstance(command_list[0]), Int) and (type(command_list[1]), Int):  # ensure that first two elemenst are integers
                     command_list[0] += x_shift / 10
                     command_list[1] += y_shift / 10
-                command[index] = tuple(command_list)                ## convert list back to tuple
+                command[index] = tuple(command_list)                # convert list back to tuple
 
-            self.xcommands[tool] = command                        ## set modified command
+            self.xcommands[tool] = command                        # set modified command
 
-    def parseGerber(self, fullname, layername, updateExtents = 0):
+    def parseGerber(self, fullname, layername, updateExtents=0):
         """Do the dirty work. Read the Gerber file given the
            global aperture table GAT and global aperture macro table GAMT"""
 
@@ -333,11 +331,11 @@ class Job:
 
             # Ignore %AMOC8* from Eagle for now as it uses a macro parameter, which
             # is not yet supported in GerbMerge.
-            if line[:7]=='%AMOC8*':
+            if line[:7] == '%AMOC8*':
                 continue
 
             # See if this is an aperture macro definition, and if so, map it.
-            M = amacro.parseApertureMacro(line,fid)
+            M = amacro.parseApertureMacro(line, fid)
             if M:
                 if currtool:
                     raise RuntimeError("File %s has an aperture macro definition that comes after drawing commands." % fullname)
@@ -368,23 +366,24 @@ class Job:
                 if match:
                     sub_line = sub_line[match.end():]
                     for item in match.groups():
-                        if item is None: continue   # Optional group didn't match
+                        if item is None:
+                            continue   # Optional group didn't match
 
                         if item[0] in "LA":   # omit leading zeroes and absolute co-ordinates
                             continue
 
-                        if item[0]=='T':      # omit trailing zeroes
+                        if item[0] == 'T':      # omit trailing zeroes
                             raise RuntimeError("Trailing zeroes not supported in RS274X files")
-                        if item[0]=='I':      # incremental co-ordinates
+                        if item[0] == 'I':      # incremental co-ordinates
                             raise RuntimeError("Incremental co-ordinates not supported in RS274X files")
 
-                        if item[0]=='N':      # Maximum digits for N* commands...ignore it
+                        if item[0] == 'N':      # Maximum digits for N* commands...ignore it
                             continue
 
-                        if item[0]=='X':      # M.N specification for X-axis.
+                        if item[0] == 'X':      # M.N specification for X-axis.
                             fracpart = int(item[2])
                             x_div = 10.0**(5-fracpart)
-                        if item[0]=='Y':      # M.N specification for Y-axis.
+                        if item[0] == 'Y':      # M.N specification for Y-axis.
                             fracpart = int(item[2])
                             y_div = 10.0**(5-fracpart)
                     continue
@@ -410,9 +409,9 @@ class Job:
 
                         # Remember last G74/G75 code so we know whether to do signed or unsigned I/J
                         # offsets.
-                        if gcode==74:
+                        if gcode == 74:
                             circ_signed = False
-                        elif gcode==75:
+                        elif gcode == 75:
                             circ_signed = True
 
                         continue
@@ -431,11 +430,11 @@ class Job:
                     # to ignore D03 because it implies a flash. Protel very inefficiently issues a D02
                     # move to a location without drawing, then a single-line D03 to flash. However, a D02
                     # terminates a polygon in G36 mode, so keep D02's in this case.
-                    if currtool=='D01' or (currtool=='D02' and (last_gmode != 36)):
+                    if currtool == 'D01' or (currtool == 'D02' and (last_gmode != 36)):
                         sub_line = sub_line[match.end():]
                         continue
 
-                    if (currtool == 'D03') or (currtool=='D02' and (last_gmode == 36)):
+                    if (currtool == 'D03') or (currtool == 'D02' and (last_gmode == 36)):
                         self.commands[layername].append(currtool)
                         sub_line = sub_line[match.end():]
                         continue
@@ -510,31 +509,35 @@ class Job:
                     # or Yxxxxx) then prepend the point X0000Y0000 into the commands as it is actually the starting
                     # point of our layer. We prepend the command X0000Y0000D02, i.e., a move to (0,0) without drawing.
                     if (isLastShorthand and firstFlash):
-                        self.commands[layername].append((0,0,2))
+                        self.commands[layername].append((0, 0, 2))
                         if updateExtents:
-                            self.minx = min(self.minx,0)
-                            self.maxx = max(self.maxx,0)
-                            self.miny = min(self.miny,0)
-                            self.maxy = max(self.maxy,0)
+                            self.minx = min(self.minx, 0)
+                            self.maxx = max(self.maxx, 0)
+                            self.miny = min(self.miny, 0)
+                            self.maxy = max(self.maxy, 0)
 
                     x = int(round(x*x_div))
                     y = int(round(y*y_div))
                     if I is not None:
                         I = int(round(I*x_div))
                         J = int(round(J*y_div))
-                        self.commands[layername].append((x,y,I,J,d,circ_signed))
+                        self.commands[layername].append((x, y, I, J, d, circ_signed))
                     else:
-                        self.commands[layername].append((x,y,d))
+                        self.commands[layername].append((x, y, d))
                     firstFlash = False
 
                     # Update dimensions...this is complicated for circular interpolation commands
                     # that span more than one quadrant. For now, we ignore this problem since users
                     # should be using a border layer to indicate extents.
                     if updateExtents:
-                        if x < self.minx: self.minx = x
-                        if x > self.maxx: self.maxx = x
-                        if y < self.miny: self.miny = y
-                        if y > self.maxy: self.maxy = y
+                        if x < self.minx:
+                            self.minx = x
+                        if x > self.maxx:
+                            self.maxx = x
+                        if y < self.miny:
+                            self.miny = y
+                        if y > self.maxy:
+                            self.maxy = y
 
                     # Move on to next match, if any
                     sub_line = sub_line[match.end():]
@@ -590,13 +593,13 @@ class Job:
             line = line.replace('\x0D', '')
 
             # Protel likes to embed comment lines beginning with ';'
-            if line[0]==';':
+            if line[0] == ';':
                 continue
 
             # Check for leading/trailing zeros included ("INCH,LZ" or "INCH,TZ")
             match = xzsup_pat.match(line)
             if match:
-                if match.group(1)=='L':
+                if match.group(1) == 'L':
                     # LZ --> Leading zeros INCLUDED
                     suppress_leading = False
                 else:
@@ -605,9 +608,9 @@ class Job:
                 continue
 
             # See if a tool is being defined. First try to match with tool name+size
-            match = xtdef_pat.match(line)    # xtdef_pat and xtdef2_pat expect tool name and diameter
-            if match is None:                # but xtdef_pat expects optional feed/speed between T and C
-                match = xtdef2_pat.match(line) # and xtdef_2pat expects feed/speed at the end
+            match = xtdef_pat.match(line)       # xtdef_pat and xtdef2_pat expect tool name and diameter
+            if match is None:                   # but xtdef_pat expects optional feed/speed between T and C
+                match = xtdef2_pat.match(line)  # and xtdef_2pat expects feed/speed at the end
             if match:
                 currtool, diam = match.groups()
                 try:
@@ -671,9 +674,9 @@ class Job:
                     raise RuntimeError("File %s has plunge command without previous tool selection" % fullname)
 
                 try:
-                    self.xcommands[currtool].append((x,y))
+                    self.xcommands[currtool].append((x, y))
                 except KeyError:
-                    self.xcommands[currtool] = [(x,y)]
+                    self.xcommands[currtool] = [(x, y)]
 
                 last_x = x
                 last_y = y
@@ -693,7 +696,8 @@ class Job:
         "Write out the data such that the lower-left corner of this job is at the given (X,Y) position, in inches"
 
         # Maybe we don't have this layer
-        if not self.hasLayer(layername): return
+        if not self.hasLayer(layername):
+            return
 
         # First convert given inches to 2.5 co-ordinates
         X = int(round(Xoff/0.00001))
@@ -710,17 +714,17 @@ class Job:
         fid.write('X%07dY%07dD02*\n' % (X, Y))
         for cmd in self.commands[layername]:
             if isinstance(cmd, tuple):
-                if len(cmd)==3:
+                if len(cmd) == 3:
                     x, y, d = cmd
                     fid.write('X%07dY%07dD%02d*\n' % (x+DX, y+DY, d))
                 else:
                     x, y, I, J, d, s = cmd
-                    fid.write('X%07dY%07dI%07dJ%07dD%02d*\n' % (x+DX, y+DY, I, J, d)) # I,J are relative
+                    fid.write('X%07dY%07dI%07dJ%07dD%02d*\n' % (x+DX, y+DY, I, J, d))  # I,J are relative
             else:
                 # It's an aperture change, G-code, or RS274-X command that begins with '%'. If
                 # it's an aperture code, the aperture has already been translated
                 # to the global aperture table during the parse phase.
-                if cmd[0]=='%':
+                if cmd[0] == '%':
                     fid.write('%s\n' % cmd)  # The command already has a * in it (e.g., "%LPD*%")
                 else:
                     fid.write('%s*\n' % cmd)
@@ -729,7 +733,7 @@ class Job:
         "Find the tools, if any, with the given diameter in inches. There may be more than one!"
         L = []
         for tool, diam in self.xdiam.items():
-            if diam==diameter:
+            if diam == diameter:
                 L.append(tool)
         return L
 
@@ -791,11 +795,11 @@ class Job:
     def aperturesAndMacros(self, layername):
         "Return dictionaries whose keys are all necessary aperture names and macro names for this layer"
 
-        GAT=config.GAT
+        GAT = config.GAT
 
         if layername in self.apertures:
             apdict = {}.fromkeys(self.apertures[layername])
-            apmlist = [GAT[ap].dimx for ap in self.apertures[layername] if GAT[ap].apname=='Macro']
+            apmlist = [GAT[ap].dimx for ap in self.apertures[layername] if GAT[ap].apname == 'Macro']
             apmdict = {}.fromkeys(apmlist)
 
             return apdict, apmdict
@@ -824,7 +828,7 @@ class Job:
         for cmd in self.commands[layername]:
             if isinstance(cmd, tuple):
                 # It is a data command: tuple (X, Y, D), all integers, or (X, Y, I, J, D), all integers.
-                if len(cmd)==3:
+                if len(cmd) == 3:
                     x, y, d = cmd
                     # I=J=None   # In case we support circular interpolation in the future
                 else:
@@ -834,7 +838,7 @@ class Job:
                     newcmds.append(cmd)
                     continue
 
-                newInBorders = self.inBorders(x,y)
+                newInBorders = self.inBorders(x, y)
 
                 # Flash commands are easy (for now). If they're outside borders,
                 # ignore them. There's no need to consider the previous command.
@@ -858,9 +862,9 @@ class Job:
                 # Both circular interpolation and polygon fills are a) uncommon,
                 # and b) hard to handle. The current version of GerbMerge does not
                 # handle these cases.
-                if d==3:
+                if d == 3:
                     if lastAperture.isRectangle():
-                        apertureRect = lastAperture.rectangleAsRect(x,y)
+                        apertureRect = lastAperture.rectangleAsRect(x, y)
                         if geometry.isRect1InRect2(apertureRect, bordersRect):
                             newcmds.append(cmd)
                         else:
@@ -876,8 +880,7 @@ class Job:
                                 # Should we make this configurable?
                                 if min(newRectWidth, newRectHeight) >= 10:
                                     # Construct an Aperture that is a Rectangle of dimensions (newRectWidth,newRectHeight)
-                                    newAP = aptable.Aperture(aptable.Rectangle, 'D??', \
-                                              util.gerb2in(newRectWidth), util.gerb2in(newRectHeight))
+                                    newAP = aptable.Aperture(aptable.Rectangle, 'D??', util.gerb2in(newRectWidth), util.gerb2in(newRectHeight))
                                     global_code = aptable.findOrAddAperture(newAP)
 
                                     # We need an unused local aperture code to correspond to this newly-created global one.
@@ -905,7 +908,7 @@ class Job:
                 # If this is a exposure off command, then it doesn't matter what the
                 # previous command is. This command just updates the (X,Y) position
                 # and sets the start point for a line draw to a new location.
-                elif d==2:
+                elif d == 2:
                     if self.inBorders(x, y):
                         newcmds.append(cmd)
 
@@ -951,14 +954,14 @@ class Job:
                         # segmentXbox() returns a list of 0, 1, or 2 points describing the intersection
                         # points of the segment (lastx,lasty)-(x,y) with the box defined
                         # by lower-left corner (minx,miny) and upper-right corner (maxx,maxy).
-                        pointsL = geometry.segmentXbox((lastx,lasty), (x,y), (self.minx,self.miny), (self.maxx,self.maxy))
+                        pointsL = geometry.segmentXbox((lastx, lasty), (x, y), (self.minx, self.miny), (self.maxx, self.maxy))
 
-                        if len(pointsL)==0:   # Case A, no intersection
+                        if len(pointsL) == 0:   # Case A, no intersection
                             # Both points are outside the box and there is no overlap with box.
                             d = 2   # Command is effectively removed since newcmds wasn't extended.
                                     # Ensure "last command" is exposure off to reflect this.
 
-                        elif len(pointsL)==1:     # Cases B and C
+                        elif len(pointsL) == 1:     # Cases B and C
                             pt1 = pointsL[0]
                             if newInBorders:      # Case B
                                 newcmds.append((pt1[0], pt1[1], 2))   # Go to intersection point, exposure off
@@ -983,7 +986,7 @@ class Job:
                 # It's a string indicating an aperture change, G-code, or RS-274X
                 # command (e.g., "D13", "G75", "%LPD*%")
                 newcmds.append(cmd)
-                if cmd[0]=='D' and int(cmd[1:])>=10:  # Don't interpret D01, D02, D03
+                if cmd[0] == 'D' and int(cmd[1:]) >= 10:  # Don't interpret D01, D02, D03
                     lastAperture = config.GAT[cmd]
 
         self.commands[layername] = newcmds
@@ -997,13 +1000,14 @@ class Job:
         keys = self.xcommands.keys()
         for toolname in keys:
             # Remember Excellon is 2.4 format while Gerber data is 2.5 format
-            validList = [(x,y) for x,y in self.xcommands[toolname] if self.inBorders(10*x,10*y)]
+            validList = [(x, y) for x, y in self.xcommands[toolname] if self.inBorders(10*x, 10*y)]
 
             if validList:
                 self.xcommands[toolname] = validList
             else:
                 del self.xcommands[toolname]
                 del self.xdiam[toolname]
+
 
 # This class encapsulates a Job object, providing absolute
 # positioning information.
@@ -1091,20 +1095,23 @@ class JobLayout:
             fid.write('X%07dY%07dD01*\n' % TL)
 
         if 1 or top:
-            if not left: fid.write('X%07dY%07dD02*\n' % TL)
+            if not left:
+                fid.write('X%07dY%07dD02*\n' % TL)
             fid.write('X%07dY%07dD01*\n' % TR)
 
         if 1 or right:
-            if not top: fid.write('X%07dY%07dD02*\n' % TR)
+            if not top:
+                fid.write('X%07dY%07dD02*\n' % TR)
             fid.write('X%07dY%07dD01*\n' % BR)
 
         if 1 or bot:
-            if not right: fid.write('X%07dY%07dD02*\n' % BR)
+            if not right:
+                fid.write('X%07dY%07dD02*\n' % BR)
             fid.write('X%07dY%07dD01*\n' % BL)
 
     def setPosition(self, x, y):
-        self.x=x
-        self.y=y
+        self.x = x
+        self.y = y
 
     def width_in(self):
         return self.job.width_in()
@@ -1126,7 +1133,8 @@ class JobLayout:
     def jobarea(self):
         return self.job.jobarea()
 
-def rotateJob(job, degrees = 90, firstpass = True):
+
+def rotateJob(job, degrees=90, firstpass=True):
     """Create a new job from an existing one, rotating by specified degrees in 90 degree passes"""
     GAT = config.GAT
     GAMT = config.GAMT
@@ -1146,8 +1154,8 @@ def rotateJob(job, degrees = 90, firstpass = True):
     J.minx = job.minx
     J.miny = job.miny
 
-    RevGAT = config.buildRevDict(GAT)   # RevGAT[hash] = aperturename
-    RevGAMT = config.buildRevDict(GAMT) # RevGAMT[hash] = aperturemacroname
+    RevGAT = config.buildRevDict(GAT)    # RevGAT[hash] = aperturename
+    RevGAMT = config.buildRevDict(GAMT)  # RevGAMT[hash] = aperturemacroname
 
     # Keep list of tool diameters and default tool list
     J.xdiam = job.xdiam
@@ -1209,9 +1217,9 @@ def rotateJob(job, degrees = 90, firstpass = True):
         for cmd in job.commands[layername]:
             # Is it a drawing command?
             if isinstance(cmd, tuple):
-                if len(cmd)==3:
+                if len(cmd) == 3:
                     x, y, d = map(builtins.int, cmd)
-                    II=JJ=None
+                    II = JJ = None
                 else:
                     x, y, II, JJ, d, signed = map(builtins.int, cmd)   # J is already used as Job object
             else:
@@ -1251,21 +1259,21 @@ def rotateJob(job, degrees = 90, firstpass = True):
                 else:
                     J.commands[layername].append((newx, newy, JJ, II, d, signed))
             else:
-                J.commands[layername].append((newx,newy,d))
+                J.commands[layername].append((newx, newy, d))
 
     # Finally, rotate drills. Offset is in hundred-thousandths (2.5) while Excellon
     # data is in 2.4 format.
     for tool in job.xcommands.keys():
         J.xcommands[tool] = []
 
-        for x,y in job.xcommands[tool]:
+        for x, y in job.xcommands[tool]:
             newx = -(10*y - job.miny) + job.minx + offset
-            newy =  (10*x - job.minx) + job.miny
+            newy = (10*x - job.minx) + job.miny
 
             newx = int(round(newx/10.0))
             newy = int(round(newy/10.0))
 
-            J.xcommands[tool].append((newx,newy))
+            J.xcommands[tool].append((newx, newy))
 
     # Rotate some more if required
     degrees -= 90
@@ -1273,6 +1281,7 @@ def rotateJob(job, degrees = 90, firstpass = True):
         return rotateJob(J, degrees, False)
     else:
         return J
+
 
 def findJob(jobname, rotated, Jobs):
     """
@@ -1298,5 +1307,5 @@ def findJob(jobname, rotated, Jobs):
             Jobs[fullname] = job
         except:
             raise RuntimeError("Job name '%s' not found" % jobname)
-    
+
     return JobLayout(job)
