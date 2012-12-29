@@ -47,8 +47,8 @@ import drillcluster
 import gerber
 import excellon
 
-VERSION_MAJOR=2
-VERSION_MINOR=0
+VERSION_MAJOR = 2
+VERSION_MINOR = 0
 
 RANDOM_SEARCH = 1
 EXHAUSTIVE_SEARCH = 2
@@ -58,7 +58,8 @@ config.RandomSearchExhaustiveJobs = 2
 # This is a handle to a GUI front end, if any, else None for command-line usage
 GUI = None
 
-def disclaimer(ack = False):
+
+def disclaimer(ack=False):
     print("""
   ****************************************************
   *           R E A D    C A R E F U L L Y           *
@@ -96,6 +97,7 @@ def disclaimer(ack = False):
     print("\nExiting...")
     sys.exit(0)
 
+
 def tile_jobs(Jobs):
     """Take a list of raw Job objects and find best tiling by calling tile_search"""
 
@@ -110,23 +112,24 @@ def tile_jobs(Jobs):
     for job in sortJobs:
         Xdim = job.width_in()
         Ydim = job.height_in()
-        rjob = jobs.rotateJob(job, 90)  ##NOTE: This will only try 90 degree rotations though 180 & 270 are available
+        rjob = jobs.rotateJob(job, 90)  # NOTE: This will only try 90 degree rotations though 180 & 270 are available
 
         for count in range(job.Repeat):
-            L.append( (Xdim,Ydim,job,rjob) )
+            L.append((Xdim, Ydim, job, rjob))
 
-    PX,PY = config.Config['panelwidth'],config.Config['panelheight']
-    if config.AutoSearchType==RANDOM_SEARCH:
+    PX, PY = config.Config['panelwidth'], config.Config['panelheight']
+    if config.AutoSearchType == RANDOM_SEARCH:
         tile = tile_search_random(L, PX, PY, config.Config['xspacing'], config.Config['yspacing'], config.RandomSearchExhaustiveJobs, config.SearchTimeout)
     else:
         tile = tile_search_exhaustive(L, PX, PY, config.Config['xspacing'], config.Config['yspacing'], config.SearchTimeout)
 
     if not tile:
-        raise RuntimeError('Panel size %.2f"x%.2f" is too small to hold jobs' % (PX,PY))
+        raise RuntimeError('Panel size %.2f"x%.2f" is too small to hold jobs' % (PX, PY))
 
     return tile
 
-def merge(opts, gui = None):
+
+def merge(opts, gui=None):
     global GUI
     GUI = gui
 
@@ -139,7 +142,7 @@ def merge(opts, gui = None):
         config.AutoSearchType = RANDOM_SEARCH
     else:
         config.AutoSearchType = EXHAUSTIVE_SEARCH
- 
+
     config.RandomSearchExhaustiveJobs = opts.rs_esjobs
     config.SearchTimeout = opts.search_timeout
 
@@ -163,10 +166,12 @@ def merge(opts, gui = None):
     for name, job in config.Jobs.items():
         min_x, min_y = job.mincoordinates()
         shift_x = shift_y = 0
-        if min_x < 0: shift_x = abs(min_x)
-        if min_y < 0: shift_y = abs(min_y)
+        if min_x < 0:
+            shift_x = abs(min_x)
+        if min_y < 0:
+            shift_y = abs(min_y)
         if (shift_x > 0) or (shift_y > 0):
-            job.fixcoordinates( shift_x, shift_y )
+            job.fixcoordinates(shift_x, shift_y)
 
     # Display job properties
     for job in config.Jobs.values():
@@ -175,7 +180,7 @@ def merge(opts, gui = None):
             print("(%d instances)" % job.Repeat)
         else:
             print()
-        print("  Extents: (%d,%d)-(%d,%d)" % (job.minx,job.miny,job.maxx,job.maxy))
+        print("  Extents: (%d,%d)-(%d,%d)" % (job.minx, job.miny, job.maxx, job.maxy))
         print("  Size: %f\" x %f\"" % (job.width_in(), job.height_in()))
         print()
 
@@ -211,7 +216,7 @@ def merge(opts, gui = None):
         Place = placement.Placement()
         Place.addFromTiling(tile, OriginX + config.Config['leftmargin'], OriginY + config.Config['bottommargin'])
 
-    (MaxXExtent,MaxYExtent) = Place.extents()
+    (MaxXExtent, MaxYExtent) = Place.extents()
     MaxXExtent += config.Config['rightmargin']
     MaxYExtent += config.Config['topmargin']
 
@@ -252,7 +257,7 @@ def merge(opts, gui = None):
             drawing_code_fiducial_soldermask = aptable.addToApertureTable(AP)
 
     if config.text:
-        text_size_ratio = 0.5 # proportion of Y spacing to use for text (much of this is taken up by, e.g., cutlines)
+        text_size_ratio = 0.5  # proportion of Y spacing to use for text (much of this is taken up by, e.g., cutlines)
         if not config.text_size:
             print("Computing text size based on Y spacing...")
         text_size = config.text_size if config.text_size else (config.Config['yspacing'] * 1000.0) * text_size_ratio
@@ -286,7 +291,7 @@ def merge(opts, gui = None):
 
     for layername in config.LayerList.keys():
         lname = layername
-        if lname[0]=='*':
+        if lname[0] == '*':
             lname = lname[1:]
 
         try:
@@ -312,36 +317,36 @@ def merge(opts, gui = None):
 
             # Fix each aperture used in this layer
             for ap in list(apUsedDict.keys()):
-                new = config.GAT[ap].getAdjusted( config.MinimumFeatureDimension[layername] )
-                if not new: ## current aperture size met minimum requirement
+                new = config.GAT[ap].getAdjusted(config.MinimumFeatureDimension[layername])
+                if not new:  # current aperture size met minimum requirement
                     continue
-                else:       ## new aperture was created
-                    new_code = aptable.findOrAddAperture(new) ## get name of existing aperture or create new one if needed
-                    del apUsedDict[ap]                        ## the old aperture is no longer used in this layer
-                    apUsedDict[new_code] = None               ## the new aperture will be used in this layer
+                else:       # new aperture was created
+                    new_code = aptable.findOrAddAperture(new)  # get name of existing aperture or create new one if needed
+                    del apUsedDict[ap]                         # the old aperture is no longer used in this layer
+                    apUsedDict[new_code] = None                # the new aperture will be used in this layer
 
                     # Replace all references to the old aperture with the new one
                     for joblayout in Place.jobs:
-                        job = joblayout.job ##access job inside job layout
+                        job = joblayout.job  # access job inside job layout
                         temp = []
                         if job.hasLayer(layername):
                             for x in job.commands[layername]:
                                 if x == ap:
-                                    temp.append(new_code) ## replace old aperture with new one
+                                    temp.append(new_code)  # replace old aperture with new one
                                 else:
-                                    temp.append(x)        ## keep old command
+                                    temp.append(x)         # keep old command
                             job.commands[layername] = temp
 
         if config.Config['cutlinelayers'] and (layername in config.Config['cutlinelayers']):
-            apUsedDict[drawing_code_cut]=None
+            apUsedDict[drawing_code_cut] = None
 
         if config.Config['cropmarklayers'] and (layername in config.Config['cropmarklayers']):
-            apUsedDict[drawing_code_crop]=None
+            apUsedDict[drawing_code_crop] = None
 
         if config.Config['fiducialpoints']:
-            if ((layername=='*toplayer') or (layername=='*bottomlayer')):
+            if ((layername == '*toplayer') or (layername == '*bottomlayer')):
                 apUsedDict[drawing_code_fiducial_copper] = None
-            elif ((layername=='*topsoldermask') or (layername=='*bottomsoldermask')):
+            elif ((layername == '*topsoldermask') or (layername == '*bottomsoldermask')):
                 apUsedDict[drawing_code_fiducial_soldermask] = None
 
         if config.text:
@@ -366,18 +371,18 @@ def merge(opts, gui = None):
                 gerber.writeCropMarks(fid, drawing_code_crop, OriginX, OriginY, MaxXExtent, MaxYExtent)
 
         if config.Config['fiducialpoints']:
-            if ((layername=='*toplayer') or (layername=='*bottomlayer')):
+            if ((layername == '*toplayer') or (layername == '*bottomlayer')):
                 gerber.writeFiducials(fid, drawing_code_fiducial_copper, OriginX, OriginY, MaxXExtent, MaxYExtent)
-            elif ((layername=='*topsoldermask') or (layername=='*bottomsoldermask')):
+            elif ((layername == '*topsoldermask') or (layername == '*bottomsoldermask')):
                 gerber.writeFiducials(fid, drawing_code_fiducial_soldermask, OriginX, OriginY, MaxXExtent, MaxYExtent)
         if config.Config['outlinelayers'] and (layername in config.Config['outlinelayers']):
             gerber.writeOutline(fid, OriginX, OriginY, MaxXExtent, MaxYExtent)
 
         if config.text:
             Y += row.height_in() + config.Config['yspacing']
-            x = config.text_x if config.text_x else util.in2mil(OriginX + config.Config['leftmargin'])  + 100 # convert inches to mils 100 is extra margin
+            x = config.text_x if config.text_x else util.in2mil(OriginX + config.Config['leftmargin']) + 100  # convert inches to mils 100 is extra margin
             y_offset = ((config.Config['yspacing'] * 1000.0) - text_size) / 2.0
-            y = config.text_y if config.text_y else util.in2mil(OriginY + config.Config['bottommargin'] + Place.jobs[0].height_in()) + y_offset # convert inches to mils
+            y = config.text_y if config.text_y else util.in2mil(OriginY + config.Config['bottommargin'] + Place.jobs[0].height_in()) + y_offset  # convert inches to mils
             fid.write('%s*\n' % drawing_code_text)    # Choose drawing aperture
             makestroke.writeString(fid, config.text, int(util.mil2gerb(x)), int(util.mil2gerb(y)), 0, int(text_size))
         gerber.writeFooter(fid)
@@ -434,7 +439,7 @@ def merge(opts, gui = None):
 
     # First construct global mapping of diameters to tool numbers
     for job in config.Jobs.values():
-        for tool,diam in job.xdiam.items():
+        for tool, diam in job.xdiam.items():
             if diam in config.GlobalToolRMap:
                 continue
 
@@ -443,11 +448,11 @@ def merge(opts, gui = None):
 
     # Cluster similar tool sizes to reduce number of drills
     if config.Config['drillclustertolerance'] > 0:
-        config.GlobalToolRMap = drillcluster.cluster( config.GlobalToolRMap, config.Config['drillclustertolerance'] )
-        drillcluster.remap( Place.jobs, list(config.GlobalToolRMap.items()) )
+        config.GlobalToolRMap = drillcluster.cluster(config.GlobalToolRMap, config.Config['drillclustertolerance'])
+        drillcluster.remap(Place.jobs, list(config.GlobalToolRMap.items()))
 
     # Now construct mapping of tool numbers to diameters
-    for diam,tool in config.GlobalToolRMap.items():
+    for diam, tool in config.GlobalToolRMap.items():
         config.GlobalToolMap[tool] = diam
 
     # Tools is just a list of tool names
@@ -508,7 +513,7 @@ def merge(opts, gui = None):
     ToolStats = {}
     drillhits = 0
     for tool in Tools:
-        ToolStats[tool]=0
+        ToolStats[tool] = 0
         for job in Place.jobs:
             hits = job.drillhits(config.GlobalToolMap[tool])
             ToolStats[tool] += hits
@@ -544,16 +549,17 @@ def merge(opts, gui = None):
     for f in OutputFiles:
         print("  ", f)
 
-    if (MaxXExtent-OriginX)>config.Config['panelwidth'] or (MaxYExtent-OriginY)>config.Config['panelheight']:
+    if (MaxXExtent-OriginX) > config.Config['panelwidth'] or (MaxYExtent-OriginY) > config.Config['panelheight']:
         print('*'*75)
         print("*")
-        print("* ERROR: Merged job %.3f\"x%.3f\" exceeds panel dimensions of %.3f\"x%.3f\"" % (MaxXExtent-OriginX, MaxYExtent-OriginY, config.Config['panelwidth'],config.Config['panelheight']))
+        print("* ERROR: Merged job %.3f\"x%.3f\" exceeds panel dimensions of %.3f\"x%.3f\"" % (MaxXExtent-OriginX, MaxYExtent-OriginY, config.Config['panelwidth'], config.Config['panelheight']))
         print("*")
         print('*'*75)
         sys.exit(1)
 
     # Done!
     return 0
+
 
 def tile_search_exhaustive(Jobs, X, Y, xspacing, yspacing, searchTimeout):
     """Wrapper around ExhaustiveSearch to handle keyboard interrupt, etc."""
@@ -574,7 +580,7 @@ def tile_search_exhaustive(Jobs, X, Y, xspacing, yspacing, searchTimeout):
     else:
         print("don't hold your breath.")
     print("Press Ctrl-C to stop and use the best placement so far.")
-    print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs,xspacing,yspacing)*100))
+    print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs, xspacing, yspacing)*100))
 
     try:
         x.run()
@@ -589,6 +595,7 @@ def tile_search_exhaustive(Jobs, X, Y, xspacing, yspacing, searchTimeout):
     print('='*70)
 
     return x.bestTiling
+
 
 def tile_search_random(Jobs, X, Y, xspacing, yspacing, exhaustiveSearchJobs, searchTimeout):
     """Wrapper around RandomSearch to handle keyboard interrupt, etc."""
@@ -613,12 +620,13 @@ def tile_search_random(Jobs, X, Y, xspacing, yspacing, exhaustiveSearchJobs, sea
 
     return x.bestTiling
 
-def updateGUI(text = None):
+
+def updateGUI(text=None):
     global GUI
-    if GUI != None:
+    if GUI is not None:
         GUI.updateProgress(text)
 
-if __name__=="__main__":
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Merge gerber files for individual boards into a single panel. Can follow\nmanual layouts or search for optimal arrangements.", epilog="If a layout file is not specified, automatic placement is performed. The layout\nfile can specify either a relative positioning or a manual positioning. A\nmanual positioning layout file is generated by default by this tool.\n\nNOTE: The dimensions of each job are determined solely by the maximum extent\nof the board outline layer for each job.", formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--search', choices=['random', 'exhaustive'], default='random', help="Specify search method for automatic layouts. Defaults to random.")
     parser.add_argument('--version', action='version', version="%(prog)s "+str(VERSION_MAJOR)+"."+str(VERSION_MINOR))
@@ -635,7 +643,7 @@ if __name__=="__main__":
     parser.add_argument('--text-y', type=int, default=0, metavar='Y', help="Y position of text. Defaults to inside space between jobs")
     parser.add_argument('configfile', type=argparse.FileType('r'), help=".cfg file setting configuration values for this panel")
     parser.add_argument('layoutfile', type=argparse.FileType('r'), default=None, nargs='?', help=".xml file specifying a manual layout for this panel")
-    
+
     args = parser.parse_args()
 
     # Display the disclaimer, skipping it if specified
