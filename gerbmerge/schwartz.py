@@ -11,24 +11,28 @@ Rugged Circuits LLC
 http://ruggedcircuits.com/gerbmerge
 """
 
+
 def stripit(pair):
     return pair[1]
 
+
 def schwartz(List, Metric):
-    def pairing(element, M = Metric):
+    def pairing(element, M=Metric):
         return (M(element), element)
 
     paired = map(pairing, List)
     paired = sorted(paired)
     return list(map(stripit, paired))
 
+
 def stripit2(pair):
     return pair[0]
+
 
 def schwartz2(List, Metric):
     "Returns sorted list and also corresponding metrics"
 
-    def pairing(element, M = Metric):
+    def pairing(element, M=Metric):
         return (M(element), element)
 
     paired = map(pairing, List)
