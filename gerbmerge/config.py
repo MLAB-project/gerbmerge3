@@ -265,7 +265,7 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
 
     Jobs.clear()
 
-    do_abort = 0
+    do_abort = False
     errstr = 'ERROR'
     if Config['allowmissinglayers']:
         errstr = 'WARNING'
@@ -317,7 +317,7 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
 
         if LL:
             if errstr == 'ERROR':
-                do_abort = 1
+                do_abort = True
 
             print("%s: Job %s is missing the following layers:" % (errstr, jobname))
             for layername in LL.keys():
