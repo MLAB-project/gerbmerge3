@@ -23,55 +23,55 @@ import excellon
 # Configuration dictionary. Specify floats as strings. Ints can be specified
 # as ints or strings.
 Config = {
-   'xspacing': '0.125',              # Spacing in horizontal direction
-   'yspacing': '0.125',              # Spacing in vertical direction
-   'panelwidth': '12.6',             # X-Dimension maximum panel size (Olimex)
-   'panelheight': '7.8',             # Y-Dimension maximum panel size (Olimex)
-   'cropmarklayers': None,           # e.g., *toplayer,*bottomlayer
-   'cropmarkwidth': '0.01',          # Width (inches) of crop lines
-   'cutlinelayers': None,            # as for cropmarklayers
-   'cutlinewidth': '0.01',           # Width (inches) of cut lines
-   'minimumfeaturesize': 0,          # Minimum dimension for selected layers
-   'toollist': None,                 # Name of file containing default tool list
-   'drillclustertolerance': '.002',  # Tolerance for clustering drill sizes
-   'allowmissinglayers': 0,          # Set to 1 to allow multiple jobs to have non-matching layers
-   'fabricationdrawingfile': None,   # Name of file to which to write fabrication drawing, or None
-   'fabricationdrawingtext': None,   # Name of file containing text to write to fab drawing
-   'excellondecimals': 4,            # Number of digits after the decimal point in input Excellon files
-   'excellonleadingzeros': 0,        # Generate leading zeros in merged Excellon output file
-   'outlinelayerfile': None,         # Name of file to which to write simple box outline, or None
-   'outlinelayers': None,            # e.g., *toplayer, *bottomlayer
-   'scoringfile': None,              # Name of file to which to write scoring data, or None
-   'leftmargin': 0,                  # Inches of extra room to leave on left side of panel for tooling
-   'topmargin': 0,                   # Inches of extra room to leave on top side of panel for tooling
-   'rightmargin': 0,                 # Inches of extra room to leave on right side of panel for tooling
-   'bottommargin': 0,                # Inches of extra room to leave on bottom side of panel for tooling
-   'fiducialpoints': None,           # List of X,Y co-ordinates at which to draw fiducials
-   'fiducialcopperdiameter': 0.08,   # Diameter of copper part of fiducial
-   'fiducialmaskdiameter': 0.32,     # Diameter of fiducial soldermask opening
-   }
+    'xspacing': '0.125',              # Spacing in horizontal direction
+    'yspacing': '0.125',              # Spacing in vertical direction
+    'panelwidth': '12.6',             # X-Dimension maximum panel size (Olimex)
+    'panelheight': '7.8',             # Y-Dimension maximum panel size (Olimex)
+    'cropmarklayers': None,           # e.g., *toplayer,*bottomlayer
+    'cropmarkwidth': '0.01',          # Width (inches) of crop lines
+    'cutlinelayers': None,            # as for cropmarklayers
+    'cutlinewidth': '0.01',           # Width (inches) of cut lines
+    'minimumfeaturesize': 0,          # Minimum dimension for selected layers
+    'toollist': None,                 # Name of file containing default tool list
+    'drillclustertolerance': '.002',  # Tolerance for clustering drill sizes
+    'allowmissinglayers': 0,          # Set to 1 to allow multiple jobs to have non-matching layers
+    'fabricationdrawingfile': None,   # Name of file to which to write fabrication drawing, or None
+    'fabricationdrawingtext': None,   # Name of file containing text to write to fab drawing
+    'excellondecimals': 4,            # Number of digits after the decimal point in input Excellon files
+    'excellonleadingzeros': 0,        # Generate leading zeros in merged Excellon output file
+    'outlinelayerfile': None,         # Name of file to which to write simple box outline, or None
+    'outlinelayers': None,            # e.g., *toplayer, *bottomlayer
+    'scoringfile': None,              # Name of file to which to write scoring data, or None
+    'leftmargin': 0,                  # Inches of extra room to leave on left side of panel for tooling
+    'topmargin': 0,                   # Inches of extra room to leave on top side of panel for tooling
+    'rightmargin': 0,                 # Inches of extra room to leave on right side of panel for tooling
+    'bottommargin': 0,                # Inches of extra room to leave on bottom side of panel for tooling
+    'fiducialpoints': None,           # List of X,Y co-ordinates at which to draw fiducials
+    'fiducialcopperdiameter': 0.08,   # Diameter of copper part of fiducial
+    'fiducialmaskdiameter': 0.32,     # Diameter of fiducial soldermask opening
+}
 
 # these are for special text, printed on every layer
-text          = None
-text_size     = None # mils, must be enough less than Yspacing that there isn't overlap
+text = None
+text_size = None  # mils, must be enough less than Yspacing that there isn't overlap
                      # if not specified, deduce based on Yspacing and other variables
                      # (cutline width, etc.)
-text_stroke   = None # mils, deduce based on text_size
-text_rotation = None # degrees
-text_x        = None # if not specified, put it in the first cutline area
-text_y        = None # if not specified, put it in the first cutline area
+text_stroke = None  # mils, deduce based on text_size
+text_rotation = None  # degrees
+text_x = None  # if not specified, put it in the first cutline area
+text_y = None  # if not specified, put it in the first cutline area
 
-min_text_stroke =  6 # mils, this is the minimum at SeeedStudio
-min_text_size   = 32 # mils, this is the minimum at SeeedStudio
+min_text_stroke = 6  # mils, this is the minimum at SeeedStudio
+min_text_size = 32  # mils, this is the minimum at SeeedStudio
 
 # This dictionary is indexed by lowercase layer name and has as values a file
 # name to use for the output.
 MergeOutputFiles = {
-  'boardoutline': 'merged.boardoutline.ger',
-  'drills':       'merged.drills.xln',
-  'placement':    'merged.placement.xml',
-  'toollist':     'merged.toollist.drl'
-  }
+    'boardoutline': 'merged.boardoutline.ger',
+    'drills':       'merged.drills.xln',
+    'placement':    'merged.placement.xml',
+    'toollist':     'merged.toollist.drl'
+}
 
 # The global aperture table, indexed by aperture code (e.g., 'D10')
 GAT = {}
@@ -119,13 +119,15 @@ MinimumFeatureDimension = {}
 # forever until a KeyboardInterrupt is raised.
 SearchTimeout = 0
 
+
 # Construct the reverse-GAT/GAMT translation table, keyed by aperture/aperture macro
 # hash string. The value is the aperture code (e.g., 'D10') or macro name (e.g., 'M5').
 def buildRevDict(D):
     RevD = {}
-    for key,val in D.items():
+    for key, val in D.items():
         RevD[val.hash()] = key
     return RevD
+
 
 def parseStringList(L):
     """Parse something like '*toplayer, *bottomlayer' into a list of names
@@ -140,6 +142,7 @@ def parseStringList(L):
         L = match.group(2)
 
     return delimitpat.split(L)
+
 
 # This function parses the job configuration file and does
 # everything needed to:
@@ -187,14 +190,14 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
         raise RuntimeError("INTERNAL ERROR: Missing tool list assignment in [Options] section")
 
     # Make integers integers, floats floats
-    for key,val in Config.items():
+    for key, val in Config.items():
         try:
             val = int(val)
-            Config[key]=val
+            Config[key] = val
         except:
             try:
                 val = float(val)
-                Config[key]=val
+                Config[key] = val
             except:
                 pass
 
@@ -211,7 +214,7 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
         temp = Config['minimumfeaturesize'].split(",")
         try:
             for index in range(0, len(temp), 2):
-                MinimumFeatureDimension[ temp[index] ] = float( temp[index + 1] )
+                MinimumFeatureDimension[temp[index]] = float(temp[index + 1])
         except:
             raise RuntimeError("Illegal configuration string:" + Config['minimumfeaturesize'])
 
@@ -219,7 +222,7 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
     if CP.has_section('MergeOutputFiles'):
         for opt in CP.options('MergeOutputFiles'):
             # Each option is a layer name and the output file for this name
-            if opt[0]=='*' or opt in ('boardoutline', 'drills', 'placement', 'toollist'):
+            if opt[0] == '*' or opt in ('boardoutline', 'drills', 'placement', 'toollist'):
                 MergeOutputFiles[opt] = CP.get('MergeOutputFiles', opt)
 
     # Now, we go through all jobs and collect Gerber layers
@@ -227,9 +230,8 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
     apfiles = []
 
     for jobname in CP.sections():
-        if jobname=='Options': continue
-        if jobname=='MergeOutputFiles': continue
-        if jobname=='GerbMergeGUI': continue
+        if jobname == 'Options' or jobname == 'MergeOutputFiles' or jobname == 'GerbMergeGUI':
+            continue
 
         # Ensure all jobs have a board outline
         if not CP.has_option(jobname, 'boardoutline'):
@@ -239,12 +241,12 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
             raise RuntimeError("Job '%s' does not have a drills layer specified" % jobname)
 
         for layername in CP.options(jobname):
-            if layername[0]=='*' or layername=='boardoutline':
+            if layername[0] == '*' or layername == 'boardoutline':
                 fname = CP.get(jobname, layername)
                 apfiles.append(fname)
 
-                if layername[0]=='*':
-                    LayerList[layername]=1
+                if layername[0] == '*':
+                    LayerList[layername] = 1
 
     # Now construct global aperture tables, GAT and GAMT. This step actually
     # reads in the jobs for aperture data but doesn't store Gerber
@@ -269,9 +271,8 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
         errstr = 'WARNING'
 
     for jobname in CP.sections():
-        if jobname=='Options': continue
-        if jobname=='MergeOutputFiles': continue
-        if jobname=='GerbMergeGUI': continue
+        if jobname == 'Options' or jobname == 'MergeOutputFiles' or jobname == 'GerbMergeGUI':
+            continue
 
         print('Reading data from', jobname, '...')
 
@@ -287,12 +288,12 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
 
             if layername == 'toollist':
                 J.ToolList = excellon.parseToolList(fname)
-            elif layername=='excellondecimals':
+            elif layername == 'excellondecimals':
                 try:
                     J.ExcellonDecimals = int(fname)
                 except:
                     raise RuntimeError("Excellon decimals '%s' in config file is not a valid integer" % fname)
-            elif layername=='repeat':
+            elif layername == 'repeat':
                 try:
                     J.Repeat = int(fname)
                 except:
@@ -301,11 +302,11 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
         for layername in CP.options(jobname):
             fname = CP.get(jobname, layername)
 
-            if layername=='boardoutline':
+            if layername == 'boardoutline':
                 J.parseGerber(fname, layername, updateExtents=1)
-            elif layername[0]=='*':
+            elif layername[0] == '*':
                 J.parseGerber(fname, layername, updateExtents=0)
-            elif layername=='drills':
+            elif layername == 'drills':
                 J.parseExcellon(fname)
 
         # Emit warnings if some layers are missing
@@ -315,8 +316,8 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
             del LL[layername]
 
         if LL:
-            if errstr=='ERROR':
-                do_abort=1
+            if errstr == 'ERROR':
+                do_abort = 1
 
             print("%s: Job %s is missing the following layers:" % (errstr, jobname))
             for layername in LL.keys():
@@ -328,7 +329,7 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
     if do_abort:
         raise RuntimeError("Exiting since jobs are missing layers. Set AllowMissingLayers=1\nto override.")
 
-if __name__=="__main__":
+if __name__ == "__main__":
     CP = parseConfigFile(sys.argv[1])
     print(Config)
     sys.exit(0)
