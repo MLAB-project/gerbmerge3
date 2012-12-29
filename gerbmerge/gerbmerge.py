@@ -23,11 +23,14 @@ Rugged Circuits LLC
 http://ruggedcircuits.com/gerbmerge
 """
 
+# Include standard modules
 import sys
 import os
 import argparse
 import re
+import time
 
+# Include gerbmerge modules
 import aptable
 import jobs
 import config
@@ -114,9 +117,9 @@ def tile_jobs(Jobs):
 
     PX,PY = config.Config['panelwidth'],config.Config['panelheight']
     if config.AutoSearchType==RANDOM_SEARCH:
-        tile = tilesearch.tile_search2(L, PX, PY, config.Config['xspacing'], config.Config['yspacing'], config.RandomSearchExhaustiveJobs, config.SearchTimeout)
+        tile = tile_search_random(L, PX, PY, config.Config['xspacing'], config.Config['yspacing'], config.RandomSearchExhaustiveJobs, config.SearchTimeout)
     else:
-        tile = tilesearch.tile_search1(L, PX, PY, config.Config['xspacing'], config.Config['yspacing'], config.SearchTimeout)
+        tile = tile_search_exhaustive(L, PX, PY, config.Config['xspacing'], config.Config['yspacing'], config.SearchTimeout)
 
     if not tile:
         raise RuntimeError('Panel size %.2f"x%.2f" is too small to hold jobs' % (PX,PY))
@@ -551,6 +554,64 @@ def merge(opts, gui = None):
 
     # Done!
     return 0
+
+def tile_search_exhaustive(Jobs, X, Y, xspacing, yspacing, searchTimeout):
+    """Wrapper around ExhaustiveSearch to handle keyboard interrupt, etc."""
+
+    x = tilesearch.ExhaustiveSearch(Jobs, X, Y, xspacing, yspacing, searchTimeout)
+
+    print('='*70)
+    print("Starting placement using exhaustive search.")
+    print("There are %ld possible permutations..." % x.possiblePermutations)
+    if x.possiblePermutations < 1e4:
+        print("this'll take no time at all.")
+    elif x.possiblePermutations < 1e5:
+        print("surf the web for a few minutes.")
+    elif x.possiblePermutations < 1e6:
+        print("take a long lunch.")
+    elif x.possiblePermutations < 1e7:
+        print("come back tomorrow.")
+    else:
+        print("don't hold your breath.")
+    print("Press Ctrl-C to stop and use the best placement so far.")
+    print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs,xspacing,yspacing)*100))
+
+    try:
+        x.run()
+        print()
+    except KeyboardInterrupt:
+        print(x)
+        print()
+        print("Interrupted.")
+
+    computeTime = time.time() - x.startTime
+    print("Computed %ld permutations in %d seconds / %.1f permutations/second" % (x.permutations, computeTime, x.permutations/computeTime))
+    print('='*70)
+
+    return x.bestTiling
+
+def tile_search_random(Jobs, X, Y, xspacing, yspacing, exhaustiveSearchJobs, searchTimeout):
+    """Wrapper around RandomSearch to handle keyboard interrupt, etc."""
+
+    x = tilesearch.RandomSearch(Jobs, X, Y, xspacing, yspacing, searchTimeout, exhaustiveSearchJobs)
+
+    print("="*70)
+    print("Starting random placement trials. You must press Ctrl-C to")
+    print("stop the process and use the best placement so far.")
+    print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs, xspacing, yspacing)*100))
+
+    try:
+        x.run()
+    except KeyboardInterrupt:
+        print(x)
+        print()
+        print("\nInterrupted.")
+
+    computeTime = time.time() - x.startTime
+    print("Computed %ld placements in %d seconds / %.1f placements/second" % (x.placements, computeTime, x.placements/computeTime))
+    print("="*70)
+
+    return x.bestTiling
 
 def updateGUI(text = None):
     global GUI
