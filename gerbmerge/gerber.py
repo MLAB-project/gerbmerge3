@@ -1,31 +1,32 @@
 import config
 import util
 
+
 def writeHeader22degrees(fid):
-    fid.write( \
-  """G75*
-  G70*
-  %OFA0B0*%
-  %FSLAX25Y25*%
-  %IPPOS*%
-  %LPD*%
-  %AMOC8*
-  5,1,8,0,0,1.08239X$1,22.5*
-  %
-  """)
+    fid.write("""G75*
+G70*
+%OFA0B0*%
+%FSLAX25Y25*%
+%IPPOS*%
+%LPD*%
+%AMOC8*
+5,1,8,0,0,1.08239X$1,22.5*
+%
+""")
+
 
 def writeHeader0degrees(fid):
-    fid.write( \
-  """G75*
-  G70*
-  %OFA0B0*%
-  %FSLAX25Y25*%
-  %IPPOS*%
-  %LPD*%
-  %AMOC8*
-  5,1,8,0,0,1.08239X$1,0.0*
-  %
-  """)
+    fid.write("""G75*
+G70*
+%OFA0B0*%
+%FSLAX25Y25*%
+%IPPOS*%
+%LPD*%
+%AMOC8*
+5,1,8,0,0,1.08239X$1,0.0*
+%
+""")
+
 
 def writeApertureMacros(fid, usedDict):
     keys = list(config.GAMT.keys())
@@ -34,6 +35,7 @@ def writeApertureMacros(fid, usedDict):
         if key in usedDict:
             config.GAMT[key].writeDef(fid)
 
+
 def writeApertures(fid, usedDict):
     keys = list(config.GAT.keys())
     keys.sort()
@@ -41,8 +43,10 @@ def writeApertures(fid, usedDict):
         if key in usedDict:
             config.GAT[key].writeDef(fid)
 
+
 def writeFooter(fid):
     fid.write('M02*\n')
+
 
 def writeFiducials(fid, drawcode, OriginX, OriginY, MaxXExtent, MaxYExtent):
     """Place fiducials at arbitrary points. The FiducialPoints list in the config specifies
@@ -54,16 +58,17 @@ def writeFiducials(fid, drawcode, OriginX, OriginY, MaxXExtent, MaxYExtent):
 
     fList = config.Config['fiducialpoints'].split(',')
     for i in range(0, len(fList), 2):
-        x,y = float(fList[i]), float(fList[i+1])
-        if x>=0:
+        x, y = float(fList[i]), float(fList[i+1])
+        if x >= 0:
             x += OriginX
         else:
             x = MaxXExtent + x
-        if y>=0:
+        if y >= 0:
             y += OriginX
         else:
             y = MaxYExtent + y
         fid.write('X%07dY%07dD03*\n' % (util.in2gerb(x), util.in2gerb(y)))
+
 
 def writeOutline(fid, OriginX, OriginY, MaxXExtent, MaxYExtent):
     # Write width-1 aperture to file
@@ -79,6 +84,7 @@ def writeOutline(fid, OriginX, OriginY, MaxXExtent, MaxYExtent):
     fid.write('X%07dY%07dD01*\n' % (util.in2gerb(MaxXExtent), util.in2gerb(MaxYExtent)))  # Top-right
     fid.write('X%07dY%07dD01*\n' % (util.in2gerb(MaxXExtent), util.in2gerb(OriginY)))     # Bottom-right
     fid.write('X%07dY%07dD01*\n' % (util.in2gerb(OriginX), util.in2gerb(OriginY)))        # Bottom-left
+
 
 def writeCropMarks(fid, drawing_code, OriginX, OriginY, MaxXExtent, MaxYExtent):
     """Add corner crop marks on the given layer"""
