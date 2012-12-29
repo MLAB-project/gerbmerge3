@@ -22,6 +22,7 @@ from math import isnan
 import jobs
 import config
 
+
 class Placement:
     def __init__(self):
         self.jobs = []
@@ -30,7 +31,7 @@ class Placement:
         # t is a Tiling. Calling its canonicalize() method will construct
         # a list of JobLayout objects and set the (X,Y) position of each
         # object.
-        self.jobs = self.jobs + t.canonicalize(OriginX,OriginY)
+        self.jobs = self.jobs + t.canonicalize(OriginX, OriginY)
 
     def addFromFile(self, file, OriginX, OriginY):
         # Preprocess the XML jobs file removing lines that start with '#' as those're comment lines.
@@ -68,7 +69,7 @@ class Placement:
             if type(row) is Row:
                 row.setPosition(x, y)
                 y += row.height_in() + config.Config['yspacing']
-        
+
         # Finally store a flattened list of jobs in this Placement
         for row in rows:
             self.jobs += row.canonicalize()
@@ -82,7 +83,7 @@ class Placement:
             maxX = max(maxX, job.x+job.width_in())
             maxY = max(maxY, job.y+job.height_in())
 
-        return (maxX,maxY)
+        return (maxX, maxY)
 
     def write(self, fname):
         """Write placement to an XML file of a form similar to that used for the layout files."""
@@ -100,6 +101,7 @@ class Placement:
         fid = open(fname, 'wt')
         newpanel.writexml(fid, addindent='\t', newl='\n')
         fid.close()
+
 
 class Panel:                 # Meant to be subclassed as either a Row() or Col()
     def __init__(self):
@@ -133,7 +135,7 @@ class Panel:                 # Meant to be subclassed as either a Row() or Col()
         "Return maximum width in inches of any one subpanel"
         width = 0.0
         for job in self.jobs:
-            width = max(width,job.width_in())
+            width = max(width, job.width_in())
         return width
 
     def addheights(self):
@@ -148,7 +150,7 @@ class Panel:                 # Meant to be subclassed as either a Row() or Col()
         "Return maximum height in inches of any one subpanel"
         height = 0.0
         for job in self.jobs:
-            height = max(height,job.height_in())
+            height = max(height, job.height_in())
         return height
 
     def writeGerber(self, fid, layername):
@@ -181,6 +183,7 @@ class Panel:                 # Meant to be subclassed as either a Row() or Col()
 
         return area
 
+
 # TODO: Add pretty-printing functionality
 class Row(Panel):
     def __init__(self):
@@ -197,8 +200,9 @@ class Row(Panel):
         self.x = x
         self.y = y
         for job in self.jobs:
-            job.setPosition(x,y)
+            job.setPosition(x, y)
             x += job.width_in() + config.Config['xspacing']
+
 
 # TODO: Add pretty-printing functionality
 class Col(Panel):
@@ -216,8 +220,9 @@ class Col(Panel):
         self.x = x
         self.y = y
         for job in self.jobs:
-            job.setPosition(x,y)
+            job.setPosition(x, y)
             y += job.height_in() + config.Config['yspacing']
+
 
 def parseJobSpec(spec, globalJobs):
     # Determine rotation for this job
@@ -237,8 +242,9 @@ def parseJobSpec(spec, globalJobs):
     # Now prepare the job
     job = jobs.findJob(spec.get('name'), rotation, globalJobs)
     if not isnan(x) and not isnan(y):
-        job.setPosition(x,y)
+        job.setPosition(x, y)
     return job
+
 
 def parseColSpec(spec, globalJobs):
     jobs = Col()
@@ -252,6 +258,7 @@ def parseColSpec(spec, globalJobs):
             raise RuntimeError("Unexpected element '%s' encountered while parsing jobs file" % coljob.tag)
 
     return jobs
+
 
 def parseRowSpec(spec, globalJobs):
     jobs = Row()
