@@ -32,42 +32,46 @@ _macro_pat = re.compile(r'^%AM([^*]+)\*$')
 # for the remaining three parameters. Thus, the entry for code 1 is
 # (int, float, float, float).
 PrimitiveParmTypes = (
-   None,                                            # Code 0  -- undefined
-  (int, float, float, float),                       # Code 1  -- circle
-  (int, float, float, float, float, float, float),  # Code 2  -- line (vector)
-   None,                                            # Code 3  -- end-of-file for .DES files
-  (int, int, float, float, float, float, float),    # Code 4  -- outline...takes any number of additional floats
-  (int, int, float, float, float, float),           # Code 5  -- regular polygon
-  (float, float, float, float, float, int, float, float, float),  # Code 6 -- moire
-  (float, float, float, float, float, float),       # Code 7  -- thermal
-   None,                                            # Code 8  -- undefined
-   None,                                            # Code 9  -- undefined
-   None,                                            # Code 10 -- undefined
-   None,                                            # Code 11 -- undefined
-   None,                                            # Code 12 -- undefined
-   None,                                            # Code 13 -- undefined
-   None,                                            # Code 14 -- undefined
-   None,                                            # Code 15 -- undefined
-   None,                                            # Code 16 -- undefined
-   None,                                            # Code 17 -- undefined
-   None,                                            # Code 18 -- undefined
-   None,                                            # Code 19 -- undefined
-  (int, float, float, float, float, float),         # Code 20 -- line (vector)...alias for code 2
-  (int, float, float, float, float, float),         # Code 21 -- line (center)
-  (int, float, float, float, float, float)          # Code 22 -- line (lower-left)
+    None,                                             # Code 0  -- undefined
+    (int, float, float, float),                       # Code 1  -- circle
+    (int, float, float, float, float, float, float),  # Code 2  -- line (vector)
+    None,                                             # Code 3  -- end-of-file for .DES files
+    (int, int, float, float, float, float, float),    # Code 4  -- outline...takes any number of additional floats
+    (int, int, float, float, float, float),           # Code 5  -- regular polygon
+    (float, float, float, float, float, int, float, float, float),  # Code 6 -- moire
+    (float, float, float, float, float, float),       # Code 7  -- thermal
+    None,                                             # Code 8  -- undefined
+    None,                                             # Code 9  -- undefined
+    None,                                             # Code 10 -- undefined
+    None,                                             # Code 11 -- undefined
+    None,                                             # Code 12 -- undefined
+    None,                                             # Code 13 -- undefined
+    None,                                             # Code 14 -- undefined
+    None,                                             # Code 15 -- undefined
+    None,                                             # Code 16 -- undefined
+    None,                                             # Code 17 -- undefined
+    None,                                             # Code 18 -- undefined
+    None,                                             # Code 19 -- undefined
+    (int, float, float, float, float, float),         # Code 20 -- line (vector)...alias for code 2
+    (int, float, float, float, float, float),         # Code 21 -- line (center)
+    (int, float, float, float, float, float)          # Code 22 -- line (lower-left)
 )
 
-def rotatexy(x,y):
+
+def rotatexy(x, y):
     # Rotate point (x,y) counterclockwise 90 degrees about the origin
-    return (-y,x)
+    return (-y, x)
+
 
 def rotatexypair(L, ix):
     # Rotate list items L[ix],L[ix+1] by 90 degrees
-    L[ix],L[ix+1] = rotatexy(L[ix],L[ix+1])
+    L[ix], L[ix+1] = rotatexy(L[ix], L[ix+1])
+
 
 def swapxypair(L, ix):
     # Swap two list elements
-    L[ix],L[ix+1] = L[ix+1],L[ix]
+    L[ix], L[ix+1] = L[ix+1], L[ix]
+
 
 def rotatetheta(th):
     # Increase angle th in degrees by +90 degrees (counterclockwise).
@@ -77,9 +81,11 @@ def rotatetheta(th):
         th -= 360
     return th
 
+
 def rotatethelem(L, ix):
     # Increase angle th by +90 degrees for a list element
     L[ix] = rotatetheta(L[ix])
+
 
 class ApertureMacroPrimitive:
     def __init__(self, code=-1, fields=None):
@@ -113,7 +119,7 @@ class ApertureMacroPrimitive:
         #   - second field is number of points
         #   - 2*N fields for X,Y points
         #   - last field is rotation
-        if self.code==4:
+        if self.code == 4:
             if len(fields) < 2:
                 raise RuntimeError("Outline macro primitive has way too few fields")
 
@@ -162,24 +168,23 @@ class ApertureMacroPrimitive:
             raise
 
     def rotate(self):
-        if self.code == 1:      # Circle: nothing to do
+        if self.code == 1:          # Circle: nothing to do
             pass
-        elif self.code in (2,20): # Line (vector): fields (2,3) and (4,5) must be rotated, no need to
-                                  # rotate field 6
+        elif self.code in (2, 20):  # Line (vector): fields (2,3) and (4,5) must be rotated, no need to
+                                    # rotate field 6
             rotatexypair(self.parms, 2)
             rotatexypair(self.parms, 4)
-        elif self.code == 21:     # Line (center): fields (3,4) must be rotated, and field 5 incremented by +90
+        elif self.code == 21:       # Line (center): fields (3,4) must be rotated, and field 5 incremented by +90
             rotatexypair(self.parms, 3)
             rotatethelem(self.parms, 5)
-        elif self.code == 22:     # Line (lower-left): fields (3,4) must be rotated, and field 5 incremented by +90
+        elif self.code == 22:       # Line (lower-left): fields (3,4) must be rotated, and field 5 incremented by +90
             rotatexypair(self.parms, 3)
             rotatethelem(self.parms, 5)
-        elif self.code == 4:      # Outline: fields (2,3), (4,5), etc. must be rotated, the last field need not be incremented
+        elif self.code == 4:        # Outline: fields (2,3), (4,5), etc. must be rotated, the last field need not be incremented
             ix = 2
             for pts in range(self.parms[1]):    # parms[1] is the number of points
                 rotatexypair(self.parms, ix)
                 ix += 2
-            #rotatethelem(self.parms, ix)
         elif self.code == 5:      # Polygon: fields (2,3) must be rotated, and field 5 incremented by +90
             rotatexypair(self.parms, 2)
             rotatethelem(self.parms, 5)
@@ -209,6 +214,7 @@ class ApertureMacroPrimitive:
 
     def writeDef(self, fid):
         fid.write('%s*\n' % str(self))
+
 
 class ApertureMacro:
     def __init__(self, name):
@@ -251,6 +257,7 @@ class ApertureMacro:
             prim.writeDef(fid)
         fid.write('%\n')
 
+
 def parseApertureMacro(s, fid):
     match = _macro_pat.match(s)
     if match:
@@ -259,7 +266,7 @@ def parseApertureMacro(s, fid):
         M = ApertureMacro(name)
 
         for line in fid:
-            if line[0]=='%':
+            if line[0] == '%':
                 return M
 
             P = ApertureMacroPrimitive()
@@ -270,6 +277,7 @@ def parseApertureMacro(s, fid):
             raise RuntimeError("Premature end-of-file while parsing aperture macro")
     else:
         return None
+
 
 # This function adds the new aperture macro AM to the provided aperture macro
 # table. The return value is the modified macro (name modified to be its global
@@ -291,7 +299,7 @@ def addToApertureMacroTable(amTable, am):
 
     return am
 
-if __name__=="__main__":
+if __name__ == "__main__":
     # Create a funky aperture macro with all the fixins, and make sure
     # it rotates properly.
     M = ApertureMacro('TEST')
@@ -321,23 +329,21 @@ if __name__=="__main__":
 
     # Generate the Gerber so we can view it
     fid = open('amacro.ger', 'wt')
-    print(\
-  """G75*
-  G70*
-  %OFA0B0*%
-  %FSLAX24Y24*%
-  %IPPOS*%
-  %LPD*%""", file=fid)
+    print("""G75*
+    G70*
+    %OFA0B0*%
+    %FSLAX24Y24*%
+    %IPPOS*%
+    %LPD*%""", file=fid)
     M.writeDef(fid)
     MR.writeDef(fid)
-    print(\
-  """%ADD10TEST*%
-  %ADD11TESTR*%
-  D10*
-  X010000Y010000D03*
-  D11*
-  X015000Y010000D03*
-  M02*""", file=fid)
+    print("""%ADD10TEST*%
+    %ADD11TESTR*%
+    D10*
+    X010000Y010000D03*
+    D11*
+    X015000Y010000D03*
+    M02*""", file=fid)
     fid.close()
 
     print(M)
