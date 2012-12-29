@@ -23,27 +23,32 @@ import math
 
 import jobs
 
+
 # Helper functions to determine if points are right-of, left-of, above, and
 # below each other. These definitions assume that points are on a line that
 # is vertical or horizontal.
-def left_of(p1,p2):
-    return p1[0]<p2[0] and p1[1]==p2[1]
+def left_of(p1, p2):
+    return p1[0] < p2[0] and p1[1] == p2[1]
 
-def right_of(p1,p2):
-    return p1[0]>p2[0] and p1[1]==p2[1]
 
-def above(p1,p2):
-    return p1[1]>p2[1] and p1[0]==p2[0]
+def right_of(p1, p2):
+    return p1[0] > p2[0] and p1[1] == p2[1]
 
-def below(p1,p2):
-    return p1[1]<p2[1] and p1[0]==p2[0]
+
+def above(p1, p2):
+    return p1[1] > p2[1] and p1[0] == p2[0]
+
+
+def below(p1, p2):
+    return p1[1] < p2[1] and p1[0] == p2[0]
+
 
 class Tiling:
     def __init__(self, Xmax, Ymax, xspacing, yspacing):
         # Store the interjob spacing
         self.xspacing = xspacing
         self.yspacing = yspacing
-    
+
         # Make maximum dimensions bigger by inter-job spacing so that
         # we allow jobs (which are seated at the lower left of their cells)
         # to just fit on the panel, and not disqualify them because their
@@ -51,7 +56,7 @@ class Tiling:
         self.xmax = Xmax + self.xspacing
         self.ymax = Ymax + self.yspacing
 
-        self.points = [(0,Ymax), (0,0), (Xmax,0)]    # List of (X,Y) co-ordinates
+        self.points = [(0, Ymax), (0, 0), (Xmax, 0)]    # List of (X,Y) co-ordinates
         self.jobs = []   # List of 3-tuples: ((Xbl,Ybl),(Xtr,Ytr),Job) where
                          # (Xbl,Ybl) is bottom left, (Xtr,Ytr) is top-right of the cell.
                          # The actual job has dimensions (Xtr-Xbl-xspacing],Ytr-Ybl-yspacing)
@@ -62,16 +67,16 @@ class Tiling:
         L = []
         for job in self.jobs:
             J = jobs.JobLayout(job[2])
-            J.setPosition(job[0][0]+OriginX, job[0][1]+OriginY)
+            J.setPosition(job[0][0] + OriginX, job[0][1] + OriginY)
             L.append(J)
 
         return L
 
     def corners(self):
-        return len(self.points)-2
+        return len(self.points) - 2
 
     def clone(self):
-        T = Tiling(self.xmax-self.xspacing, self.ymax-self.yspacing, self.xspacing, self.yspacing)
+        T = Tiling(self.xmax - self.xspacing, self.ymax - self.yspacing, self.xspacing, self.yspacing)
         T.points = self.points[:]
         T.jobs = self.jobs[:]
         return T
@@ -82,19 +87,19 @@ class Tiling:
         for XY in self.points:
             fid.write("%s " % str(XY))
             count += 1
-            if count==8:
+            if count == 8:
                 fid.write("\n  ")
-                count=0
+                count = 0
         if count:
             fid.write("\n")
 
         fid.write("Jobs:\n")
-        for bl,tr,Job in self.jobs:
+        for bl, tr, Job in self.jobs:
             fid.write("  %s: %s\n" % (str(Job), str(bl)))
 
     def joblist(self, fid=sys.stdout):
-        for bl,tr,Job in self.jobs:
-            fid.write("%s@(%.1f,%.1f) " % (Job.name,bl[0],bl[1]))
+        for bl, tr, Job in self.jobs:
+            fid.write("%s@(%.1f,%.1f) " % (Job.name, bl[0], bl[1]))
         fid.write('\n')
 
     def isOverlap(self, ix, X, Y):
@@ -125,19 +130,17 @@ class Tiling:
         """
         if self.isL(ix):
             p_bl = self.points[ix]
-            p_tr = (p_bl[0]+X, p_bl[1]+Y)
-            if p_tr[0]>self.xmax or p_tr[1]>self.ymax:
+            p_tr = (p_bl[0] + X, p_bl[1] + Y)
+            if p_tr[0] > self.xmax or p_tr[1] > self.ymax:
                 return 1
         else:
-            p_bl = (self.points[ix][0]-X,self.points[ix][1])
-            p_tr = (self.points[ix][0],self.points[ix][1]+Y)
-            if p_bl[0]<0 or p_tr[1]>self.ymax:
+            p_bl = (self.points[ix][0] - X, self.points[ix][1])
+            p_tr = (self.points[ix][0], self.points[ix][1] + Y)
+            if p_bl[0] < 0 or p_tr[1] > self.ymax:
                 return 1
 
-        for t_bl,t_tr,Job in self.jobs:
-            if p_bl[0]<t_tr[0] and p_tr[0]>t_bl[0] \
-                               and                 \
-               p_bl[1]<t_tr[1] and p_tr[1]>t_bl[1]:
+        for t_bl, t_tr, Job in self.jobs:
+            if (p_bl[0] < t_tr[0] and p_tr[0] > t_bl[0]) and (p_bl[1] < t_tr[1] and p_tr[1] > t_bl[1]):
                 return 1
 
         return 0
@@ -161,10 +164,7 @@ class Tiling:
         #   previous point Y co-ordinate is higher, and
         #   next point Y co-ordinate is the same, and
         #   next point X co-ordinate is to the right
-        return pts[ix-1][0]==pts[ix][0]      \
-           and pts[ix-1][1]>pts[ix][1]       \
-           and pts[ix+1][1]==pts[ix][1]      \
-           and pts[ix+1][0]>pts[ix][0]
+        return pts[ix - 1][0] == pts[ix][0] and pts[ix - 1][1] > pts[ix][1] and pts[ix + 1][1] == pts[ix][1] and pts[ix + 1][0] > pts[ix][0]
 
     def isMirrorL(self, ix):
         """True if self.points[ix] represents a mirrored L-shaped corner where there
@@ -186,10 +186,7 @@ class Tiling:
         #   previous point X co-ordinate is lower, and
         #   next point X co-ordinate is the same, and
         #   next point X co-ordinate is higher
-        return pts[ix-1][1]==pts[ix][1]       \
-           and pts[ix-1][0]<pts[ix][0]        \
-           and pts[ix+1][0]==pts[ix][0]       \
-           and pts[ix+1][1]>pts[ix][1]
+        return pts[ix - 1][1] == pts[ix][1] and pts[ix - 1][0] < pts[ix][0] and pts[ix + 1][0] == pts[ix][0] and pts[ix + 1][1] > pts[ix][1]
 
     def validAddPoints(self, X, Y):
         """Return a list of all valid indices into self.points at which we can add
@@ -197,7 +194,7 @@ class Tiling:
         mirrored-L-points and which would support the given job with no overlaps
         are returned.
         """
-        return [ix for ix in range(1,len(self.points)-1) if (self.isL(ix) or self.isMirrorL(ix)) and not self.isOverlap(ix,X,Y)]
+        return [ix for ix in range(1, len(self.points) - 1) if (self.isL(ix) or self.isMirrorL(ix)) and not self.isOverlap(ix, X, Y)]
 
     def mergePoints(self, ix):
         """Inspect points self.points[ix] and self.points[ix+1] as well
@@ -206,11 +203,11 @@ class Tiling:
         """
 
         # Do farther-on points first so we can delete things right from the list
-        if self.points[ix+3]==self.points[ix+4]:
-            del self.points[ix+3:ix+5]
+        if self.points[ix + 3] == self.points[ix + 4]:
+            del self.points[ix + 3:ix + 5]
 
-        if self.points[ix]==self.points[ix+1]:
-            del self.points[ix:ix+2]
+        if self.points[ix] == self.points[ix + 1]:
+            del self.points[ix:ix + 2]
 
     # Experimental
     def removeInlets(self, minSize):
@@ -246,36 +243,36 @@ class Tiling:
 
         while not done:
             # Repeat this loop each time there is a change
-            for ix in range(0, len(pt)-3):
+            for ix in range(0, len(pt) - 3):
 
                 # Check for horizontal left-going inlet
-                if right_of(pt[ix],pt[ix+1]) and above(pt[ix+1],pt[ix+2]) and left_of(pt[ix+2],pt[ix+3]):
+                if right_of(pt[ix], pt[ix + 1]) and above(pt[ix + 1], pt[ix + 2]) and left_of(pt[ix + 2], pt[ix + 3]):
                     # Make sure minSize requirement is met
-                    if pt[ix][1]-pt[ix+3][1] < minSize:
+                    if pt[ix][1] - pt[ix + 3][1] < minSize:
                         # Get rid of middle two points, extend Y-value of highest point down to lowest point
-                        pt[ix] = (pt[ix][0],pt[ix+3][1])
-                        del pt[ix+1:ix+3]
+                        pt[ix] = (pt[ix][0], pt[ix + 3][1])
+                        del pt[ix + 1:ix + 3]
                         break
 
                 # Check for horizontal right-going inlet
-                if left_of(pt[ix],pt[ix+1]) and below(pt[ix+1],pt[ix+2]) and right_of(pt[ix+2],pt[ix+3]):
+                if left_of(pt[ix], pt[ix + 1]) and below(pt[ix + 1], pt[ix + 2]) and right_of(pt[ix + 2], pt[ix + 3]):
                     # Make sure minSize requirement is met
-                    if pt[ix+3][1]-pt[ix][1] < minSize:
+                    if pt[ix + 3][1] - pt[ix][1] < minSize:
                         # Get rid of middle two points, exten Y-value of highest point down to lowest point
-                        pt[ix+3] = (pt[ix+3][0], pt[ix][1])
-                        del pt[ix+1:ix+3]
+                        pt[ix + 3] = (pt[ix + 3][0], pt[ix][1])
+                        del pt[ix + 1:ix + 3]
                         break
 
                 # Check for vertical inlets
-                if above(pt[ix],pt[ix+1]) and left_of(pt[ix+1],pt[ix+2]) and below(pt[ix+2],pt[ix+3]):
+                if above(pt[ix], pt[ix + 1]) and left_of(pt[ix + 1], pt[ix + 2]) and below(pt[ix + 2], pt[ix + 3]):
                     # Make sure minSize requirement is met
-                    if pt[ix+3][0]-pt[ix][0] < minSize:
+                    if pt[ix + 3][0] - pt[ix][0] < minSize:
                         # Is right side lower or higher?
-                        if pt[ix+3][1]>=pt[ix][1]:   # higher?
-                            pt[ix] = (pt[ix+3][0], pt[ix][1]) # Move first point to the right
+                        if pt[ix + 3][1] >= pt[ix][1]:   # higher?
+                            pt[ix] = (pt[ix + 3][0], pt[ix][1])  # Move first point to the right
                         else:                        # lower?
-                            pt[ix+3] = (pt[ix][0], pt[ix+3][1]) # Move last point to the left
-                        del pt[ix+1:ix+3]
+                            pt[ix + 3] = (pt[ix][0], pt[ix + 3][1])  # Move last point to the left
+                        del pt[ix + 1:ix + 3]
                         break
 
             else:
@@ -287,13 +284,13 @@ class Tiling:
         is removed from the tiling and new points are added at the top-left, top-right
         and bottom-right of the new job, with extra space added for inter-job spacing.
         """
-        x,y = self.points[ix]
-        x_tr = x+X
-        y_tr = y+Y
-        self.points[ix:ix+1] = [(x,y_tr), (x_tr,y_tr), (x_tr,y)]
-        self.jobs.append( ((x,y),(x_tr,y_tr),Job) )
+        x, y = self.points[ix]
+        x_tr = x + X
+        y_tr = y + Y
+        self.points[ix:ix + 1] = [(x, y_tr), (x_tr, y_tr), (x_tr, y)]
+        self.jobs.append(((x, y), (x_tr, y_tr), Job))
 
-        self.mergePoints(ix-1)
+        self.mergePoints(ix - 1)
 
     def addMirrorLJob(self, ix, X, Y, Job):
         """Add a job to the tiling at mirror-L-point self.points[ix] with dimensions X-by-Y.
@@ -301,13 +298,13 @@ class Tiling:
         is removed from the tiling and new points are added at the bottom-left, top-left
         and top-right of the new job, with extra space added for inter-job spacing.
         """
-        x_tr,y = self.points[ix]
-        x    = x_tr-X
-        y_tr = y+Y
-        self.points[ix:ix+1] = [(x,y), (x,y_tr), (x_tr,y_tr)]
-        self.jobs.append( ((x,y),(x_tr,y_tr),Job) )
+        x_tr, y = self.points[ix]
+        x = x_tr - X
+        y_tr = y + Y
+        self.points[ix:ix + 1] = [(x, y), (x, y_tr), (x_tr, y_tr)]
+        self.jobs.append(((x, y), (x_tr, y_tr), Job))
 
-        self.mergePoints(ix-1)
+        self.mergePoints(ix - 1)
 
     def addJob(self, ix, X, Y, Job):
         """Add a job to the tiling at point self.points[ix] and with dimensions X-by-Y.
@@ -325,21 +322,21 @@ class Tiling:
         minX = minY = float("inf")
         maxX = maxY = 0.0
 
-        for bl,tr,job in self.jobs:
-            minX = min(minX,bl[0])
-            maxX = max(maxX,tr[0])
-            minY = min(minY,bl[1])
-            maxY = max(maxY,tr[1])
+        for bl, tr, job in self.jobs:
+            minX = min(minX, bl[0])
+            maxX = max(maxX, tr[0])
+            minY = min(minY, bl[1])
+            maxY = max(maxY, tr[1])
 
-        return ( (minX,minY), (maxX-self.xspacing, maxY-self.yspacing) )
+        return ((minX, minY), (maxX - self.xspacing, maxY - self.yspacing))
 
     def area(self):
         """Return area of rectangular region defined by all jobs."""
-        bl,tr = self.bounds()
+        bl, tr = self.bounds()
 
-        DX = tr[0]-bl[0]
-        DY = tr[1]-bl[1]
-        return DX*DY
+        DX = tr[0] - bl[0]
+        DY = tr[1] - bl[1]
+        return DX * DY
 
     def usedArea(self):
         """Return total area of just jobs, not spaces in-between."""
@@ -349,11 +346,12 @@ class Tiling:
 
         return area
 
+
 # Function to estimate the maximum possible utilization given a list of jobs.
-# Jobs list is 4-tuple (Xdim,Ydim,job,rjob).
+# Jobs list is 4-tuple (Xdim, Ydim, job, rjob).
 def maxUtilization(Jobs, xspacing, yspacing):
     usedArea = totalArea = 0.0
-    for Xdim,Ydim,job,rjob in Jobs:
+    for Xdim, Ydim, job, rjob in Jobs:
         usedArea += job.jobarea()
         totalArea += job.jobarea()
         totalArea += job.width_in()*xspacing + job.height_in()*yspacing + xspacing*yspacing
@@ -363,15 +361,16 @@ def maxUtilization(Jobs, xspacing, yspacing):
     sq_side = math.sqrt(totalArea)
     totalArea -= sq_side*xspacing + sq_side*yspacing + xspacing*yspacing
 
-    return usedArea/totalArea
+    return usedArea / totalArea
+
 
 # Utility function to compute the minimum dimension along any axis of all jobs.
 # Used to remove inlets.
 def minDimension(Jobs):
     M = float("inf")
-    for Xdim,Ydim,job,rjob in Jobs:
-        M = min(M,Xdim)
-        M = min(M,Ydim)
+    for Xdim, Ydim, job, rjob in Jobs:
+        M = min(M, Xdim)
+        M = min(M, Ydim)
     return M
 
 # vim: expandtab ts=2 sw=2
