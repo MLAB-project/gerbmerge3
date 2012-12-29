@@ -65,12 +65,12 @@ def rotatexy(x, y):
 
 def rotatexypair(L, ix):
     # Rotate list items L[ix],L[ix+1] by 90 degrees
-    L[ix], L[ix+1] = rotatexy(L[ix], L[ix+1])
+    L[ix], L[ix + 1] = rotatexy(L[ix], L[ix + 1])
 
 
 def swapxypair(L, ix):
     # Swap two list elements
-    L[ix], L[ix+1] = L[ix+1], L[ix]
+    L[ix], L[ix + 1] = L[ix + 1], L[ix]
 
 
 def rotatetheta(th):
@@ -128,8 +128,8 @@ class ApertureMacroPrimitive:
             except:
                 raise RuntimeError("Outline macro primitive has non-integer number of points")
 
-            if len(fields) != (3+2*N):
-                raise RuntimeError("Outline macro primitive has %d fields...expecting %d fields" % (len(fields), 3+2*N))
+            if len(fields) != (3 + 2*N):
+                raise RuntimeError("Outline macro primitive has %d fields...expecting %d fields" % (len(fields), 3 + 2*N))
         else:
             if len(fields) != len(valids):
                 raise RuntimeError("Macro primitive has %d fields...expecting %d fields" % (len(fields), len(valids)))
@@ -145,7 +145,7 @@ class ApertureMacroPrimitive:
             try:
                 self.parms.append(converter(fields[parmix]))
             except:
-                raise RuntimeError("Aperture macro primitive parameter %d has incorrect type" % (parmix+1))
+                raise RuntimeError("Aperture macro primitive parameter %d has incorrect type" % (parmix + 1))
 
     def setFromLine(self, line):
         # Account for DOS line endings and get rid of line ending and '*' at the end
@@ -162,9 +162,9 @@ class ApertureMacroPrimitive:
                 raise RuntimeError("Illegal aperture macro primitive code \"%s\"" % fields[0])
             self.setFromFields(code, fields[1:])
         except:
-            print('='*20)
+            print('=' * 20)
             print("==> ", line)
-            print('='*20)
+            print('=' * 20)
             raise
 
     def rotate(self):
@@ -234,7 +234,7 @@ class ApertureMacro:
         # number of aperture macros by stripping off the leading character.
         M = copy.deepcopy(self)
         M.rotate()
-        M.name = 'R'+M.name[1:]
+        M.name = 'R' + M.name[1:]
         return M
 
     def dump(self, fid=sys.stdout):
@@ -248,7 +248,7 @@ class ApertureMacro:
     def hash(self):
         s = ''
         for prim in self.prim:
-            s += '  '+str(prim)+'\n'
+            s += '  ' + str(prim) + '\n'
         return s
 
     def writeDef(self, fid):
@@ -293,7 +293,7 @@ def addToApertureMacroTable(amTable, am):
     else:
         lastCode = 0
 
-    mcode = 'M%d' % (lastCode+1)
+    mcode = 'M%d' % (lastCode + 1)
     am.name = mcode
     amTable[mcode] = am
 
