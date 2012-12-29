@@ -140,7 +140,7 @@ class RandomSearch(TileSearch):
 
                 # Check for timeout
                 if (self.searchTimeout > 0) and ((time.time() - self.startTime) > self.searchTimeout):
-                    raise KeyboardInterrupt
+                    return
 
 
 class ExhaustiveSearch(TileSearch):
@@ -293,7 +293,7 @@ class ExhaustiveSearch(TileSearch):
 
                 # Check for timeout
                 if (self.searchTimeout > 0) and ((time.time() - self.startTime) > self.searchTimeout):
-                    raise KeyboardInterrupt
+                    return
 
 def tile_search1(Jobs, X, Y, xspacing, yspacing, searchTimeout):
     """Wrapper around ExhaustiveSearch to handle keyboard interrupt, etc."""
