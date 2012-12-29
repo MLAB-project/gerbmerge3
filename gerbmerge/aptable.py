@@ -11,10 +11,12 @@ Rugged Circuits LLC
 http://ruggedcircuits.com/gerbmerge
 """
 
+# Include standard modules
 import sys
 import re
 import string
 
+# Include gerbmerge modules
 import config
 import amacro
 import util
@@ -109,7 +111,7 @@ class Aperture:
             try:
                 self.dimx = RevGAMT[hash]
             except KeyError:
-                AMR = amacro.addToApertureMacroTable(AMR)   # adds to GAMT and modifies name to global name
+                AMR = amacro.addToApertureMacroTable(config.GAMT, AMR)   # adds to GAMT and modifies name to global name
                 self.dimx = RevGAMT[hash] = AMR.name
 
         elif self.dimy is not None:       # Rectangles and Ovals have a dimy setting and need to be rotated
@@ -237,7 +239,7 @@ def constructApertureTable(fileList):
                     # No, so define the global macro and do the translation. Note that
                     # addToApertureMacroTable() MODIFIES AM.name to the new M-name.
                     localMacroName = AM.name
-                    AM = amacro.addToApertureMacroTable(AM)
+                    AM = amacro.addToApertureMacroTable(config.GAMT, AM)
                     knownMacroNames[localMacroName] = AM.name
                     RevGAMT[AM.hash()] = AM.name
             else:

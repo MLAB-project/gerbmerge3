@@ -18,8 +18,6 @@ import re
 import string
 import copy
 
-import config
-
 _macro_pat = re.compile(r'^%AM([^*]+)\*$')
 
 # This list stores the expected types of parameters for each primitive type
@@ -273,15 +271,13 @@ def parseApertureMacro(s, fid):
     else:
         return None
 
-# This function adds the new aperture macro AM to the global aperture macro
+# This function adds the new aperture macro AM to the provided aperture macro
 # table. The return value is the modified macro (name modified to be its global
 # name).  macro.
-def addToApertureMacroTable(AM):
-    GAMT = config.GAMT
-
+def addToApertureMacroTable(amTable, am):
     # Must sort keys by integer value, not string since 99 comes before 100
     # as an integer but not a string.
-    keys = map(int, map(lambda K: K[1:], GAMT.keys()))
+    keys = map(int, map(lambda k: k[1:], amTable.keys()))
     keys.sort()
 
     if len(keys):
@@ -290,10 +286,10 @@ def addToApertureMacroTable(AM):
         lastCode = 0
 
     mcode = 'M%d' % (lastCode+1)
-    AM.name = mcode
-    GAMT[mcode] = AM
+    am.name = mcode
+    amTable[mcode] = am
 
-    return AM
+    return am
 
 if __name__=="__main__":
     # Create a funky aperture macro with all the fixins, and make sure
