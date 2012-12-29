@@ -16,6 +16,7 @@ import config
 import makestroke
 import util
 
+
 def writeDrillHits(fid, Place, Tools):
     toolNumber = -1
 
@@ -30,13 +31,15 @@ def writeDrillHits(fid, Place, Tools):
         for job in Place.jobs:
             job.writeDrillHits(fid, size, toolNumber)
 
+
 def writeBoundingBox(fid, OriginX, OriginY, MaxXExtent, MaxYExtent):
     x = util.in2gerb(OriginX)
     y = util.in2gerb(OriginY)
     X = util.in2gerb(MaxXExtent)
     Y = util.in2gerb(MaxYExtent)
 
-    makestroke.drawPolyline(fid, [(x,y), (X,y), (X,Y), (x,Y), (x,y)], 0, 0)
+    makestroke.drawPolyline(fid, [(x, y), (X, y), (X, Y), (x, Y), (x, y)], 0, 0)
+
 
 def writeDrillLegend(fid, Tools, OriginY, MaxXExtent):
     # This is the spacing from the right edge of the board to where the
@@ -46,7 +49,7 @@ def writeDrillLegend(fid, Tools, OriginY, MaxXExtent):
 
     # This is the spacing from the drill hit glyph to the drill size
     # in inches.
-    glyphspace = 0.1 # inches
+    glyphspace = 0.1  # inches
 
     # Convert to Gerber 2.5 units
     dimspace = util.in2gerb(dimspace)
@@ -72,10 +75,10 @@ def writeDrillLegend(fid, Tools, OriginY, MaxXExtent):
     posY = util.in2gerb(OriginY)
     posX = util.in2gerb(MaxXExtent) + dimspace
     maxX = 0
-    for size,toolNum in L:
+    for size, toolNum in L:
         # Determine string to write and midpoint of string
         s = '%.3f"' % size
-        ll, ur = makestroke.boundingBox(s, posX+glyphspace, posY) # Returns lower-left point, upper-right point
+        ll, ur = makestroke.boundingBox(s, posX+glyphspace, posY)  # Returns lower-left point, upper-right point
         midpoint = (ur[1]+ll[1])/2
 
         # Keep track of maximum extent of legend
@@ -88,6 +91,7 @@ def writeDrillLegend(fid, Tools, OriginY, MaxXExtent):
 
     # Return value is lower-left of user text area, without any padding.
     return maxX, util.in2gerb(OriginY)
+
 
 def writeDimensionArrow(fid, OriginX, OriginY, MaxXExtent, MaxYExtent):
     x = util.in2gerb(OriginX)
@@ -125,8 +129,8 @@ def writeDimensionArrow(fid, OriginX, OriginY, MaxXExtent, MaxYExtent):
 
     # Finally, draw the extending lines from the text to the arrows.
     posY = Y + dimspace
-    posX1 = posX - util.in2gerb(0.1) # 1000
-    posX2 = posX + s_width + util.in2gerb(0.1) # 1000
+    posX1 = posX - util.in2gerb(0.1)  # 1000
+    posX2 = posX + s_width + util.in2gerb(0.1)  # 1000
     makestroke.drawLine(fid, x, posY, posX1, posY)
     makestroke.drawLine(fid, posX2, posY, X, posY)
 
@@ -145,26 +149,28 @@ def writeDimensionArrow(fid, OriginX, OriginY, MaxXExtent, MaxYExtent):
 
     # Draw extending lines
     posX = X + dimspace
-    posY1 = posY + util.in2gerb(0.1) # 1000
-    posY2 = posY - s_width - util.in2gerb(0.1) # 1000
+    posY1 = posY + util.in2gerb(0.1)  # 1000
+    posY2 = posY - s_width - util.in2gerb(0.1)  # 1000
     makestroke.drawLine(fid, posX, Y, posX, posY1)
     makestroke.drawLine(fid, posX, posY2, posX, y)
 
+
 def writeUserText(fid, X, Y):
     fname = config.Config['fabricationdrawingtext']
-    if not fname: return
+    if not fname:
+        return
 
     try:
         tfile = open(fname, 'rt')
     except Exception as detail:
-        raise RuntimeError("Could not open fabrication drawing text file '%s':\n  %s" % (fname,str(detail)))
+        raise RuntimeError("Could not open fabrication drawing text file '%s':\n  %s" % (fname, str(detail)))
 
     lines = tfile.readlines()
     tfile.close()
     lines.reverse()  # We're going to print from bottom up
 
     # Offset X position to give some clearance from drill legend
-    X += util.in2gerb(0.2) # 2000
+    X += util.in2gerb(0.2)  # 2000
 
     for line in lines:
         # Get rid of CR
@@ -182,6 +188,7 @@ def writeUserText(fid, X, Y):
 
         Y += int(round((ur[1]-ll[1])*1.5))
 
+
 # Main entry point. Gerber file has already been opened, header written
 # out, 1mil tool selected.
 def writeFabDrawing(fid, Place, Tools, OriginX, OriginY, MaxXExtent, MaxYExtent):
@@ -195,7 +202,7 @@ def writeFabDrawing(fid, Place, Tools, OriginX, OriginY, MaxXExtent, MaxYExtent)
     # Write out the drill hit legend off to the side. This function returns
     # (X,Y) lower-left origin where user text is to begin, in Gerber units
     # and without any padding.
-    X,Y = writeDrillLegend(fid, Tools, OriginY, MaxXExtent)
+    X, Y = writeDrillLegend(fid, Tools, OriginY, MaxXExtent)
 
     # Write out the dimensioning arrows
     writeDimensionArrow(fid, OriginX, OriginY, MaxXExtent, MaxYExtent)
