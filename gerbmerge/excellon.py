@@ -1,13 +1,17 @@
 import re
 
+
 def writeheader(fid):
     fid.write('%\n')
+
 
 def writefooter(fid):
     fid.write('M30\n')
 
+
 def writetool(fid, tool, size):
     fid.write('%sC%f\n' % (tool, size))
+
 
 def parseToolList(fname):
     """Parse an Excellon tool list file of the form:
@@ -21,12 +25,13 @@ def parseToolList(fname):
     except Exception as detail:
         raise RuntimeError("Unable to open tool list file '%s':\n  %s" % (fname, str(detail)))
 
-    pat_in  = re.compile(r'\s*(T\d+)\s+([0-9.]+)\s*in\s*')
-    pat_mm  = re.compile(r'\s*(T\d+)\s+([0-9.]+)\s*mm\s*')
+    pat_in = re.compile(r'\s*(T\d+)\s+([0-9.]+)\s*in\s*')
+    pat_mm = re.compile(r'\s*(T\d+)\s+([0-9.]+)\s*mm\s*')
     pat_mil = re.compile(r'\s*(T\d+)\s+([0-9.]+)\s*(?:mil)?')
     for line in fid.xreadlines():
         line = string.strip(line)
-        if (not line) or (line[0] in ('#', ';')): continue
+        if (not line) or (line[0] in ('#', ';')):
+            continue
 
         mm = 0
         mil = 0
@@ -45,7 +50,7 @@ def parseToolList(fname):
         try:
             size = float(size)
         except:
-            raise RuntimeError("Tool size in file '%s' is not a valid floating-point number:\n  %s" % (fname,line))
+            raise RuntimeError("Tool size in file '%s' is not a valid floating-point number:\n  %s" % (fname, line))
 
         if mil:
             size = size*0.001  # Convert mil to inches
@@ -56,9 +61,9 @@ def parseToolList(fname):
         tool = 'T%02d' % int(tool[1:])
 
         if tool in TL:
-            raise RuntimeError("Tool '%s' defined more than once in tool list file '%s'" % (tool,fname))
+            raise RuntimeError("Tool '%s' defined more than once in tool list file '%s'" % (tool, fname))
 
-        TL[tool]=size
+        TL[tool] = size
     fid.close()
 
     return TL
