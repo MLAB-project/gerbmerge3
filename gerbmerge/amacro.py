@@ -128,8 +128,8 @@ class ApertureMacroPrimitive:
             except:
                 raise RuntimeError("Outline macro primitive has non-integer number of points")
 
-            if len(fields) != (3 + 2*N):
-                raise RuntimeError("Outline macro primitive has %d fields...expecting %d fields" % (len(fields), 3 + 2*N))
+            if len(fields) != (3 + 2 * N):
+                raise RuntimeError("Outline macro primitive has %d fields...expecting %d fields" % (len(fields), 3 + 2 * N))
         else:
             if len(fields) != len(valids):
                 raise RuntimeError("Macro primitive has %d fields...expecting %d fields" % (len(fields), len(valids)))

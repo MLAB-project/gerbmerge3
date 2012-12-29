@@ -68,9 +68,9 @@ min_text_size = 32  # mils, this is the minimum at SeeedStudio
 # name to use for the output.
 MergeOutputFiles = {
     'boardoutline': 'merged.boardoutline.ger',
-    'drills':       'merged.drills.xln',
-    'placement':    'merged.placement.xml',
-    'toollist':     'merged.toollist.drl'
+    'drills': 'merged.drills.xln',
+    'placement': 'merged.placement.xml',
+    'toollist': 'merged.toollist.drl'
 }
 
 # The global aperture table, indexed by aperture code (e.g., 'D10')
@@ -174,11 +174,11 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
                 pass   # Ignore DEFAULTS section keys
 
             elif opt in ('fabricationdrawing', 'outlinelayer'):
-                print('*'*73)
+                print('*' * 73)
                 print('\nThe FabricationDrawing and OutlineLayer configuration options have been')
                 print('renamed as of GerbMerge version 1.0. Please consult the documentation for')
                 print('a description of the new options, then modify your configuration file.\n')
-                print('*'*73)
+                print('*' * 73)
                 sys.exit(1)
             else:
                 raise RuntimeError("Unknown option '%s' in [Options] section of configuration file" % opt)

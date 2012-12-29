@@ -354,12 +354,12 @@ def maxUtilization(Jobs, xspacing, yspacing):
     for Xdim, Ydim, job, rjob in Jobs:
         usedArea += job.jobarea()
         totalArea += job.jobarea()
-        totalArea += job.width_in()*xspacing + job.height_in()*yspacing + xspacing*yspacing
+        totalArea += job.width_in() * xspacing + job.height_in() * yspacing + xspacing * yspacing
 
     # Reduce total area by strip of unused spacing around top and side. Assume
     # final result will be approximately square.
     sq_side = math.sqrt(totalArea)
-    totalArea -= sq_side*xspacing + sq_side*yspacing + xspacing*yspacing
+    totalArea -= sq_side * xspacing + sq_side * yspacing + xspacing * yspacing
 
     return usedArea / totalArea
 

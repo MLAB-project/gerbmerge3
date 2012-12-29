@@ -183,14 +183,14 @@ class Job:
 
     def width_in(self):
         "Return width in INCHES"
-        return float(self.maxx-self.minx)*0.00001
+        return float(self.maxx - self.minx) * 0.00001
 
     def height_in(self):
         "Return height in INCHES"
-        return float(self.maxy-self.miny)*0.00001
+        return float(self.maxy - self.miny) * 0.00001
 
     def jobarea(self):
-        return self.width_in()*self.height_in()
+        return self.width_in() * self.height_in()
 
     def maxdimension(self):
         return max(self.width_in(), self.height_in())
@@ -382,10 +382,10 @@ class Job:
 
                         if item[0] == 'X':      # M.N specification for X-axis.
                             fracpart = int(item[2])
-                            x_div = 10.0**(5-fracpart)
+                            x_div = 10.0 ** (5 - fracpart)
                         if item[0] == 'Y':      # M.N specification for Y-axis.
                             fracpart = int(item[2])
-                            y_div = 10.0**(5-fracpart)
+                            y_div = 10.0 ** (5 - fracpart)
                     continue
 
                 # Parse and interpret G-codes
@@ -516,11 +516,11 @@ class Job:
                             self.miny = min(self.miny, 0)
                             self.maxy = max(self.maxy, 0)
 
-                    x = int(round(x*x_div))
-                    y = int(round(y*y_div))
+                    x = int(round(x * x_div))
+                    y = int(round(y * y_div))
                     if I is not None:
-                        I = int(round(I*x_div))
-                        J = int(round(J*y_div))
+                        I = int(round(I * x_div))
+                        J = int(round(J * y_div))
                         self.commands[layername].append((x, y, I, J, d, circ_signed))
                     else:
                         self.commands[layername].append((x, y, d))
@@ -569,11 +569,11 @@ class Job:
         # trailing-zero-pad all input integers to M+N digits (e.g., 6 digits for 2.4 mode)
         # specified by the 'zeropadto' variable.
         if self.ExcellonDecimals > 0:
-            divisor = 10.0**(4 - self.ExcellonDecimals)
-            zeropadto = 2+self.ExcellonDecimals
+            divisor = 10.0 ** (4 - self.ExcellonDecimals)
+            zeropadto = 2 + self.ExcellonDecimals
         else:
-            divisor = 10.0**(4 - config.Config['excellondecimals'])
-            zeropadto = 2+config.Config['excellondecimals']
+            divisor = 10.0 ** (4 - config.Config['excellondecimals'])
+            zeropadto = 2 + config.Config['excellondecimals']
 
         # Protel takes advantage of optional X/Y components when the previous one is the same,
         # so we have to remember them.
@@ -584,8 +584,8 @@ class Job:
             V = []
             for s in L:
                 if not suppress_leading:
-                    s = s + '0'*(zeropadto-len(s))
-                V.append(int(round(int(s)*divisor)))
+                    s = s + '0' * (zeropadto - len(s))
+                V.append(int(round(int(s) * divisor)))
             return tuple(V)
 
         for line in fid:
@@ -700,8 +700,8 @@ class Job:
             return
 
         # First convert given inches to 2.5 co-ordinates
-        X = int(round(Xoff/0.00001))
-        Y = int(round(Yoff/0.00001))
+        X = int(round(Xoff / 0.00001))
+        Y = int(round(Yoff / 0.00001))
 
         # Now calculate displacement for each position so that we end up at specified origin
         DX = X - self.minx
@@ -716,10 +716,10 @@ class Job:
             if isinstance(cmd, tuple):
                 if len(cmd) == 3:
                     x, y, d = cmd
-                    fid.write('X%07dY%07dD%02d*\n' % (x+DX, y+DY, d))
+                    fid.write('X%07dY%07dD%02d*\n' % (x + DX, y + DY, d))
                 else:
                     x, y, I, J, d, s = cmd
-                    fid.write('X%07dY%07dI%07dJ%07dD%02d*\n' % (x+DX, y+DY, I, J, d))  # I,J are relative
+                    fid.write('X%07dY%07dI%07dJ%07dD%02d*\n' % (x + DX, y + DY, I, J, d))  # I,J are relative
             else:
                 # It's an aperture change, G-code, or RS274-X command that begins with '%'. If
                 # it's an aperture code, the aperture has already been translated
@@ -744,16 +744,16 @@ class Job:
         # and our internal Excellon representation is 2.4 as of GerbMerge
         # version 0.91. We use X,Y to calculate DX,DY in 2.4 units (i.e., with a
         # resolution of 0.0001".
-        X = int(round(Xoff/0.00001))  # First work in 2.5 format to match Gerber
-        Y = int(round(Yoff/0.00001))
+        X = int(round(Xoff / 0.00001))  # First work in 2.5 format to match Gerber
+        Y = int(round(Yoff / 0.00001))
 
         # Now calculate displacement for each position so that we end up at specified origin
         DX = X - self.minx
         DY = Y - self.miny
 
         # Now round down to 2.4 format
-        DX = int(round(DX/10.0))
-        DY = int(round(DY/10.0))
+        DX = int(round(DX / 10.0))
+        DY = int(round(DY / 10.0))
 
         ltools = self.findTools(diameter)
 
@@ -767,15 +767,15 @@ class Job:
             if ltool in self.xcommands:
                 for cmd in self.xcommands[ltool]:
                     x, y = cmd
-                    fid.write(fmtstr % (x+DX, y+DY))
+                    fid.write(fmtstr % (x + DX, y + DY))
 
     def writeDrillHits(self, fid, diameter, toolNum, Xoff, Yoff):
         """Write a drill hit pattern. diameter is tool diameter in inches, while toolNum is
         an integer index into strokes.DrillStrokeList"""
 
         # First convert given inches to 2.5 co-ordinates
-        X = int(round(Xoff/0.00001))
-        Y = int(round(Yoff/0.00001))
+        X = int(round(Xoff / 0.00001))
+        Y = int(round(Yoff / 0.00001))
 
         # Now calculate displacement for each position so that we end up at specified origin
         DX = X - self.minx
@@ -790,7 +790,7 @@ class Job:
             if ltool in self.xcommands:
                 for cmd in self.xcommands[ltool]:
                     x, y = cmd
-                    makestroke.drawDrillHit(fid, 10*x+DX, 10*y+DY, toolNum)
+                    makestroke.drawDrillHit(fid, 10 * x + DX, 10 * y + DY, toolNum)
 
     def aperturesAndMacros(self, layername):
         "Return dictionaries whose keys are all necessary aperture names and macro names for this layer"
@@ -810,7 +810,7 @@ class Job:
         "Find or create a layer-specific aperture code to represent the global aperture given"
         if AP.code not in self.apxlat[layername].values():
             lastCode = aptable.findHighestApertureCode(self.apxlat[layername].keys())
-            localCode = 'D%d' % (lastCode+1)
+            localCode = 'D%d' % (lastCode + 1)
             self.apxlat[layername][localCode] = AP.code
 
     def inBorders(self, x, y):
@@ -1000,7 +1000,7 @@ class Job:
         keys = self.xcommands.keys()
         for toolname in keys:
             # Remember Excellon is 2.4 format while Gerber data is 2.5 format
-            validList = [(x, y) for x, y in self.xcommands[toolname] if self.inBorders(10*x, 10*y)]
+            validList = [(x, y) for x, y in self.xcommands[toolname] if self.inBorders(10 * x, 10 * y)]
 
             if validList:
                 self.xcommands[toolname] = validList
@@ -1041,41 +1041,41 @@ class JobLayout:
     def writeCutLines(self, fid, drawing_code, X1, Y1, X2, Y2):
         """Draw a board outline using the given aperture code"""
         def notEdge(x, X):
-            return round(abs(1000*(x-X)))
+            return round(abs(1000 * (x - X)))
 
         assert self.x and self.y
 
-        radius = config.GAT[drawing_code].dimx/2.0
+        radius = config.GAT[drawing_code].dimx / 2.0
 
         # Start at lower-left, proceed clockwise
         x = self.x - radius
         y = self.y - radius
 
         left = notEdge(self.x, X1)
-        right = notEdge(self.x+self.width_in(), X2)
+        right = notEdge(self.x + self.width_in(), X2)
         bot = notEdge(self.y, Y1)
-        top = notEdge(self.y+self.height_in(), Y2)
+        top = notEdge(self.y + self.height_in(), Y2)
 
         BL = ((x), (y))
-        TL = ((x), (y+self.height_in()+2*radius))
-        TR = ((x+self.width_in()+2*radius), (y+self.height_in()+2*radius))
-        BR = ((x+self.width_in()+2*radius), (y))
+        TL = ((x), (y + self.height_in() + 2 * radius))
+        TR = ((x + self.width_in() + 2 * radius), (y + self.height_in() + 2 * radius))
+        BR = ((x + self.width_in() + 2 * radius), (y))
 
         if not left:
-            BL = (BL[0]+2*radius, BL[1])
-            TL = (TL[0]+2*radius, TL[1])
+            BL = (BL[0] + 2 * radius, BL[1])
+            TL = (TL[0] + 2 * radius, TL[1])
 
         if not top:
-            TL = (TL[0], TL[1]-2*radius)
-            TR = (TR[0], TR[1]-2*radius)
+            TL = (TL[0], TL[1] - 2 * radius)
+            TR = (TR[0], TR[1] - 2 * radius)
 
         if not right:
-            TR = (TR[0]-2*radius, TR[1])
-            BR = (BR[0]-2*radius, BR[1])
+            TR = (TR[0] - 2 * radius, TR[1])
+            BR = (BR[0] - 2 * radius, BR[1])
 
         if not bot:
-            BL = (BL[0], BL[1]+2*radius)
-            BR = (BR[0], BR[1]+2*radius)
+            BL = (BL[0], BL[1] + 2 * radius)
+            BR = (BR[0], BR[1] + 2 * radius)
 
         BL = (util.in2gerb(BL[0]), util.in2gerb(BL[1]))
         TL = (util.in2gerb(TL[0]), util.in2gerb(TL[1]))
@@ -1140,17 +1140,17 @@ def rotateJob(job, degrees=90, firstpass=True):
     GAMT = config.GAMT
     if firstpass:
         if degrees == 270:
-            J = Job(job.name+'*rotated270')
+            J = Job(job.name + '*rotated270')
         elif degrees == 180:
-            J = Job(job.name+'*rotated180')
+            J = Job(job.name + '*rotated180')
         else:
-            J = Job(job.name+'*rotated90')
+            J = Job(job.name + '*rotated90')
     else:
         J = Job(job.name)
 
     # Keep the origin (lower-left) in the same place
-    J.maxx = job.minx + job.maxy-job.miny
-    J.maxy = job.miny + job.maxx-job.minx
+    J.maxx = job.minx + job.maxy - job.miny
+    J.maxy = job.miny + job.maxx - job.minx
     J.minx = job.minx
     J.miny = job.miny
 
@@ -1209,7 +1209,7 @@ def rotateJob(job, degrees=90, firstpass=True):
     # We also have to take aperture change commands and
     # replace them with the new aperture code if we have
     # a rotation.
-    offset = job.maxy-job.miny
+    offset = job.maxy - job.miny
     for layername in job.commands.keys():
         J.commands[layername] = []
         J.apertures[layername] = []
@@ -1247,7 +1247,7 @@ def rotateJob(job, degrees=90, firstpass=True):
             # (X,Y) --> (-Y,X) effects a 90-degree counterclockwise shift
             # Adding 'offset' to -Y maintains the lower-left origin of (minx,miny).
             newx = -(y - job.miny) + job.minx + offset
-            newy = (x-job.minx) + job.miny
+            newy = (x - job.minx) + job.miny
 
             # For circular interpolation commands, (I,J) components are always relative
             # so we do not worry about offsets, just reverse their sense, i.e., I becomes J
@@ -1267,11 +1267,11 @@ def rotateJob(job, degrees=90, firstpass=True):
         J.xcommands[tool] = []
 
         for x, y in job.xcommands[tool]:
-            newx = -(10*y - job.miny) + job.minx + offset
-            newy = (10*x - job.minx) + job.miny
+            newx = -(10 * y - job.miny) + job.minx + offset
+            newy = (10 * x - job.minx) + job.miny
 
-            newx = int(round(newx/10.0))
-            newy = int(round(newy/10.0))
+            newx = int(round(newx / 10.0))
+            newy = int(round(newy / 10.0))
 
             J.xcommands[tool].append((newx, newy))
 

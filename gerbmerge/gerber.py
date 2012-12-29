@@ -58,7 +58,7 @@ def writeFiducials(fid, drawcode, OriginX, OriginY, MaxXExtent, MaxYExtent):
 
     fList = config.Config['fiducialpoints'].split(',')
     for i in range(0, len(fList), 2):
-        x, y = float(fList[i]), float(fList[i+1])
+        x, y = float(fList[i]), float(fList[i + 1])
         if x >= 0:
             x += OriginX
         else:
@@ -94,32 +94,32 @@ def writeCropMarks(fid, drawing_code, OriginX, OriginY, MaxXExtent, MaxYExtent):
     # from the panel border, where D is the drawing line diameter.
     fid.write('%s*\n' % drawing_code)    # Choose drawing aperture
 
-    offset = config.GAT[drawing_code].dimx/2.0
+    offset = config.GAT[drawing_code].dimx / 2.0
 
     # Lower-left
     x = OriginX + offset
     y = OriginY + offset
-    fid.write('X%07dY%07dD02*\n' % (util.in2gerb(x+0.125), util.in2gerb(y+0.000)))
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x+0.000), util.in2gerb(y+0.000)))
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x+0.000), util.in2gerb(y+0.125)))
+    fid.write('X%07dY%07dD02*\n' % (util.in2gerb(x + 0.125), util.in2gerb(y + 0.000)))
+    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x + 0.000), util.in2gerb(y + 0.000)))
+    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x + 0.000), util.in2gerb(y + 0.125)))
 
     # Lower-right
     x = MaxXExtent - offset
     y = OriginY + offset
-    fid.write('X%07dY%07dD02*\n' % (util.in2gerb(x+0.000), util.in2gerb(y+0.125)))
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x+0.000), util.in2gerb(y+0.000)))
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x-0.125), util.in2gerb(y+0.000)))
+    fid.write('X%07dY%07dD02*\n' % (util.in2gerb(x + 0.000), util.in2gerb(y + 0.125)))
+    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x + 0.000), util.in2gerb(y + 0.000)))
+    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x - 0.125), util.in2gerb(y + 0.000)))
 
     # Upper-right
     x = MaxXExtent - offset
     y = MaxYExtent - offset
-    fid.write('X%07dY%07dD02*\n' % (util.in2gerb(x-0.125), util.in2gerb(y+0.000)))
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x+0.000), util.in2gerb(y+0.000)))
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x+0.000), util.in2gerb(y-0.125)))
+    fid.write('X%07dY%07dD02*\n' % (util.in2gerb(x - 0.125), util.in2gerb(y + 0.000)))
+    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x + 0.000), util.in2gerb(y + 0.000)))
+    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x + 0.000), util.in2gerb(y - 0.125)))
 
     # Upper-left
     x = OriginX + offset
     y = MaxYExtent - offset
-    fid.write('X%07dY%07dD02*\n' % (util.in2gerb(x+0.000), util.in2gerb(y-0.125)))
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x+0.000), util.in2gerb(y+0.000)))
-    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x+0.125), util.in2gerb(y+0.000)))
+    fid.write('X%07dY%07dD02*\n' % (util.in2gerb(x + 0.000), util.in2gerb(y - 0.125)))
+    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x + 0.000), util.in2gerb(y + 0.000)))
+    fid.write('X%07dY%07dD01*\n' % (util.in2gerb(x + 0.125), util.in2gerb(y + 0.000)))

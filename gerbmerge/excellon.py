@@ -53,9 +53,9 @@ def parseToolList(fname):
             raise RuntimeError("Tool size in file '%s' is not a valid floating-point number:\n  %s" % (fname, line))
 
         if mil:
-            size = size*0.001  # Convert mil to inches
+            size = size * 0.001  # Convert mil to inches
         elif mm:
-            size = size/25.4   # Convert mm to inches
+            size = size / 25.4   # Convert mm to inches
 
         # Canonicalize tool so that T1 becomes T01
         tool = 'T%02d' % int(tool[1:])

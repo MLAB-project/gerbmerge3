@@ -31,7 +31,7 @@ def isSegmentHorizontal(p1, p2):
 
 # Returns slope of a non-vertical line segment
 def segmentSlope(p1, p2):
-    return float(p2[1]-p1[1])/(p2[0]-p1[0])
+    return float(p2[1] - p1[1]) / (p2[0] - p1[0])
 
 
 # Determine if the (X,Y) 'point' is on the line segment defined by endpoints p1
@@ -42,10 +42,10 @@ def segmentSlope(p1, p2):
 def isPointOnSegment(point, p1, p2):
     if isSegmentVertical(p1, p2):
         # Treat vertical lines by comparing Y-ordinates
-        return (point[1]-p2[1])*(point[1]-p1[1]) <= 0
+        return (point[1] - p2[1]) * (point[1] - p1[1]) <= 0
     else:
         # Treat other lines, including horizontal lines, by comparing X-ordinates
-        return (point[0]-p2[0])*(point[0]-p1[0]) <= 0
+        return (point[0] - p2[0]) * (point[0] - p1[0]) <= 0
 
 
 # Returns (X,Y) point where the line segment defined by (X,Y) endpoints p1 and
@@ -64,10 +64,10 @@ def segmentXsegment1pt(p1, p2, q1, q2):
             return None
 
         x = A
-        y = segmentSlope(q1, q2)*(A-P) + Q
+        y = segmentSlope(q1, q2) * (A - P) + Q
     elif isSegmentVertical(q1, q2):
         x = P
-        y = segmentSlope(p1, p2)*(P-A) + B
+        y = segmentSlope(p1, p2) * (P - A) + B
     else:
         m1 = segmentSlope(p1, p2)
         m2 = segmentSlope(q1, q2)
@@ -75,8 +75,8 @@ def segmentXsegment1pt(p1, p2, q1, q2):
         if m1 == m2:
             return None
 
-        x = (A*m1 - B - P*m2 + Q) / (m1-m2)
-        y = m1*(x-A) + B
+        x = (A * m1 - B - P * m2 + Q) / (m1 - m2)
+        y = m1 * (x - A) + B
 
     # Candidate point identified. Check to make sure it's on both line segments.
     if isPointOnSegment((x, y), p1, p2) and isPointOnSegment((x, y), q1, q2):
@@ -209,7 +209,7 @@ def segmentXbox(pt1, pt2, llpt, urpt):
     # If the total number of intersections len(L)+len(corners) is 2, the corner
     # is valid. If there is only a single corner, it's a tangent and invalid.
     # However, if both corners are on the same side of the box, it's not valid.
-    numPts = len(L)+len(corners)
+    numPts = len(L) + len(corners)
     assert numPts <= 2
     if numPts == 2:
         if len(corners) == 2 and (isSegmentHorizontal(corners[0], corners[1]) or isSegmentVertical(corners[0], corners[1])):
@@ -271,20 +271,19 @@ def isRect1InRect2(E1, E2):
     ll1, ul1, ur1, lr1, rect1 = canonicalizeExtents(E1)
     ll2, ul2, ur2, lr2, rect2 = canonicalizeExtents(E2)
 
-    return (ll1[0] >= ll2[0]) and (ll1[1] >= ll2[1]) \
-        and (ur1[0] <= ur2[0]) and (ur1[1] <= ur2[1])
+    return (ll1[0] >= ll2[0]) and (ll1[1] >= ll2[1]) and (ur1[0] <= ur2[0]) and (ur1[1] <= ur2[1])
 
 
 # Return width of rectangle, which may be 0 if bottom-left and upper-right X
 # positions are the same. The rectangle is a 4-tuple (minx,miny,maxx,maxy).
 def rectWidth(rect):
-    return abs(rect[2]-rect[0])
+    return abs(rect[2] - rect[0])
 
 
 # Return height of rectangle, which may be 0 if bottom-left and upper-right Y
 # positions are the same. The rectangle is a 4-tuple (minx,miny,maxx,maxy).
 def rectHeight(rect):
-    return abs(rect[3]-rect[1])
+    return abs(rect[3] - rect[1])
 
 
 # Return center (X,Y) co-ordinates of rectangle.
@@ -293,14 +292,14 @@ def rectCenter(rect):
     dy = rectHeight(rect)
 
     if int(dx) & 1:    # Odd width: center is (left+right)/2 + 1/2
-        X = (rect[0] + rect[2] + 1)/2
+        X = (rect[0] + rect[2] + 1) / 2
     else:         # Even width: center is (left+right)/2
-        X = (rect[0] + rect[2])/2
+        X = (rect[0] + rect[2]) / 2
 
     if int(dy) & 1:
-        Y = (rect[1] + rect[3] + 1)/2
+        Y = (rect[1] + rect[3] + 1) / 2
     else:
-        Y = (rect[1] + rect[3])/2
+        Y = (rect[1] + rect[3]) / 2
 
     return (X, Y)
 
@@ -315,8 +314,8 @@ if __name__ == "__main__":
     assert segmentXbox((2500, 2500), (5500, 5500), llpt, urpt) == [(5000, 5000)]        # One valid corner
 
     # Segments collinear with box sides
-    assert segmentXbox((1000, 0),    (1000, 6000), llpt, urpt) == []    # Box side contained in segment
-    assert segmentXbox((1000, 0),    (1000, 3000), llpt, urpt) == []    # Box side partially overlaps segment
+    assert segmentXbox((1000, 0), (1000, 6000), llpt, urpt) == []    # Box side contained in segment
+    assert segmentXbox((1000, 0), (1000, 3000), llpt, urpt) == []    # Box side partially overlaps segment
     assert segmentXbox((1000, 2000), (1000, 4000), llpt, urpt) == []    # Segment contained in box side
 
     # Segments fully contained within box
