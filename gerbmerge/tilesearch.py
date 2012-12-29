@@ -16,6 +16,7 @@ from math import factorial
 
 import tiling
 
+
 class TileSearch:
     def __init__(self, jobs, x, y, xspacing, yspacing, searchTimeout):
         # Start the start-time counter. Since this is in Init() and not in *Search(),
@@ -56,13 +57,14 @@ class TileSearch:
         # Store some other configuration values
         self.searchTimeout = searchTimeout
 
+
 class RandomSearch(TileSearch):
     def __init__(self, jobs, x, y, xspacing, yspacing, searchTimeout, exhaustiveSearchJobs):
         super().__init__(jobs, x, y, xspacing, yspacing, searchTimeout)
 
         # We also store a blank tiling to start
         self.baseTiling = tiling.Tiling(x, y, self.xspacing, self.yspacing)
-        
+
         # Record the number of jobs that should be searched exhaustively
         self.RandomSearchExhaustiveJobs = exhaustiveSearchJobs
 
@@ -89,7 +91,7 @@ class RandomSearch(TileSearch):
         # M is the number of jobs that will be placed randomly.
         # N-M is the number of jobs that will be searched exhaustively.
         M = N - self.RandomSearchExhaustiveJobs
-        M = max(M,0)
+        M = max(M, 0)
 
         # Must escape with Ctrl-C
         while 1:
@@ -99,11 +101,11 @@ class RandomSearch(TileSearch):
             minInletSize = tiling.minDimension(self.jobs)
 
             for ix in joborder[:M]:
-                Xdim,Ydim,job,rjob = self.jobs[ix]
+                Xdim, Ydim, job, rjob = self.jobs[ix]
 
                 currentTiling.removeInlets(minInletSize)
 
-                if r.choice([0,1]):
+                if r.choice([0, 1]):
                     addpoints = currentTiling.validAddPoints(Xdim+self.xspacing, Ydim+self.yspacing)
                     if not addpoints:
                         break
@@ -236,15 +238,15 @@ class ExhaustiveSearch(TileSearch):
         for job_ix in range(len(Jobs)):
             # Pop off the next job and construct remaining_jobs, a sub-list
             # of Jobs with the job we've just popped off excluded.
-            Xdim,Ydim,job,rjob = Jobs[job_ix]
+            Xdim, Ydim, job, rjob = Jobs[job_ix]
             remaining_jobs = Jobs[:job_ix]+Jobs[job_ix+1:]
 
             # Construct add-points for the non-rotated and rotated job.
             # As an optimization, do not construct add-points for the rotated
             # job if the job is a square (duh).
-            addpoints1 = tiles.validAddPoints(Xdim+self.xspacing,Ydim+self.yspacing)     # unrotated job
+            addpoints1 = tiles.validAddPoints(Xdim+self.xspacing, Ydim+self.yspacing)     # unrotated job
             if Xdim != Ydim:
-                addpoints2 = tiles.validAddPoints(Ydim+self.xspacing,Xdim+self.yspacing)   # rotated job
+                addpoints2 = tiles.validAddPoints(Ydim+self.xspacing, Xdim+self.yspacing)   # rotated job
             else:
                 addpoints2 = []
 
@@ -263,7 +265,7 @@ class ExhaustiveSearch(TileSearch):
                     # A permutation is some ordering of jobs (N! choices) and some
                     # ordering of non-rotated and rotated within that ordering (2**N
                     # possibilities per ordering).
-                    self._run(remaining_jobs, T, firstAddPoint and ix==addpoints1[0], printStats)
+                    self._run(remaining_jobs, T, firstAddPoint and ix == addpoints1[0], printStats)
             elif firstAddPoint:
                 # Premature prune due to not being able to put this job anywhere. We
                 # have pruned off 2^M permutations where M is the length of the remaining
@@ -279,7 +281,7 @@ class ExhaustiveSearch(TileSearch):
                     T.addJob(ix, Ydim+self.xspacing, Xdim+self.yspacing, rjob)
 
                     # Recursive call with the remaining jobs and this new tiling.
-                    self._run(remaining_jobs, T, firstAddPoint and ix==addpoints2[0], printStats)
+                    self._run(remaining_jobs, T, firstAddPoint and ix == addpoints2[0], printStats)
             elif firstAddPoint:
                 # Premature prune due to not being able to put this job anywhere. We
                 # have pruned off 2^M permutations where M is the length of the remaining
