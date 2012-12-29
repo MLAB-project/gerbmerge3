@@ -33,15 +33,15 @@ FACING_DOWN = 1   # 90 degrees counterclockwise
 FACING_RIGHT = 2  # 180 degrees
 FACING_UP = 3     # 270 degrees
 
-SPACING_DX = 10*int(round(strokes.MaxWidth*SPACING_X))
-SPACING_DY = 10*int(round(strokes.MaxHeight*SPACING_Y))
+SPACING_DX = 10 * int(round(strokes.MaxWidth * SPACING_X))
+SPACING_DY = 10 * int(round(strokes.MaxHeight * SPACING_Y))
 
 RotatedGlyphs = {}
 
 # Default arrow glyph is at 0 degrees rotation, facing left
 ArrowGlyph = [
-    [(0, -BAR_LENGTH/2), (0, BAR_LENGTH/2)],
-    [(ARROW_LENGTH, ARROW_WIDTH/2), (0, 0), (ARROW_LENGTH, -ARROW_WIDTH/2)],
+    [(0, -BAR_LENGTH / 2), (0, BAR_LENGTH / 2)],
+    [(ARROW_LENGTH, ARROW_WIDTH / 2), (0, 0), (ARROW_LENGTH, -ARROW_WIDTH / 2)],
     [(0, 0), (ARROW_STEM_LENGTH, 0)]
 ]
 
@@ -54,7 +54,7 @@ def rotateGlyph(glyph, degrees, glyphName):
     except KeyError:
         pass  # Not cached yet
 
-    rad = degrees/180.0*math.pi
+    rad = degrees / 180.0 * math.pi
     cosx = math.cos(rad)
     sinx = math.sin(rad)
 
@@ -62,8 +62,8 @@ def rotateGlyph(glyph, degrees, glyphName):
     for path in glyph:
         newpath = []
         for X, Y in path:
-            x = int(round(X*cosx - Y*sinx))
-            y = int(round(X*sinx + Y*cosx))
+            x = int(round(X * cosx - Y * sinx))
+            y = int(round(X * sinx + Y * cosx))
             newpath.append((x, y))
         newglyph.append(newpath)
 
@@ -81,9 +81,9 @@ def drawPolyline(fid, L, offX, offY, scale=1):
         X *= scale
         Y *= scale
         if ix == 0:
-            writeFlash(fid, X+offX, Y+offY, 2)
+            writeFlash(fid, X + offX, Y + offY, 2)
         else:
-            writeFlash(fid, X+offX, Y+offY, 1)
+            writeFlash(fid, X + offX, Y + offY, 1)
 
 
 def writeGlyph(fid, glyph, X, Y, degrees, glyphName=None, size=10):
@@ -112,12 +112,12 @@ def writeChar(fid, c, X, Y, degrees, size=10):
 def writeString(fid, s, X, Y, degrees, size=60.0):
     posX = X
     posY = Y
-    rad = degrees/180.0*math.pi
+    rad = degrees / 180.0 * math.pi
     # convert mils to whatever goofy unit they use
-    size = size * 1/6.0
+    size = size * 1 / 6.0
     # divide by 10 to get offset of size right
-    dX = int(round(math.cos(rad)*SPACING_DX*(size / 10.0)))
-    dY = int(round(math.sin(rad)*SPACING_DX*(size / 10.0)))
+    dX = int(round(math.cos(rad) * SPACING_DX * (size / 10.0)))
+    dY = int(round(math.sin(rad) * SPACING_DX * (size / 10.0)))
 
     for char in s:
         writeChar(fid, char, posX, posY, degrees, size)
@@ -134,13 +134,13 @@ def boundingBox(s, X1, Y1):
     if not s:
         return (X1, Y1), (X1, Y1)
 
-    X2 = X1 + (len(s)-1)*SPACING_DX + 10*strokes.MaxWidth
-    Y2 = Y1 + 10*strokes.MaxHeight  # Not including descenders
+    X2 = X1 + (len(s) - 1) * SPACING_DX + 10 * strokes.MaxWidth
+    Y2 = Y1 + 10 * strokes.MaxHeight  # Not including descenders
     return (X1, Y1), (X2, Y2)
 
 
 def drawDimensionArrow(fid, X, Y, facing):
-    writeGlyph(fid, ArrowGlyph, X, Y, facing*90, "Arrow")
+    writeGlyph(fid, ArrowGlyph, X, Y, facing * 90, "Arrow")
 
 
 def drawDrillHit(fid, X, Y, toolNum):
@@ -149,7 +149,7 @@ def drawDrillHit(fid, X, Y, toolNum):
 
 if __name__ == "__main__":
     import string
-    s = string.digits+string.ascii_letters+string.punctuation
+    s = string.digits + string.ascii_letters + string.punctuation
     #s = "The quick brown fox jumped over the lazy dog!"
     size = float(sys.argv[1]) if len(sys.argv) > 1 else 10
     fid = open('test.ger', 'wt')
@@ -174,7 +174,7 @@ if __name__ == "__main__":
     drawDimensionArrow(fid, 5000, 10000, FACING_DOWN)
 
     for diam in range(0, strokes.MaxNumDrillTools):
-        writeGlyph(fid, strokes.DrillStrokeList[diam], diam*1250, 15000, 0, "%02d" % diam)
+        writeGlyph(fid, strokes.DrillStrokeList[diam], diam * 1250, 15000, 0, "%02d" % diam)
 
     fid.write("M02*\n")
     fid.close()
