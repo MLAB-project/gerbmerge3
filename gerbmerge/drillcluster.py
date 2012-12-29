@@ -13,10 +13,11 @@ Rugged Circuits LLC
 http://ruggedcircuits.com/gerbmerge
 """
 
-_STATUS = True ## indicates status messages should be shown
-_DEBUG = False ## indicates debug and status messages should be shown
+_STATUS = True  # indicates status messages should be shown
+_DEBUG = False  # indicates debug and status messages should be shown
 
-def cluster(drills, tolerance, debug = _DEBUG):
+
+def cluster(drills, tolerance, debug=_DEBUG):
     """
         Take a dictionary of drill names and sizes and cluster them
         A tolerance of 0 will effectively disable clustering
@@ -29,8 +30,8 @@ def cluster(drills, tolerance, debug = _DEBUG):
 
     clusters = []
 
-    debug_print("\n  " + str( len(drills) ) + " Original drills:")
-    debug_print( drillsToString(drills) )
+    debug_print("\n  " + str(len(drills)) + " Original drills:")
+    debug_print(drillsToString(drills))
     debug_print("Clustering drill sizes ...", True)
 
     # Loop through all drill sizes
@@ -40,7 +41,7 @@ def cluster(drills, tolerance, debug = _DEBUG):
         match = False
 
         # See if size fits into any current clusters, else make new cluster
-        for index in range( len(clusters) ):
+        for index in range(len(clusters)):
             c = clusters[index]
             if not len(c):
                 break
@@ -49,7 +50,7 @@ def cluster(drills, tolerance, debug = _DEBUG):
 
             if (size >= mx - 2 * tolerance) and (size <= mn + 2 * tolerance):
 
-                debug_print( str_d(size) + " belongs with " + str_d(c) )
+                debug_print(str_d(size) + " belongs with " + str_d(c))
 
                 clusters[index].append(size)
                 match = True
@@ -57,7 +58,7 @@ def cluster(drills, tolerance, debug = _DEBUG):
 
         if not match:
             debug_print(str_d(size) + " belongs in a new cluster")
-            clusters.append( [size] )
+            clusters.append([size])
 
     debug_print("\n  Creating new drill dictionary ...")
 
@@ -69,18 +70,19 @@ def cluster(drills, tolerance, debug = _DEBUG):
         tool_num += 1
         new_drill = "T%02d" % tool_num
         c.sort()
-        new_size = ( min(c) + max(c) ) / 2.0
+        new_size = (min(c) + max(c)) / 2.0
         new_drills[new_size] = new_drill
 
         debug_print(str_d(c) + " will be represented by " + new_drill + " (" + str_d(new_size) + ")")
 
-    debug_print("\n  " + str( len(new_drills) ) + " Clustered Drills:")
-    debug_print( drillsToString(new_drills) )
-    debug_print("Drill count reduced from " + str( len(drills) ) + " to " + str( len(new_drills) ), True)
+    debug_print("\n  " + str(len(new_drills)) + " Clustered Drills:")
+    debug_print(drillsToString(new_drills))
+    debug_print("Drill count reduced from " + str(len(drills)) + " to " + str(len(new_drills)), True)
 
     return new_drills
 
-def remap(jobs, globalToolMap, debug = _DEBUG):
+
+def remap(jobs, globalToolMap, debug=_DEBUG):
     """
         Remap tools and commands in all jobs to match new tool map
 
@@ -94,12 +96,12 @@ def remap(jobs, globalToolMap, debug = _DEBUG):
     debug_print("Remapping tools and commands ...", True)
 
     for job in jobs:
-        job = job.job ##access job inside job layout
+        job = job.job  # Access job inside job layout
         debug_print("\n  Job name: " + job.name)
         debug_print("\n  Original job tools:")
-        debug_print( str(job.xdiam) )
+        debug_print(str(job.xdiam))
         debug_print("\n  Original commands:")
-        debug_print( str(job.xcommands) )
+        debug_print(str(job.xcommands))
         new_tools = {}
         new_commands = {}
         for tool, diam in job.xdiam.items():
@@ -116,19 +118,20 @@ def remap(jobs, globalToolMap, debug = _DEBUG):
             # Append commands to existing commands if they exist
             if best_tool in new_commands:
                 temp = new_commands[best_tool]
-                temp.extend( job.xcommands[tool] )
+                temp.extend(job.xcommands[tool])
                 new_commands[best_tool] = temp
             else:
                 new_commands[best_tool] = job.xcommands[tool]
 
         debug_print("\n  New job tools:")
-        debug_print( str(new_tools) )
+        debug_print(str(new_tools))
         debug_print("\n  New commands:")
-        debug_print( str(new_commands) )
+        debug_print(str(new_commands))
         job.xdiam = new_tools
         job.xcommands = new_commands
 
-def debug_print(text, status = False, newLine = True):
+
+def debug_print(text, status=False, newLine=True):
     """
         Print debugging statemetns
 
@@ -140,6 +143,7 @@ def debug_print(text, status = False, newLine = True):
             print(" ", text)
         else:
             print(" ", text)
+
 
 def str_d(drills):
     """
@@ -153,14 +157,15 @@ def str_d(drills):
     try:
         len(drills)
     except:
-        string =  "%.4f" % drills
+        string = "%.4f" % drills
     else:
         string = "["
         for drill in drills:
-            string += ( "%.4f" % drill + ", ")
+            string += ("%.4f" % drill + ", ")
         string = string[:len(string) - 2] + "]"
 
     return string
+
 
 def drillsToString(drills):
     """
@@ -180,7 +185,7 @@ def drillsToString(drills):
     The following code runs test drill clusterings with random drill sets.
 """
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import random
 
     print("  Clustering random drills...")
