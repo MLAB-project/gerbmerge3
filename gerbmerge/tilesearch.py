@@ -17,7 +17,7 @@ from math import factorial
 import tiling
 
 class TileSearch:
-    def __init__(self, jobs, x, y, xspacing, yspacing, exhaustiveSearchJobs, searchTimeout):
+    def __init__(self, jobs, x, y, xspacing, yspacing, searchTimeout):
         # Start the start-time counter. Since this is in Init() and not in *Search(),
         # it will be a little off, but that shouldn't be a problem.
         self.startTime = time.time()
@@ -41,16 +41,6 @@ class TileSearch:
         # Track how many placements have been attempted
         # This is only tracked per this process
         self.placements = 0
-        
-        # Track the number of permutations checked so far
-        self.permutations = 0
-        
-        # Track the possible permutations given the `jobs` provided
-        # There are (2**N)*(N!) possible permutations where N is the number of jobs.
-        # This is assuming all jobs are unique and each job has a rotation (i.e., is not
-        # square). Practically, these assumptions make no difference because the software
-        # currently doesn't optimize for cases of repeated jobs.
-        self.possiblePermutations = (2**len(jobs))*factorial(len(jobs))
 
         # Store the total list of jobs to place
         self.jobs = jobs
@@ -60,12 +50,21 @@ class TileSearch:
         self.yspacing = yspacing
 
         # Store the X and Y grid of the Tiling
-        # We also store a blank tiling to start
-        self.baseTiling = tiling.Tiling(x, y, self.xspacing, self.yspacing)
+        self.x = x
+        self.y = y
 
         # Store some other configuration values
+        self.searchTimeout = searchTimeout
+
+class RandomSearch(TileSearch):
+    def __init__(self, jobs, x, y, xspacing, yspacing, searchTimeout, exhaustiveSearchJobs):
+        super().__init__(jobs, x, y, xspacing, yspacing, searchTimeout)
+
+        # We also store a blank tiling to start
+        self.baseTiling = tiling.Tiling(x, y, self.xspacing, self.yspacing)
+        
+        # Record the number of jobs that should be searched exhaustively
         self.RandomSearchExhaustiveJobs = exhaustiveSearchJobs
-        self.SearchTimeout = searchTimeout
 
     def __str__(self):
         if self.bestTiling:
@@ -77,13 +76,10 @@ class TileSearch:
 
         if self.placements > 0:
             return "\n  %ld placements | Smallest area: %.1f sq. in. | Best utilization: %.1f%%" % (self.placements, area, utilization)
-        elif self.permutations > 0:
-            percent = 100.0 * self.permutations / self.possiblePermutations
-            return "\n  %5.2f complete | %d/%d Permutations checked | Smallest area: %.1f sq. in. / Best utilization: %.1f%%" % (percent, self.permutations, self.possiblePermutations, area, utilization)
         else:
             return "\n  No calculations yet."
 
-    def RandomSearch(self):
+    def run(self):
         """Perform a random search through all possible jobs given the provided panel size.
         Only self.placements & lastCheckTime are modified within this method.
         """
@@ -128,7 +124,12 @@ class TileSearch:
                     for ix in joborder[M:]:
                         remainingJobs.append(self.jobs[ix])
 
-                    self.ExhaustiveSearch(remainingJobs, currentTiling, True, False)
+                    finalSearch = ExhaustiveSearch(remainingJobs, self.x, self.y, self.xspacing, self.yspacing, 0, currentTiling)
+                    finalSearch.run(False)
+
+                    if finalSearch.bestScore < self.bestScore:
+                        self.bestScore = finalSearch.bestScore
+                        self.bestTiling = finalSearch.bestTiling
 
             self.placements += 1
 
@@ -138,12 +139,54 @@ class TileSearch:
                 print(self)
 
                 # Check for timeout
-                if (self.SearchTimeout > 0) and ((time.time() - self.startTime) > self.SearchTimeout):
+                if (self.searchTimeout > 0) and ((time.time() - self.startTime) > self.searchTimeout):
                     raise KeyboardInterrupt
 
 
-    def ExhaustiveSearch(self, Jobs, TSoFar, firstAddPoint, printStats=True):
-        """This recursive function does the following with an existing tiling TSoFar:
+class ExhaustiveSearch(TileSearch):
+    def __init__(self, jobs, x, y, xspacing, yspacing, searchTimeout, baseTiling=None):
+        # Initialize the base class first
+        super().__init__(jobs, x, y, xspacing, yspacing, searchTimeout)
+
+        # Track the possible permutations given the `jobs` provided
+        # There are (2**N)*(N!) possible permutations where N is the number of jobs.
+        # This is assuming all jobs are unique and each job has a rotation (i.e., is not
+        # square). Practically, these assumptions make no difference because the software
+        # currently doesn't optimize for cases of repeated jobs.
+        self.possiblePermutations = (2**len(jobs))*factorial(len(jobs))
+
+        # Track the number of permutations checked so far
+        self.permutations = 0
+
+        # Store the tiling we've already encountered, otherwise generate
+        # a default tiling
+        if baseTiling:
+            self.baseTiling = baseTiling
+        else:
+            self.baseTiling = tiling.Tiling(self.x, self.y, self.xspacing, self.yspacing)
+
+    def __str__(self):
+        if self.bestTiling:
+            area = self.bestTiling.area()
+            utilization = self.bestTiling.usedArea() / area * 100.0
+        else:
+            area = float("inf")
+            utilization = 0.0
+
+        if self.permutations > 0:
+            percent = 100.0 * self.permutations / self.possiblePermutations
+            return "\n  %5.2f complete | %d/%d Permutations checked | Smallest area: %.1f sq. in. / Best utilization: %.1f%%" % (percent, self.permutations, self.possiblePermutations, area, utilization)
+        else:
+            return "\n  No calculations yet."
+
+    def run(self, printStats=True):
+        """This function provides an external interface to the internal recursive search."""
+
+        # Now start the recursive search!
+        self._run(self.jobs, self.baseTiling, True, printStats)
+
+    def _run(self, Jobs, tiles, firstAddPoint, printStats):
+        """This recursive function does the following with an existing tiling baseTiling:
 
            * For each 4-tuple (Xdim,Ydim,job,rjob) in Jobs, the non-rotated 'job' is selected
 
@@ -164,24 +207,23 @@ class TileSearch:
 
            * The best tiling encountered from all recursive calls is returned.
 
-           If TSoFar is None it means this combination of jobs is not tileable.
+           If baseTiling is None it means this combination of jobs is not tileable.
 
-           The side-effect of this function is to set _TBestTiling and _TBestScore
-           to the best tiling encountered so far. _TBestTiling could be None if
+           The side-effect of this function is to set self.bestTiling and self.bestScore
+           to the best tiling encountered so far. self.bestTiling could be None if
            no valid tilings have been found so far.
         """
-
-        if not TSoFar:
+        if not tiles:
             return (None, float("inf"))
 
         if not Jobs:
             # Update the best tiling and score. If the new tiling matches
             # the best score so far, compare on number of corners, trying to
             # minimize them.
-            score = TSoFar.area()
+            score = tiles.area()
 
-            if score < self.bestScore or (score == self.bestScore and TSoFar.corners() < self.bestTiling.corners()):
-                self.bestTiling = TSoFar
+            if score < self.bestScore or (score == self.bestScore and tiles.corners() < self.bestTiling.corners()):
+                self.bestTiling = tiles
                 self.bestScore = score
 
             if firstAddPoint:
@@ -189,7 +231,7 @@ class TileSearch:
             return
 
         minInletSize = tiling.minDimension(Jobs)
-        TSoFar.removeInlets(minInletSize)
+        tiles.removeInlets(minInletSize)
 
         for job_ix in range(len(Jobs)):
             # Pop off the next job and construct remaining_jobs, a sub-list
@@ -200,9 +242,9 @@ class TileSearch:
             # Construct add-points for the non-rotated and rotated job.
             # As an optimization, do not construct add-points for the rotated
             # job if the job is a square (duh).
-            addpoints1 = TSoFar.validAddPoints(Xdim+self.xspacing,Ydim+self.yspacing)     # unrotated job
+            addpoints1 = tiles.validAddPoints(Xdim+self.xspacing,Ydim+self.yspacing)     # unrotated job
             if Xdim != Ydim:
-                addpoints2 = TSoFar.validAddPoints(Ydim+self.xspacing,Xdim+self.yspacing)   # rotated job
+                addpoints2 = tiles.validAddPoints(Ydim+self.xspacing,Xdim+self.yspacing)   # rotated job
             else:
                 addpoints2 = []
 
@@ -212,7 +254,7 @@ class TileSearch:
                 for ix in addpoints1:
                     # Clone the tiling we're starting with and add the job at this
                     # add-point.
-                    T = TSoFar.clone()
+                    T = tiles.clone()
                     T.addJob(ix, Xdim+self.xspacing, Ydim+self.yspacing, job)
 
                     # Recursive call with the remaining jobs and this new tiling. The
@@ -221,7 +263,7 @@ class TileSearch:
                     # A permutation is some ordering of jobs (N! choices) and some
                     # ordering of non-rotated and rotated within that ordering (2**N
                     # possibilities per ordering).
-                    self.ExhaustiveSearch(remaining_jobs, T, firstAddPoint and ix==addpoints1[0])
+                    self._run(remaining_jobs, T, firstAddPoint and ix==addpoints1[0], printStats)
             elif firstAddPoint:
                 # Premature prune due to not being able to put this job anywhere. We
                 # have pruned off 2^M permutations where M is the length of the remaining
@@ -233,11 +275,11 @@ class TileSearch:
                     # Clone the tiling we're starting with and add the job at this
                     # add-point. Remember that the job is rotated so swap X and Y
                     # dimensions.
-                    T = TSoFar.clone()
+                    T = tiles.clone()
                     T.addJob(ix, Ydim+self.xspacing, Xdim+self.yspacing, rjob)
 
                     # Recursive call with the remaining jobs and this new tiling.
-                    self.ExhaustiveSearch(remaining_jobs, T, firstAddPoint and ix==addpoints2[0])
+                    self._run(remaining_jobs, T, firstAddPoint and ix==addpoints2[0], printStats)
             elif firstAddPoint:
                 # Premature prune due to not being able to put this job anywhere. We
                 # have pruned off 2^M permutations where M is the length of the remaining
@@ -250,34 +292,13 @@ class TileSearch:
                 print(self)
 
                 # Check for timeout
-                if (self.SearchTimeout > 0) and ((time.time() - self.startTime) > self.SearchTimeout):
+                if (self.searchTimeout > 0) and ((time.time() - self.startTime) > self.searchTimeout):
                     raise KeyboardInterrupt
 
-def tile_search2(Jobs, X, Y, xspacing, yspacing, exhaustiveSearchJobs, searchTimeout):
-    """Wrapper around _tile_search2 to handle keyboard interrupt, etc."""
-
-    print("="*70)
-    print("Starting random placement trials. You must press Ctrl-C to")
-    print("stop the process and use the best placement so far.")
-    print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs,xspacing,yspacing)*100))
-
-    try:
-        x = TileSearch(Jobs, X, Y, xspacing, yspacing, exhaustiveSearchJobs, searchTimeout)
-        x.RandomSearch()
-    except KeyboardInterrupt:
-        print(x)
-        print("\nInterrupted.")
-
-    computeTime = time.time() - x.startTime
-    print("Computed %ld placements in %d seconds / %.1f placements/second" % (x.placements, computeTime, x.placements/computeTime))
-    print("="*70)
-
-    return x.bestTiling
-
 def tile_search1(Jobs, X, Y, xspacing, yspacing, searchTimeout):
-    """Wrapper around _tile_search1 to handle keyboard interrupt, etc."""
-    
-    x = TileSearch(Jobs, X, Y, xspacing, yspacing, 0, searchTimeout)
+    """Wrapper around ExhaustiveSearch to handle keyboard interrupt, etc."""
+
+    x = ExhaustiveSearch(Jobs, X, Y, xspacing, yspacing, searchTimeout)
 
     print('='*70)
     print("Starting placement using exhaustive search.")
@@ -296,7 +317,7 @@ def tile_search1(Jobs, X, Y, xspacing, yspacing, searchTimeout):
     print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs,xspacing,yspacing)*100))
 
     try:
-        x.ExhaustiveSearch(Jobs, tiling.Tiling(X,Y,xspacing,yspacing), True)
+        x.run()
         print()
     except KeyboardInterrupt:
         print(x)
@@ -306,5 +327,28 @@ def tile_search1(Jobs, X, Y, xspacing, yspacing, searchTimeout):
     computeTime = time.time() - x.startTime
     print("Computed %ld permutations in %d seconds / %.1f permutations/second" % (x.permutations, computeTime, x.permutations/computeTime))
     print('='*70)
+
+    return x.bestTiling
+
+def tile_search2(Jobs, X, Y, xspacing, yspacing, exhaustiveSearchJobs, searchTimeout):
+    """Wrapper around RandomSearch to handle keyboard interrupt, etc."""
+
+    x = RandomSearch(Jobs, X, Y, xspacing, yspacing, searchTimeout, exhaustiveSearchJobs)
+
+    print("="*70)
+    print("Starting random placement trials. You must press Ctrl-C to")
+    print("stop the process and use the best placement so far.")
+    print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs, xspacing, yspacing)*100))
+
+    try:
+        x.run()
+    except KeyboardInterrupt:
+        print(x)
+        print()
+        print("\nInterrupted.")
+
+    computeTime = time.time() - x.startTime
+    print("Computed %ld placements in %d seconds / %.1f placements/second" % (x.placements, computeTime, x.placements/computeTime))
+    print("="*70)
 
     return x.bestTiling
