@@ -106,22 +106,22 @@ class RandomSearch(TileSearch):
                 currentTiling.removeInlets(minInletSize)
 
                 if r.choice([0, 1]):
-                    addpoints = currentTiling.validAddPoints(Xdim+self.xspacing, Ydim+self.yspacing)
+                    addpoints = currentTiling.validAddPoints(Xdim + self.xspacing, Ydim + self.yspacing)
                     if not addpoints:
                         break
 
                     pt = r.choice(addpoints)
-                    currentTiling.addJob(pt, Xdim+self.xspacing, Ydim+self.yspacing, job)
+                    currentTiling.addJob(pt, Xdim + self.xspacing, Ydim + self.yspacing, job)
                 else:
-                    addpoints = currentTiling.validAddPoints(Ydim+self.xspacing, Xdim+self.yspacing)
+                    addpoints = currentTiling.validAddPoints(Ydim + self.xspacing, Xdim + self.yspacing)
                     if not addpoints:
                         break
 
                     pt = r.choice(addpoints)
-                    currentTiling.addJob(pt, Ydim+self.xspacing, Xdim+self.yspacing, rjob)
+                    currentTiling.addJob(pt, Ydim + self.xspacing, Xdim + self.yspacing, rjob)
             else:
                 # Do exhaustive search on remaining jobs
-                if N-M:
+                if N - M:
                     remainingJobs = []
                     for ix in joborder[M:]:
                         remainingJobs.append(self.jobs[ix])
@@ -155,7 +155,7 @@ class ExhaustiveSearch(TileSearch):
         # This is assuming all jobs are unique and each job has a rotation (i.e., is not
         # square). Practically, these assumptions make no difference because the software
         # currently doesn't optimize for cases of repeated jobs.
-        self.possiblePermutations = (2**len(jobs))*factorial(len(jobs))
+        self.possiblePermutations = (2 ** len(jobs)) * factorial(len(jobs))
 
         # Track the number of permutations checked so far
         self.permutations = 0
@@ -239,14 +239,14 @@ class ExhaustiveSearch(TileSearch):
             # Pop off the next job and construct remaining_jobs, a sub-list
             # of Jobs with the job we've just popped off excluded.
             Xdim, Ydim, job, rjob = Jobs[job_ix]
-            remaining_jobs = Jobs[:job_ix]+Jobs[job_ix+1:]
+            remaining_jobs = Jobs[:job_ix] + Jobs[job_ix + 1:]
 
             # Construct add-points for the non-rotated and rotated job.
             # As an optimization, do not construct add-points for the rotated
             # job if the job is a square (duh).
-            addpoints1 = tiles.validAddPoints(Xdim+self.xspacing, Ydim+self.yspacing)     # unrotated job
+            addpoints1 = tiles.validAddPoints(Xdim + self.xspacing, Ydim + self.yspacing)     # unrotated job
             if Xdim != Ydim:
-                addpoints2 = tiles.validAddPoints(Ydim+self.xspacing, Xdim+self.yspacing)   # rotated job
+                addpoints2 = tiles.validAddPoints(Ydim + self.xspacing, Xdim + self.yspacing)   # rotated job
             else:
                 addpoints2 = []
 
@@ -257,7 +257,7 @@ class ExhaustiveSearch(TileSearch):
                     # Clone the tiling we're starting with and add the job at this
                     # add-point.
                     T = tiles.clone()
-                    T.addJob(ix, Xdim+self.xspacing, Ydim+self.yspacing, job)
+                    T.addJob(ix, Xdim + self.xspacing, Ydim + self.yspacing, job)
 
                     # Recursive call with the remaining jobs and this new tiling. The
                     # point behind the last parameter is simply so that self.permutations is
@@ -270,7 +270,7 @@ class ExhaustiveSearch(TileSearch):
                 # Premature prune due to not being able to put this job anywhere. We
                 # have pruned off 2^M permutations where M is the length of the remaining
                 # jobs.
-                self.permutations += 2**len(remaining_jobs)
+                self.permutations += 2 ** len(remaining_jobs)
 
             if addpoints2:
                 for ix in addpoints2:
@@ -278,7 +278,7 @@ class ExhaustiveSearch(TileSearch):
                     # add-point. Remember that the job is rotated so swap X and Y
                     # dimensions.
                     T = tiles.clone()
-                    T.addJob(ix, Ydim+self.xspacing, Xdim+self.yspacing, rjob)
+                    T.addJob(ix, Ydim + self.xspacing, Xdim + self.yspacing, rjob)
 
                     # Recursive call with the remaining jobs and this new tiling.
                     self._run(remaining_jobs, T, firstAddPoint and ix == addpoints2[0], printStats)
@@ -286,7 +286,7 @@ class ExhaustiveSearch(TileSearch):
                 # Premature prune due to not being able to put this job anywhere. We
                 # have pruned off 2^M permutations where M is the length of the remaining
                 # jobs.
-                self.permutations += 2**len(remaining_jobs)
+                self.permutations += 2 ** len(remaining_jobs)
 
             # If we've been at this for one period, print some status information
             if printStats and time.time() > self.lastCheckTime + self.syncPeriod:
