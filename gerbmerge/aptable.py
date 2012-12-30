@@ -14,7 +14,6 @@ http://ruggedcircuits.com/gerbmerge
 # Include standard modules
 import sys
 import re
-import string
 
 # Include gerbmerge modules
 import config

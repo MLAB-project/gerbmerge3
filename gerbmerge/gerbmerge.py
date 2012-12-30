@@ -25,9 +25,7 @@ http://ruggedcircuits.com/gerbmerge
 
 # Include standard modules
 import sys
-import os
 import argparse
-import re
 import time
 
 # Include gerbmerge modules

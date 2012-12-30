@@ -13,8 +13,6 @@ Rugged Circuits LLC
 http://ruggedcircuits.com/gerbmerge
 """
 
-import sys
-import re
 from xml.dom.minidom import getDOMImplementation
 import xml.etree.ElementTree as ET
 from math import isnan

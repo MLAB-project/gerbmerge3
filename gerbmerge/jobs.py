@@ -12,11 +12,8 @@ Rugged Circuits LLC
 http://ruggedcircuits.com/gerbmerge
 """
 
-import sys
 import re
-import string
 import builtins
-import copy
 
 import aptable
 import config

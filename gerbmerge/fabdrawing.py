@@ -10,8 +10,6 @@ Rugged Circuits LLC
 http://ruggedcircuits.com/gerbmerge
 """
 
-import string
-
 import config
 import makestroke
 import util

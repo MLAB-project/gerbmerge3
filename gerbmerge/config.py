@@ -14,7 +14,6 @@ http://ruggedcircuits.com/gerbmerge
 import sys
 import configparser
 import re
-import string
 
 import jobs
 import aptable

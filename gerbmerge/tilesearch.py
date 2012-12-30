@@ -9,7 +9,6 @@ Rugged Circuits LLC
 http://ruggedcircuits.com/gerbmerge
 """
 
-import sys
 import time
 import random
 from math import factorial

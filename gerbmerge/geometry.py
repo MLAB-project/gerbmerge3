@@ -11,8 +11,6 @@ Rugged Circuits LLC
 http://ruggedcircuits.com/gerbmerge
 """
 
-import math
-
 
 # This function rounds an (X,Y) point to integer co-ordinates
 def roundPoint(pt):
