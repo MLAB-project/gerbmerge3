@@ -621,32 +621,37 @@ def tile_search_random(Jobs, X, Y, xspacing, yspacing, searchTimeout, exhaustive
     placementsTried = 0
     startTime = time.time()
     q = multiprocessing.Queue()
-    p = multiprocessing.Process(target=_tile_search_random, args=(q, Jobs, X, Y, xspacing, yspacing, searchTimeout, exhaustiveSearchJobs))
+    p = []
+    for i in range(multiprocessing.cpu_count()):
+        p.append(multiprocessing.Process(target=_tile_search_random, args=(q, Jobs, X, Y, xspacing, yspacing, searchTimeout, exhaustiveSearchJobs)))
     try:
-        p.start()
+        for i in p:
+            i.start()
         while 1:
-            time.sleep(1)
+            time.sleep(3)
             foundBetter = False
-            print("wow")
             try:
                 newResult = q.get(block=False)
                 while newResult is not None:
                     placementsTried += newResult[0]
-                    print("yay")
                     if newResult[1] and newResult[1].area() < bestScore:
                         bestTiling = newResult[1]
                         foundBetter = True
+                        bestScore = newResult[1].area()
                     newResult = q.get(block=False)
             except queue.Empty:
-                print("huh?")
                 if foundBetter:
                     if bestTiling:
                         utilization = bestTiling.usedArea() / bestTiling.area() * 100.0
                     else:
                         utilization = 0.0
-                    print("Tested %d placements over %d seconds. Best tiling at %.1f%%" % (placementsTried, time.time() - startTime, utilization))
+                    print("\nTested %d placements over %d seconds. Best tiling at %.2f%% usage." % (placementsTried, time.time() - startTime, utilization))
+                else:
+                    print(".", end='')
+                    sys.stdout.flush()
     except KeyboardInterrupt:
-        p.terminate()
+        for i in p:
+            i.terminate()
         print("\nSearch ended by user.")
 
     computeTime = time.time() - startTime
