@@ -26,7 +26,10 @@ http://ruggedcircuits.com/gerbmerge
 # Include standard modules
 import sys
 import argparse
+from math import factorial
 import time
+import queue
+import multiprocessing
 
 # Include gerbmerge modules
 import aptable
@@ -117,7 +120,7 @@ def tile_jobs(Jobs):
 
     PX, PY = config.Config['panelwidth'], config.Config['panelheight']
     if config.AutoSearchType == RANDOM_SEARCH:
-        tile = tile_search_random(L, PX, PY, config.Config['xspacing'], config.Config['yspacing'], config.RandomSearchExhaustiveJobs, config.SearchTimeout)
+        tile = tile_search_random(L, PX, PY, config.Config['xspacing'], config.Config['yspacing'], config.SearchTimeout, config.RandomSearchExhaustiveJobs)
     else:
         tile = tile_search_exhaustive(L, PX, PY, config.Config['xspacing'], config.Config['yspacing'], config.SearchTimeout)
 
@@ -559,21 +562,27 @@ def merge(opts, gui=None):
     return 0
 
 
+def _tile_search_exhaustive(q, Jobs, X, Y, xspacing, yspacing, searchTimeout):
+    search = tilesearch.ExhaustiveSearch(Jobs, X, Y, xspacing, yspacing, searchTimeout)
+    search.run(q)
+
+
 def tile_search_exhaustive(Jobs, X, Y, xspacing, yspacing, searchTimeout):
     """Wrapper around ExhaustiveSearch to handle keyboard interrupt, etc."""
 
-    x = tilesearch.ExhaustiveSearch(Jobs, X, Y, xspacing, yspacing, searchTimeout)
+    search = tilesearch.ExhaustiveSearch(Jobs, X, Y, xspacing, yspacing, searchTimeout)
 
+    possiblePermutations = (2 ** len(Jobs)) * factorial(len(Jobs))
     print('=' * 70)
     print("Starting placement using exhaustive search.")
-    print("There are %ld possible permutations..." % x.possiblePermutations)
-    if x.possiblePermutations < 1e4:
+    print("There are %ld possible permutations..." % possiblePermutations)
+    if possiblePermutations < 1e4:
         print("this'll take no time at all.")
-    elif x.possiblePermutations < 1e5:
+    elif possiblePermutations < 1e5:
         print("surf the web for a few minutes.")
-    elif x.possiblePermutations < 1e6:
+    elif possiblePermutations < 1e6:
         print("take a long lunch.")
-    elif x.possiblePermutations < 1e7:
+    elif possiblePermutations < 1e7:
         print("come back tomorrow.")
     else:
         print("don't hold your breath.")
@@ -581,42 +590,70 @@ def tile_search_exhaustive(Jobs, X, Y, xspacing, yspacing, searchTimeout):
     print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs, xspacing, yspacing) * 100))
 
     try:
-        x.run()
-        print()
+        search.run()
     except KeyboardInterrupt:
-        print(x)
+        print(search)
         print()
         print("Interrupted.")
 
-    computeTime = time.time() - x.startTime
-    print("Computed %ld permutations in %d seconds / %.1f permutations/second" % (x.permutations, computeTime, x.permutations / computeTime))
+    #computeTime = time.time() - x.startTime
+    #print("Computed %ld permutations in %d seconds / %.1f permutations/second" % (x.permutations, computeTime, x.permutations / computeTime))
     print('=' * 70)
 
-    return x.bestTiling
+    return search.bestTiling
 
 
-def tile_search_random(Jobs, X, Y, xspacing, yspacing, exhaustiveSearchJobs, searchTimeout):
+def _tile_search_random(q, Jobs, X, Y, xspacing, yspacing, searchTimeout, exhaustiveSearchJobs):
+    search = tilesearch.RandomSearch(Jobs, X, Y, xspacing, yspacing, searchTimeout, exhaustiveSearchJobs)
+    search.run(q)
+
+
+def tile_search_random(Jobs, X, Y, xspacing, yspacing, searchTimeout, exhaustiveSearchJobs):
     """Wrapper around RandomSearch to handle keyboard interrupt, etc."""
-
-    x = tilesearch.RandomSearch(Jobs, X, Y, xspacing, yspacing, searchTimeout, exhaustiveSearchJobs)
 
     print("=" * 70)
     print("Starting random placement trials. You must press Ctrl-C to")
     print("stop the process and use the best placement so far.")
     print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs, xspacing, yspacing) * 100))
 
+    bestScore = float("inf")
+    bestTiling = None
+    placementsTried = 0
+    startTime = time.time()
+    q = multiprocessing.Queue()
+    p = multiprocessing.Process(target=_tile_search_random, args=(q, Jobs, X, Y, xspacing, yspacing, searchTimeout, exhaustiveSearchJobs))
     try:
-        x.run()
+        p.start()
+        while 1:
+            time.sleep(1)
+            foundBetter = False
+            print("wow")
+            try:
+                newResult = q.get(block=False)
+                while newResult is not None:
+                    placementsTried += newResult[0]
+                    print("yay")
+                    if newResult[1] and newResult[1].area() < bestScore:
+                        bestTiling = newResult[1]
+                        foundBetter = True
+                    newResult = q.get(block=False)
+            except queue.Empty:
+                print("huh?")
+                if foundBetter:
+                    if bestTiling:
+                        utilization = bestTiling.usedArea() / bestTiling.area() * 100.0
+                    else:
+                        utilization = 0.0
+                    print("Tested %d placements over %d seconds. Best tiling at %.1f%%" % (placementsTried, time.time() - startTime, utilization))
     except KeyboardInterrupt:
-        print(x)
-        print()
-        print("\nInterrupted.")
+        p.terminate()
+        print("\nSearch ended by user.")
 
-    computeTime = time.time() - x.startTime
-    print("Computed %ld placements in %d seconds / %.1f placements/second" % (x.placements, computeTime, x.placements / computeTime))
+    computeTime = time.time() - startTime
+    print("Computed %ld placements in %d seconds (%.1f placements/second)." % (placementsTried, computeTime, placementsTried / computeTime))
     print("=" * 70)
 
-    return x.bestTiling
+    return bestTiling
 
 
 def updateGUI(text=None):

@@ -80,7 +80,7 @@ class RandomSearch(TileSearch):
         else:
             return "\n  No calculations yet."
 
-    def run(self):
+    def run(self, q):
         """Perform a random search through all possible jobs given the provided panel size.
         Only self.placements & lastCheckTime are modified within this method.
         """
@@ -91,6 +91,11 @@ class RandomSearch(TileSearch):
         # N-M is the number of jobs that will be searched exhaustively.
         M = N - self.RandomSearchExhaustiveJobs
         M = max(M, 0)
+
+        # Track if a new bestTiling has been found
+        # Also track how many placements it's been since then
+        foundBetter = False
+        placementsSinceLastCheck = 0
 
         # Must escape with Ctrl-C
         while 1:
@@ -131,16 +136,29 @@ class RandomSearch(TileSearch):
                     if finalSearch.bestScore < self.bestScore:
                         self.bestScore = finalSearch.bestScore
                         self.bestTiling = finalSearch.bestTiling
+                        foundBetter = True
 
             self.placements += 1
+            placementsSinceLastCheck += 1
 
-            # If we've been at this for one period, print some status information
+            # If we've been at this for one period and found a better
+            # tiling since last checkTime, output the new one
             if time.time() > self.lastCheckTime + self.syncPeriod:
                 self.lastCheckTime = time.time()
-                print(self)
+
+                # Only output a tiling if it's better. We still report
+                # attempled placements though
+                # We also reset the placements tried
+                if foundBetter is True:
+                    q.put((placementsSinceLastCheck, self.bestTiling), block=True)
+                    foundBetter = False
+                else:
+                    q.put((placementsSinceLastCheck, None), block=True)
+
+                placementsSinceLastCheck = 0
 
                 # Check for timeout
-                if (self.searchTimeout > 0) and ((time.time() - self.startTime) > self.searchTimeout):
+                if self.searchTimeout > 0 and ((time.time() - self.startTime) > self.searchTimeout):
                     return
 
 
