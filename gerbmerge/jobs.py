@@ -21,6 +21,7 @@ import makestroke
 import amacro
 import geometry
 import util
+import excellon
 
 # Parsing Gerber/Excellon files is currently very brittle. A more robust
 # RS274X/Excellon parser would be a good idea and allow this program to work
@@ -735,36 +736,7 @@ class Job:
         return L
 
     def writeExcellon(self, fid, diameter, Xoff, Yoff):
-        "Write out the data such that the lower-left corner of this job is at the given (X,Y) position, in inches"
-
-        # First convert given inches to 2.4 co-ordinates. Note that Gerber is 2.5 (as of GerbMerge 1.2)
-        # and our internal Excellon representation is 2.4 as of GerbMerge
-        # version 0.91. We use X,Y to calculate DX,DY in 2.4 units (i.e., with a
-        # resolution of 0.0001".
-        X = int(round(Xoff / 0.00001))  # First work in 2.5 format to match Gerber
-        Y = int(round(Yoff / 0.00001))
-
-        # Now calculate displacement for each position so that we end up at specified origin
-        DX = X - self.minx
-        DY = Y - self.miny
-
-        # Now round down to 2.4 format
-        DX = int(round(DX / 10.0))
-        DY = int(round(DY / 10.0))
-
-        ltools = self.findTools(diameter)
-
-        if config.Config['excellonleadingzeros']:
-            fmtstr = 'X%06dY%06d\n'
-        else:
-            fmtstr = 'X%dY%d\n'
-
-        # Boogie
-        for ltool in ltools:
-            if ltool in self.xcommands:
-                for cmd in self.xcommands[ltool]:
-                    x, y = cmd
-                    fid.write(fmtstr % (x + DX, y + DY))
+        excellon.write_excellon(fid, diameter, Xoff, Yoff, config.Config['excellonleadingzeros'], self.xdiam, self.xcommands, self.minx, self.miny)
 
     def writeDrillHits(self, fid, diameter, toolNum, Xoff, Yoff):
         """Write a drill hit pattern. diameter is tool diameter in inches, while toolNum is
