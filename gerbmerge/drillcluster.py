@@ -13,8 +13,10 @@ Rugged Circuits LLC
 http://ruggedcircuits.com/gerbmerge
 """
 
+global _STATUS
 _STATUS = True  # indicates status messages should be shown
-_DEBUG = False  # indicates debug and status messages should be shown
+global _DEBUG
+_DEBUG = False   # indicates debug and status messages should be shown
 
 
 def cluster(drills, tolerance, debug=_DEBUG):
