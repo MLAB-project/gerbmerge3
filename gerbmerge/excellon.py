@@ -53,43 +53,32 @@ def parseToolList(fname):
     except Exception as detail:
         raise RuntimeError("Unable to open tool list file '%s':\n  %s" % (fname, str(detail)))
 
-    # TODO: Replace following 3 regexes into a single one that checks for in,mm,mil
-    pat_in = re.compile(r'\s*(T\d+)\s+([0-9.]+)\s*in\s*')
-    pat_mm = re.compile(r'\s*(T\d+)\s+([0-9.]+)\s*mm\s*')
-    pat_mil = re.compile(r'\s*(T\d+)\s+([0-9.]+)\s*(?:mil)?')
-    for line in fid.xreadlines():
-        line = string.strip(line)
-        if (not line) or (line[0] in ('#', ';')):
+    units_pat = re.compile(r'\s*(T\d+)\s+([0-9.]+)\s*(in|mm|mil)\s*')
+    for line in fid:
+        line = line.lstrip()
+        if line[0] == '#' or line[0] == ';':
             continue
 
-        # TODO: Change mm/mil to Boolean datatypes
-        mm = 0
-        mil = 0
-        match = pat_in.match(line)
-        if not match:
-            mm = 1
-            match = pat_mm.match(line)
-            if not match:
-                mil = 1
-                match = pat_mil.match(line)
-                if not match:
-                    continue
+        # Parse out tool name and size (with units) from lines
+        match = units_pat.match(line)
+        tool, size, units = match.groups()
 
-        tool, size = match.groups()
-
+        # Get the size as a float
         try:
             size = float(size)
         except:
             raise RuntimeError("Tool size in file '%s' is not a valid floating-point number:\n  %s" % (fname, line))
 
-        if mil:
+        # Convert any non-inches unit to inches
+        if units == "mil":
             size = size * 0.001  # Convert mil to inches
-        elif mm:
+        elif units == "mm":
             size = size / 25.4   # Convert mm to inches
 
         # Canonicalize tool so that T1 becomes T01
         tool = 'T%02d' % int(tool[1:])
 
+        # If this tool already exists, there's a problem with the file
         if tool in TL:
             raise RuntimeError("Tool '%s' defined more than once in tool list file '%s'" % (tool, fname))
 
