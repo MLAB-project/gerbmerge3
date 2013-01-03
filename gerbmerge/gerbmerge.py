@@ -484,7 +484,7 @@ def merge(opts, gui=None):
     OutputFiles.append(fullname)
     fid = open(fullname, 'wt')
 
-    excellon.writeheader(fid)
+    excellon.writeheader(fid, [(x, config.GlobalToolMap[x]) for x in Tools], units="in")
 
     # Ensure each one of our tools is represented in the tool list specified
     # by the user.
@@ -494,8 +494,8 @@ def merge(opts, gui=None):
         except:
             raise RuntimeError("INTERNAL ERROR: Tool code %s not found in global tool map" % tool)
 
-        excellon.writetool(fid, tool, size)
-
+        # Write the tool name then all of the positions where it will be drilled.
+        excellon.writetoolname(fid, tool)
         for job in Place.jobs:
             job.writeExcellon(fid, size)
 

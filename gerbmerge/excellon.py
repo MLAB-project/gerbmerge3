@@ -2,16 +2,43 @@ import re
 import string
 
 
-def writeheader(fid):
-    fid.write('%\n')
+def writeheader(fid, tools, units="mm"):
+    """This file writes the header for an Excellon drill file. Specifically it specifies the name of each drill and its size and specifies the units both the drills and the placement values. Note that tools should be a list of tuples with the tool name and then its size."""
+    # Print start of header
+    fid.write('%\nM48\n')
+    
+    # Specify units
+    if units == "mm":
+        fid.write("M71\n")
+    elif units == "in":
+        fid.write("M72\n")
+    else:
+        raise RuntimeError("Invalid units %s specified in excellon.writeheader()" % units)
+
+    # Write out all tool dimensions
+    for tool in tools:
+        writetool(fid, tool[0], tool[1], units)
+
+    # End the header
+    fid.write("%\n")
 
 
 def writefooter(fid):
     fid.write('M30\n')
 
 
-def writetool(fid, tool, size):
-    fid.write('%sC%f\n' % (tool, size))
+def writetool(fid, tool, size, units="mm"):
+    if units == "mm":
+        numformat = "%4.2f"
+    elif units == "in":
+        numformat = "%2.4f"
+    else:
+        raise RuntimeError("Invalid units %s specified in excellon.writetool()" % units)
+    fid.write(("%sC" + numformat + "\n") % (tool, size))
+
+
+def writetoolname(fid, tool):
+    fid.write("%s\n" % tool)
 
 
 def parseToolList(fname):
@@ -94,7 +121,6 @@ def write_excellon(fid, diameter, Xoff, Yoff, leadingZeros, xdiam, xcommands, mi
     for tool, diam in xdiam.items():
         if diam == diameter:
             ltools.append(tool)
-    print(ltools)
 
     if leadingZeros:
         fmtstr = 'X%06dY%06d\n'
