@@ -436,16 +436,21 @@ def merge(opts, gui=None):
 
     # Get a list of all tools used by merging keys from each job's dictionary
     # of tools.
-    toolNum = 0
-
-    # First construct global mapping of diameters to tool numbers
+    # Grab all tool diameters and sort them.
+    allToolDiam = []
     for job in config.Jobs.values():
         for tool, diam in job.xdiam.items():
             if diam in config.GlobalToolRMap:
                 continue
 
-            toolNum += 1
-            config.GlobalToolRMap[diam] = "T%02d" % toolNum
+            allToolDiam.append(diam)
+    allToolDiam.sort()
+    
+    # Then construct global mapping of diameters to tool numbers
+    toolNum = 1
+    for d in allToolDiam:
+        config.GlobalToolRMap[d] = "T%02d" % toolNum
+        toolNum += 1
 
     # Cluster similar tool sizes to reduce number of drills
     if config.Config['drillclustertolerance'] > 0:
