@@ -276,9 +276,7 @@ def findHighestApertureCode(keys):
     return keys[-1]
 
 
-def addToApertureTable(AP):
-    GAT = config.GAT
-
+def addToApertureTable(AP, GAT):
     lastCode = findHighestApertureCode(GAT.keys())
     code = 'D%d' % (lastCode + 1)
     GAT[code] = AP
@@ -287,27 +285,27 @@ def addToApertureTable(AP):
     return code
 
 
-def findInApertureTable(AP):
+def findInApertureTable(AP, GAT):
     """Return 'D10', for example in response to query for an object
        of type Aperture()"""
     hash = AP.hash()
-    for key, val in config.GAT.items():
+    for key, val in GAT.items():
         if hash == val.hash():
             return key
 
     return None
 
 
-def findOrAddAperture(AP):
+def findOrAddAperture(AP, GAT):
     """If the aperture exists in the GAT, modify the AP.code field to reflect the global code
     and return the code. Otherwise, create a new aperture in the GAT and return the new code
     for it."""
-    code = findInApertureTable(AP)
+    code = findInApertureTable(AP, GAT)
     if code:
         AP.code = code
         return code
     else:
-        return addToApertureTable(AP)
+        return addToApertureTable(AP, GAT)
 
 if __name__ == "__main__":
     constructApertureTable(sys.argv[1:])

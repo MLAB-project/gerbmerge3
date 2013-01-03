@@ -235,27 +235,27 @@ def merge(opts, gui=None):
 
     # For cut lines
     AP = aptable.Aperture(aptable.Circle, 'D??', config.Config['cutlinewidth'])
-    drawing_code_cut = aptable.findInApertureTable(AP)
+    drawing_code_cut = aptable.findInApertureTable(AP, config.GAT)
     if drawing_code_cut is None:
-        drawing_code_cut = aptable.addToApertureTable(AP)
+        drawing_code_cut = aptable.addToApertureTable(AP, config.GAT)
 
     # For crop marks
     AP = aptable.Aperture(aptable.Circle, 'D??', config.Config['cropmarkwidth'])
-    drawing_code_crop = aptable.findInApertureTable(AP)
+    drawing_code_crop = aptable.findInApertureTable(AP, config.GAT)
     if drawing_code_crop is None:
-        drawing_code_crop = aptable.addToApertureTable(AP)
+        drawing_code_crop = aptable.addToApertureTable(AP, config.GAT)
 
     # For fiducials
     drawing_code_fiducial_copper = drawing_code_fiducial_soldermask = None
     if config.Config['fiducialpoints']:
         AP = aptable.Aperture(aptable.Circle, 'D??', config.Config['fiducialcopperdiameter'])
-        drawing_code_fiducial_copper = aptable.findInApertureTable(AP)
+        drawing_code_fiducial_copper = aptable.findInApertureTable(AP, config.GAT)
         if drawing_code_fiducial_copper is None:
-            drawing_code_fiducial_copper = aptable.addToApertureTable(AP)
+            drawing_code_fiducial_copper = aptable.addToApertureTable(AP, config.GAT)
         AP = aptable.Aperture(aptable.Circle, 'D??', config.Config['fiducialmaskdiameter'])
-        drawing_code_fiducial_soldermask = aptable.findInApertureTable(AP)
+        drawing_code_fiducial_soldermask = aptable.findInApertureTable(AP, config.GAT)
         if drawing_code_fiducial_soldermask is None:
-            drawing_code_fiducial_soldermask = aptable.addToApertureTable(AP)
+            drawing_code_fiducial_soldermask = aptable.addToApertureTable(AP, config.GAT)
 
     if config.text:
         text_size_ratio = 0.5  # proportion of Y spacing to use for text (much of this is taken up by, e.g., cutlines)
@@ -277,15 +277,15 @@ def merge(opts, gui=None):
         print("Using text stroke: {0} mils".format(text_stroke))
 
         AP = aptable.Aperture(aptable.Circle, 'D??', text_stroke / 1000.0)
-        drawing_code_text = aptable.findInApertureTable(AP)
+        drawing_code_text = aptable.findInApertureTable(AP, config.GAT)
         if drawing_code_text is None:
-            drawing_code_text = aptable.addToApertureTable(AP)
+            drawing_code_text = aptable.addToApertureTable(AP, config.GAT)
 
     # For fabrication drawing.
     AP = aptable.Aperture(aptable.Circle, 'D??', 0.001)
-    drawing_code1 = aptable.findInApertureTable(AP)
+    drawing_code1 = aptable.findInApertureTable(AP, config.GAT)
     if drawing_code1 is None:
-        drawing_code1 = aptable.addToApertureTable(AP)
+        drawing_code1 = aptable.addToApertureTable(AP, config.GAT)
 
     updateGUI("Writing merged files...")
     print("Writing merged output files ...")
@@ -322,7 +322,7 @@ def merge(opts, gui=None):
                 if not new:  # current aperture size met minimum requirement
                     continue
                 else:       # new aperture was created
-                    new_code = aptable.findOrAddAperture(new)  # get name of existing aperture or create new one if needed
+                    new_code = aptable.findOrAddAperture(new, config.GAT)  # get name of existing aperture or create new one if needed
                     del apUsedDict[ap]                         # the old aperture is no longer used in this layer
                     apUsedDict[new_code] = None                # the new aperture will be used in this layer
 

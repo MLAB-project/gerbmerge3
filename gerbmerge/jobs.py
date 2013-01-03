@@ -850,7 +850,7 @@ class Job:
                                 if min(newRectWidth, newRectHeight) >= 10:
                                     # Construct an Aperture that is a Rectangle of dimensions (newRectWidth,newRectHeight)
                                     newAP = aptable.Aperture(aptable.Rectangle, 'D??', util.gerb2in(newRectWidth), util.gerb2in(newRectHeight))
-                                    global_code = aptable.findOrAddAperture(newAP)
+                                    global_code = aptable.findOrAddAperture(newAP, config.GAT)
 
                                     # We need an unused local aperture code to correspond to this newly-created global one.
                                     self.makeLocalApertureCode(layername, newAP)
@@ -1157,7 +1157,7 @@ def rotateJob(job, degrees=90, firstpass=True):
                 newcode = RevGAT[hash]
             except KeyError:
                 # Must add new aperture to GAT
-                newcode = aptable.addToApertureTable(APR)
+                newcode = aptable.addToApertureTable(APR, config.GAT)
 
                 # Rebuild RevGAT
                 #RevGAT = config.buildRevDict(GAT)
