@@ -16,7 +16,6 @@ import sys
 import re
 
 # Include gerbmerge modules
-import config
 import amacro
 import util
 
@@ -101,19 +100,19 @@ class Aperture:
         else:
             return False  # no new aperture needs to be created
 
-    def rotate(self, RevGAMT):
+    def rotate(self, GAMT, RevGAMT):
         if self.apname in ('Macro',):
             # Construct a rotated macro, see if it's in the GAMT, and set self.dimx
             # to its name if so. If not, add the rotated macro to the GAMT and set
             # self.dimx to the new name. Recall that GAMT maps name to macro
             # (e.g., GAMT['M9'] = ApertureMacro(...)) while RevGAMT maps hash to
             # macro name (e.g., RevGAMT[hash] = 'M9')
-            AMR = config.GAMT[self.dimx].rotated()
+            AMR = GAMT[self.dimx].rotated()
             hash = AMR.hash()
             try:
                 self.dimx = RevGAMT[hash]
             except KeyError:
-                AMR = amacro.addToApertureMacroTable(config.GAMT, AMR)   # adds to GAMT and modifies name to global name
+                AMR = amacro.addToApertureMacroTable(GAMT, AMR)   # adds to GAMT and modifies name to global name
                 self.dimx = RevGAMT[hash] = AMR.name
 
         elif self.dimy is not None:       # Rectangles and Ovals have a dimy setting and need to be rotated
@@ -121,10 +120,10 @@ class Aperture:
             self.dimx = self.dimy
             self.dimy = t
 
-    def rotated(self, RevGAMT):
+    def rotated(self, GAMT, RevGAMT):
         # deepcopy doesn't work on re patterns for some reason so we copy ourselves manually
         APR = Aperture((self.apname, self.pat, self.format), self.code, self.dimx, self.dimy)
-        APR.rotate(RevGAMT)
+        APR.rotate(GAMT, RevGAMT)
         return APR
 
     def dump(self, fid=sys.stdout):
@@ -198,16 +197,14 @@ def parseAperture(s, knownMacroNames):
 tool_pat = re.compile(r'^(?:G54)?D\d+\*$')
 
 
-def constructApertureTable(fileList):
+def constructApertureTable(fileList, GAT, GAMT):
     # First we construct a dictionary where each key is the
     # string representation of the aperture. Then we go back and assign
     # numbers. For aperture macros, we construct their final version
     # (i.e., 'M1', 'M2', etc.) right away, as they are parsed. Thus,
     # we translate from 'THX10N' or whatever to 'M2' right away.
-    GAT = config.GAT      # Global Aperture Table
-    GAT.clear()
-    GAMT = config.GAMT    # Global Aperture Macro Table
-    GAMT.clear()
+    GAT.clear() # Clear Global Aperture Table
+    GAMT.clear() # Clear Global Aperture Macro Table
     RevGAMT = {}          # Dictionary keyed by aperture macro hash and returning macro name
 
     AT = {}               # Aperture Table for this file
@@ -243,7 +240,7 @@ def constructApertureTable(fileList):
                     # No, so define the global macro and do the translation. Note that
                     # addToApertureMacroTable() MODIFIES AM.name to the new M-name.
                     localMacroName = AM.name
-                    AM = amacro.addToApertureMacroTable(config.GAMT, AM)
+                    AM = amacro.addToApertureMacroTable(GAMT, AM)
                     knownMacroNames[localMacroName] = AM.name
                     RevGAMT[AM.hash()] = AM.name
             else:
@@ -308,18 +305,20 @@ def findOrAddAperture(AP, GAT):
         return addToApertureTable(AP, GAT)
 
 if __name__ == "__main__":
-    constructApertureTable(sys.argv[1:])
+    GAT = {}
+    GAMT = {}
+    constructApertureTable(sys.argv[1:], GAT, GAMT)
 
-    keylist = config.GAMT.keys()
+    keylist = GAMT.keys()
     keylist.sort()
     print('Aperture Macros')
     print('===============')
     for key in keylist:
-        print('%s' % config.GAMT[key])
+        print('%s' % GAMT[key])
 
-    keylist = config.GAT.keys()
+    keylist = GAT.keys()
     keylist.sort()
     print('Apertures')
     print('=========')
     for key in keylist:
-        print('%s' % config.GAT[key])
+        print('%s' % GAT[key])

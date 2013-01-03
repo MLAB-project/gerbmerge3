@@ -1148,7 +1148,7 @@ def rotateJob(job, degrees=90, firstpass=True):
                 continue
 
             # Must rotate the aperture
-            APR = A.rotated(RevGAMT)
+            APR = A.rotated(config.GAMT, RevGAMT)
 
             # Does it already exist in the GAT?
             hash = APR.hash()

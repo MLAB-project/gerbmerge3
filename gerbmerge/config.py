@@ -250,7 +250,7 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
     # Now construct global aperture tables, GAT and GAMT. This step actually
     # reads in the jobs for aperture data but doesn't store Gerber
     # data yet.
-    aptable.constructApertureTable(apfiles)
+    aptable.constructApertureTable(apfiles, GAT, GAMT)
     del apfiles
 
     # Parse the tool list
