@@ -148,9 +148,9 @@ def merge(opts, gui=None):
     config.SearchTimeout = opts.search_timeout
 
     if opts.no_trim_gerber:
-        config.TrimGerber = 0
+        config.TrimGerber = False
     if opts.no_trim_excellon:
-        config.TrimExcellon = 0
+        config.TrimExcellon = False
 
     config.text = opts.text
     config.text_size = opts.text_size

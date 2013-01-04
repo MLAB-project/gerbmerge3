@@ -102,10 +102,10 @@ GlobalToolRMap = {}
 ##############################################################################
 
 # This configuration option determines whether trimGerber() is called
-TrimGerber = 1
+TrimGerber = True
 
 # This configuration option determines whether trimExcellon() is called
-TrimExcellon = 1
+TrimExcellon = True
 
 # This configuration option determines the minimum size of feature dimensions for
 # each layer. It is a dictionary indexed by layer name (e.g. '*topsilkscreen') and
