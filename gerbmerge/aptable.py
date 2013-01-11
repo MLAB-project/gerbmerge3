@@ -26,11 +26,11 @@ import util
 # GerbMerge doesn't handle these yet...only fixed macros (no parameters) are
 # currently supported.
 Apertures = (
-    ('Rectangle', re.compile(r'^%AD(D\d+)R,([^X]+)X([^*]+)\*%$'), '%%AD%sR,%.5fX%.5f*%%\n'),
-    ('Circle', re.compile(r'^%AD(D\d+)C,([^*]+)\*%$'), '%%AD%sC,%.5f*%%\n'),
-    ('Oval', re.compile(r'^%AD(D\d+)O,([^X]+)X([^*]+)\*%$'), '%%AD%sO,%.5fX%.5f*%%\n'),
-    ('Octagon', re.compile(r'^%AD(D\d+)OC8,([^*]+)\*%$'), '%%AD%sOC8,%.5f*%%\n'),     # Specific to Eagle
-    ('Macro', re.compile(r'^%AD(D\d+)([^*]+)\*%$'), '%%AD%s%s*%%\n')
+    ('Rectangle', re.compile(r"^%AD(D\d+)R,([^X]+)X([^*]+)\*%$"), "%AD{:s}R,{:.5f}X{:.5f}*%\n"),
+    ('Circle', re.compile(r"^%AD(D\d+)C,([^*]+)\*%$"), "%AD{:s}C,{:.5f}*%\n"),
+    ('Oval', re.compile(r"^%AD(D\d+)O,([^X]+)X([^*]+)\*%$"), "%AD{:s}O,{:.5f}X{:.5f}*%\n"),
+    ('Octagon', re.compile(r"^%AD(D\d+)OC8,([^*]+)\*%$"), "%AD{:s}OC8,{:.5f}*%\n"),     # Specific to Eagle
+    ('Macro', re.compile(r"^%AD(D\d+)([^*]+)\*%$"), "%AD{:s}{:s}*%\n")
 )
 
 # This loop defines names in this module like 'Rectangle',
@@ -130,22 +130,22 @@ class Aperture:
         fid.write(str(self))
 
     def __str__(self):
-        return '%s: %s' % (self.code, self.hash())
+        return "{:s}: {:s}".format(self.code, self.hash())
 
     def hash(self):
         if self.dimy:
-            return ('%s (%.5f x %.5f)' % (self.apname, self.dimx, self.dimy))
+            return ("{:s} ({:.5f} x {:.5f})".format(self.apname, self.dimx, self.dimy))
         else:
             if self.apname in ('Macro',):
-                return ('%s (%s)' % (self.apname, self.dimx))
+                return ("{:s} ({:s})".format(self.apname, self.dimx))
             else:
-                return ('%s (%.5f)' % (self.apname, self.dimx))
+                return ("{:s} ({:.5f})".format(self.apname, self.dimx))
 
     def writeDef(self, fid):
         if self.dimy:
-            fid.write(self.format % (self.code, self.dimx, self.dimy))
+            fid.write(self.format.format(self.code, self.dimx, self.dimy))
         else:
-            fid.write(self.format % (self.code, self.dimx))
+            fid.write(self.format.format(self.code, self.dimx))
 
 
 # Parse the aperture definition in line 's'. macroNames is an aperture macro dictionary
@@ -166,7 +166,7 @@ def parseAperture(s, knownMacroNames):
                 if dimx in knownMacroNames:
                     dimx = knownMacroNames[dimx]    # dimx is now GLOBAL, permanent macro name (e.g., 'M2')
                 else:
-                    raise RuntimeError("Aperture Macro name \"%s\" not defined" % dimx)
+                    raise RuntimeError("Aperture Macro name \"{:s}\" not defined".format(dimx))
             else:
                 try:
                     dimx = float(dimx)
@@ -194,7 +194,7 @@ def parseAperture(s, knownMacroNames):
 # examined, and a global aperture table will be constructed as a dictionary.
 # Same goes for the global aperture macro table.
 
-tool_pat = re.compile(r'^(?:G54)?D\d+\*$')
+tool_pat = re.compile(r"^(?:G54)?D\d+\*$")
 
 
 def constructApertureTable(fileList, GAT, GAMT):
@@ -223,7 +223,7 @@ def constructApertureTable(fileList, GAT, GAMT):
             # If this is an aperture macro definition, add its string
             # representation to the dictionary. It might already exist.
             # Ignore %AMOC8* from Eagle for now as it uses a macro parameter.
-            if line[:7] == '%AMOC8*':
+            if line[:7] == "%AMOC8*":
                 continue
 
             # parseApertureMacro() sucks up all macro lines up to terminating '%'
@@ -256,7 +256,7 @@ def constructApertureTable(fileList, GAT, GAMT):
     # Now, go through and assign sequential codes to all apertures
     code = 10
     for val in AT.values():
-        key = 'D%d' % code
+        key = "D{:d}".format(code)
         GAT[key] = val
         val.code = key
         code += 1
@@ -275,7 +275,7 @@ def findHighestApertureCode(keys):
 
 def addToApertureTable(AP, GAT):
     lastCode = findHighestApertureCode(GAT.keys())
-    code = 'D%d' % (lastCode + 1)
+    code = "D{:d}".format(lastCode + 1)
     GAT[code] = AP
     AP.code = code
 
@@ -309,16 +309,14 @@ if __name__ == "__main__":
     GAMT = {}
     constructApertureTable(sys.argv[1:], GAT, GAMT)
 
-    keylist = GAMT.keys()
-    keylist.sort()
-    print('Aperture Macros')
-    print('===============')
+    keylist = sorted(GAMT.keys())
+    print("Aperture Macros")
+    print("===============")
     for key in keylist:
-        print('%s' % GAMT[key])
+        print("{:s}".format(GAMT[key]))
 
-    keylist = GAT.keys()
-    keylist.sort()
-    print('Apertures')
-    print('=========')
+    keylist = sorted(GAT.keys())
+    print("Apertures")
+    print("=========")
     for key in keylist:
-        print('%s' % GAT[key])
+        print("{:s}".format(GAT[key]))

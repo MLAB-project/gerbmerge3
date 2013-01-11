@@ -24,7 +24,7 @@ def writeDrillHits(fid, Place, Tools):
         try:
             size = config.GlobalToolMap[tool]
         except:
-            raise RuntimeError("INTERNAL ERROR: Tool code %s not found in global tool list" % tool)
+            raise RuntimeError("INTERNAL ERROR: Tool code {:s} not found in global tool list".format(tool))
 
         for job in Place.jobs:
             job.writeDrillHits(fid, size, toolNumber)
@@ -75,7 +75,7 @@ def writeDrillLegend(fid, Tools, OriginY, MaxXExtent):
     maxX = 0
     for size, toolNum in L:
         # Determine string to write and midpoint of string
-        s = '%.3f"' % size
+        s = "{:.3f}\"".format(size)
         ll, ur = makestroke.boundingBox(s, posX + glyphspace, posY)  # Returns lower-left point, upper-right point
         midpoint = (ur[1] + ll[1]) / 2
 
@@ -113,7 +113,7 @@ def writeDimensionArrow(fid, OriginX, OriginY, MaxXExtent, MaxYExtent):
     makestroke.drawDimensionArrow(fid, X + dimspace, y, makestroke.FACING_DOWN)
 
     # Now draw the text. First, horizontal text above the board.
-    s = '%.3f"' % (MaxXExtent - OriginX)
+    s = "{:.3f}\"".format(MaxXExtent - OriginX)
     ll, ur = makestroke.boundingBox(s, 0, 0)
     s_width = ur[0] - ll[0]   # Width in 2.5 units
     s_height = ur[1] - ll[1]  # Height in 2.5 units
@@ -133,7 +133,7 @@ def writeDimensionArrow(fid, OriginX, OriginY, MaxXExtent, MaxYExtent):
     makestroke.drawLine(fid, posX2, posY, X, posY)
 
     # Now do the vertical text
-    s = '%.3f"' % (MaxYExtent - OriginY)
+    s = "{:.3f}\"".format(MaxYExtent - OriginY)
     ll, ur = makestroke.boundingBox(s, 0, 0)
     s_width = ur[0] - ll[0]
     s_height = ur[1] - ll[1]
@@ -161,7 +161,7 @@ def writeUserText(fid, X, Y):
     try:
         tfile = open(fname, 'rt')
     except Exception as detail:
-        raise RuntimeError("Could not open fabrication drawing text file '%s':\n  %s" % (fname, str(detail)))
+        raise RuntimeError("Could not open fabrication drawing text file '{:s}':\n  {:s}".format(fname, detail))
 
     lines = tfile.readlines()
     tfile.close()

@@ -18,7 +18,7 @@ import re
 import string
 import copy
 
-_macro_pat = re.compile(r'^%AM([^*]+)\*$')
+_macro_pat = re.compile(r"^%AM([^*]+)\*$")
 
 # This list stores the expected types of parameters for each primitive type
 # (e.g., outline, line, circle, polygon, etc.). None is used for undefined
@@ -108,7 +108,7 @@ class ApertureMacroPrimitive:
             valids = None
 
         if valids is None:
-            raise RuntimeError("Undefined aperture macro primitive code %d" % code)
+            raise RuntimeError("Undefined aperture macro primitive code {}".format(code))
 
         # We expect exactly the number of fields required, except for macro
         # type 4 which is an outline and has a variable number of points.
@@ -129,10 +129,10 @@ class ApertureMacroPrimitive:
                 raise RuntimeError("Outline macro primitive has non-integer number of points")
 
             if len(fields) != (3 + 2 * N):
-                raise RuntimeError("Outline macro primitive has %d fields...expecting %d fields" % (len(fields), 3 + 2 * N))
+                raise RuntimeError("Outline macro primitive has {} fields...expecting {} fields".format(len(fields), 3 + 2 * N))
         else:
             if len(fields) != len(valids):
-                raise RuntimeError("Macro primitive has %d fields...expecting %d fields" % (len(fields), len(valids)))
+                raise RuntimeError("Macro primitive has {} fields...expecting {} fields".format(len(fields), len(valids)))
 
         # Convert each parameter on the input line to an entry in the self.parms
         # list, using either int() or float() conversion.
@@ -145,7 +145,7 @@ class ApertureMacroPrimitive:
             try:
                 self.parms.append(converter(fields[parmix]))
             except:
-                raise RuntimeError("Aperture macro primitive parameter %d has incorrect type" % (parmix + 1))
+                raise RuntimeError("Aperture macro primitive parameter {} has incorrect type".format(parmix + 1))
 
     def setFromLine(self, line):
         # Account for DOS line endings and get rid of line ending and '*' at the end
@@ -159,7 +159,7 @@ class ApertureMacroPrimitive:
             try:
                 code = int(fields[0])
             except:
-                raise RuntimeError("Illegal aperture macro primitive code \"%s\"" % fields[0])
+                raise RuntimeError("Illegal aperture macro primitive code \"{:s}\"".format(fields[0]))
             self.setFromFields(code, fields[1:])
         except:
             print('=' * 20)
@@ -197,23 +197,23 @@ class ApertureMacroPrimitive:
 
     def __str__(self):
         # Construct a string with ints as ints and floats as floats
-        s = '%d' % self.code
+        s = "{:d}".format(self.code)
         for parmix in range(len(self.parms)):
             valids = PrimitiveParmTypes[self.code]
 
-            format = ',%f'
+            format = ",{:f}"
             try:
                 if valids[parmix] is int:
-                    format = ',%d'
+                    format = ",{:d}"
             except:
-                pass    # '%f' is OK for Outline extra points
+                pass    # floats are ok for Outline extra points
 
-            s += format % self.parms[parmix]
+            s += format.format(self.parms[parmix])
 
         return s
 
     def writeDef(self, fid):
-        fid.write('%s*\n' % str(self))
+        fid.write("{:s}*\n".format(self))
 
 
 class ApertureMacro:
@@ -241,21 +241,21 @@ class ApertureMacro:
         fid.write(str(self))
 
     def __str__(self):
-        s = '%s:\n' % self.name
+        s = "{:s}:\n".format(self.name)
         s += self.hash()
         return s
 
     def hash(self):
-        s = ''
+        s = ""
         for prim in self.prim:
-            s += '  ' + str(prim) + '\n'
+            s += "  {:s}\n".format(prim)
         return s
 
     def writeDef(self, fid):
-        fid.write('%%AM%s*\n' % self.name)
+        fid.write("%AM{:s}*\n".format(self.name))
         for prim in self.prim:
             prim.writeDef(fid)
-        fid.write('%\n')
+        fid.write("%\n")
 
 
 def parseApertureMacro(s, fid):
@@ -293,7 +293,7 @@ def addToApertureMacroTable(amTable, am):
     else:
         lastCode = 0
 
-    mcode = 'M%d' % (lastCode + 1)
+    mcode = "M{:d".format(lastCode + 1)
     am.name = mcode
     amTable[mcode] = am
 
@@ -328,7 +328,7 @@ if __name__ == "__main__":
     MR = M.rotated()
 
     # Generate the Gerber so we can view it
-    fid = open('amacro.ger', 'wt')
+    fid = open("amacro.ger", 'wt')
     print("""G75*
     G70*
     %OFA0B0*%

@@ -125,7 +125,7 @@ def tile_jobs(Jobs):
         tile = tile_search_exhaustive(L, PX, PY, config.Config['xspacing'], config.Config['yspacing'], config.SearchTimeout)
 
     if not tile:
-        raise RuntimeError('Panel size %.2f"x%.2f" is too small to hold jobs' % (PX, PY))
+        raise RuntimeError('Panel size {:.2f}"x{:.2f}" is too small to hold jobs'.format(PX, PY))
 
     return tile
 
@@ -176,13 +176,13 @@ def merge(opts, gui=None):
 
     # Display job properties
     for job in config.Jobs.values():
-        print("Job %s:" % job.name)
+        print("Job {:s}:".format(job.name))
         if job.Repeat > 1:
-            print("(%d instances)" % job.Repeat)
+            print("({:d} instances)".format(job.Repeat))
         else:
             print()
-        print("  Extents: (%d,%d)-(%d,%d)" % (job.minx, job.miny, job.maxx, job.maxy))
-        print("  Size: %f\" x %f\"" % (job.width_in(), job.height_in()))
+        print("  Extents: ({:d},{:d})-({:d},{:d})".format(job.minx, job.miny, job.maxx, job.maxy))
+        print("  Size: {:f}\" x {:f}\"".format(job.width_in(), job.height_in()))
         print()
 
     # Trim drill locations and flash data to board extents
@@ -298,7 +298,7 @@ def merge(opts, gui=None):
         try:
             fullname = config.MergeOutputFiles[layername]
         except KeyError:
-            fullname = 'merged.%s.ger' % lname
+            fullname = "merged.{:s}.ger".format(lname)
         OutputFiles.append(fullname)
         fid = open(fullname, 'wt')
         writeGerberHeader(fid)
@@ -364,7 +364,7 @@ def merge(opts, gui=None):
             job.writeGerber(fid, layername)
 
             if config.Config['cutlinelayers'] and (layername in config.Config['cutlinelayers']):
-                fid.write('%s*\n' % drawing_code_cut)    # Choose drawing aperture
+                fid.write("{:s}*\n".format(drawing_code_cut))    # Choose drawing aperture
                 job.writeCutLines(fid, drawing_code_cut, OriginX, OriginY, MaxXExtent, MaxYExtent)
 
         if config.Config['cropmarklayers']:
@@ -384,7 +384,7 @@ def merge(opts, gui=None):
             x = config.text_x if config.text_x else util.in2mil(OriginX + config.Config['leftmargin']) + 100  # convert inches to mils 100 is extra margin
             y_offset = ((config.Config['yspacing'] * 1000.0) - text_size) / 2.0
             y = config.text_y if config.text_y else util.in2mil(OriginY + config.Config['bottommargin'] + Place.jobs[0].height_in()) + y_offset  # convert inches to mils
-            fid.write('%s*\n' % drawing_code_text)    # Choose drawing aperture
+            fid.write("{:s}*\n".format(drawing_code_text))    # Choose drawing aperture
             makestroke.writeString(fid, config.text, int(util.mil2gerb(x)), int(util.mil2gerb(y)), 0, int(text_size))
         gerber.writeFooter(fid)
 
@@ -402,14 +402,14 @@ def merge(opts, gui=None):
         AP.writeDef(fid)
 
         # Choose drawing aperture D10
-        fid.write('D10*\n')
+        fid.write("D10*\n")
 
         # Draw the rectangle
-        fid.write('X%07dY%07dD02*\n' % (util.in2gerb(OriginX), util.in2gerb(OriginY)))        # Bottom-left
-        fid.write('X%07dY%07dD01*\n' % (util.in2gerb(OriginX), util.in2gerb(MaxYExtent)))     # Top-left
-        fid.write('X%07dY%07dD01*\n' % (util.in2gerb(MaxXExtent), util.in2gerb(MaxYExtent)))  # Top-right
-        fid.write('X%07dY%07dD01*\n' % (util.in2gerb(MaxXExtent), util.in2gerb(OriginY)))     # Bottom-right
-        fid.write('X%07dY%07dD01*\n' % (util.in2gerb(OriginX), util.in2gerb(OriginY)))        # Bottom-left
+        fid.write("X{:07d}Y{:07d}D02*\n".format(util.in2gerb(OriginX), util.in2gerb(OriginY)))        # Bottom-left
+        fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(OriginX), util.in2gerb(MaxYExtent)))     # Top-left
+        fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(MaxXExtent), util.in2gerb(MaxYExtent)))  # Top-right
+        fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(MaxXExtent), util.in2gerb(OriginY)))     # Bottom-right
+        fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(OriginX), util.in2gerb(OriginY)))        # Bottom-left
 
         gerber.writeFooter(fid)
         fid.close()
@@ -426,7 +426,7 @@ def merge(opts, gui=None):
         AP.writeDef(fid)
 
         # Choose drawing aperture D10
-        fid.write('D10*\n')
+        fid.write("D10*\n")
 
         # Draw the scoring lines
         scoring.writeScoring(fid, Place, OriginX, OriginY, MaxXExtent, MaxYExtent, config.Config['xspacing'], config.Config['yspacing'])
@@ -449,7 +449,7 @@ def merge(opts, gui=None):
     # Then construct global mapping of diameters to tool numbers
     toolNum = 1
     for d in allToolDiam:
-        config.GlobalToolRMap[d] = "T%02d" % toolNum
+        config.GlobalToolRMap[d] = "T{:02d}".format(toolNum)
         toolNum += 1
 
     # Cluster similar tool sizes to reduce number of drills
@@ -468,13 +468,13 @@ def merge(opts, gui=None):
     fullname = config.Config['fabricationdrawingfile']
     if fullname and fullname.lower() != 'none':
         if len(Tools) > strokes.MaxNumDrillTools:
-            raise RuntimeError("Only %d different tool sizes supported for fabrication drawing." % strokes.MaxNumDrillTools)
+            raise RuntimeError("Only {:d} different tool sizes supported for fabrication drawing.".format(strokes.MaxNumDrillTools))
 
         OutputFiles.append(fullname)
         fid = open(fullname, 'wt')
         writeGerberHeader(fid)
         gerber.writeApertures(fid, {drawing_code1: None})
-        fid.write('%s*\n' % drawing_code1)    # Choose drawing aperture
+        fid.write("{:s}*\n".format(drawing_code1))    # Choose drawing aperture
 
         fabdrawing.writeFabDrawing(fid, Place, Tools, OriginX, OriginY, MaxXExtent, MaxYExtent)
 
@@ -485,11 +485,11 @@ def merge(opts, gui=None):
     try:
         fullname = config.MergeOutputFiles['drills']
     except KeyError:
-        fullname = 'merged.drills.xln'
+        fullname = "merged.drills.xln"
     OutputFiles.append(fullname)
     fid = open(fullname, 'wt')
 
-    excellon.writeheader(fid, [(x, config.GlobalToolMap[x]) for x in Tools], units="in")
+    excellon.writeheader(fid, [(x, config.GlobalToolMap[x]) for x in Tools], units='in')
 
     # Ensure each one of our tools is represented in the tool list specified
     # by the user.
@@ -497,7 +497,7 @@ def merge(opts, gui=None):
         try:
             size = config.GlobalToolMap[tool]
         except:
-            raise RuntimeError("INTERNAL ERROR: Tool code %s not found in global tool map" % tool)
+            raise RuntimeError("INTERNAL ERROR: Tool code {:s} not found in global tool map".format(tool))
 
         # Write the tool name then all of the positions where it will be drilled.
         excellon.writetoolname(fid, tool)
@@ -528,27 +528,27 @@ def merge(opts, gui=None):
     try:
         fullname = config.MergeOutputFiles['toollist']
     except KeyError:
-        fullname = 'merged.toollist.drl'
+        fullname = "merged.toollist.drl"
     OutputFiles.append(fullname)
     fid = open(fullname, 'wt')
 
     print('-' * 50)
-    print("     Job Size : %f\" x %f\"" % (MaxXExtent - OriginX, MaxYExtent - OriginY))
-    print("     Job Area : %.2f sq. in." % totalarea)
-    print("   Area Usage : %.1f%%" % (jobarea / totalarea * 100))
-    print("   Drill hits : %d" % drillhits)
-    print("Drill density : %.1f hits/sq.in." % (drillhits / totalarea))
+    print("     Job Size : {:f}\" x {:f}\"".format(MaxXExtent - OriginX, MaxYExtent - OriginY))
+    print("     Job Area : {:.2f} sq. in.".format(totalarea))
+    print("   Area Usage : {:.1f}%".format(jobarea / totalarea * 100))
+    print("   Drill hits : {:d}".format(drillhits))
+    print("Drill density : {:.1f} hits/sq.in.".format(drillhits / totalarea))
 
     print("\nTool List:")
     smallestDrill = 999.9
     for tool in Tools:
         if ToolStats[tool]:
-            fid.write('%s %.4fin\n' % (tool, config.GlobalToolMap[tool]))
-            print("  %s %.4f\" %5d hits" % (tool, config.GlobalToolMap[tool], ToolStats[tool]))
+            fid.write("{:s} {:.4f}in\n".format(tool, config.GlobalToolMap[tool]))
+            print("  {:s} {:.4f}\" {:5d} hits".format(tool, config.GlobalToolMap[tool], ToolStats[tool]))
             smallestDrill = min(smallestDrill, config.GlobalToolMap[tool])
 
     fid.close()
-    print("Smallest Tool: %.4fin" % smallestDrill)
+    print("Smallest Tool: {:.4f}in".format(smallestDrill))
 
     print()
     print("Output Files :")
@@ -558,7 +558,7 @@ def merge(opts, gui=None):
     if (MaxXExtent - OriginX) > config.Config['panelwidth'] or (MaxYExtent - OriginY) > config.Config['panelheight']:
         print('*' * 75)
         print("*")
-        print("* ERROR: Merged job %.3f\"x%.3f\" exceeds panel dimensions of %.3f\"x%.3f\"" % (MaxXExtent - OriginX, MaxYExtent - OriginY, config.Config['panelwidth'], config.Config['panelheight']))
+        print("* ERROR: Merged job {:.3f}\"x{:.3f}\" exceeds panel dimensions of {:.3f}\"x{:.3f}\"".format(MaxXExtent - OriginX, MaxYExtent - OriginY, config.Config['panelwidth'], config.Config['panelheight']))
         print("*")
         print('*' * 75)
         sys.exit(1)
@@ -580,7 +580,7 @@ def tile_search_exhaustive(Jobs, X, Y, xspacing, yspacing, searchTimeout):
     possiblePermutations = (2 ** len(Jobs)) * factorial(len(Jobs))
     print('=' * 70)
     print("Starting placement using exhaustive search.")
-    print("There are %ld possible permutations..." % possiblePermutations)
+    print("There are {:d} possible permutations...".format(possiblePermutations))
     if possiblePermutations < 1e4:
         print("this'll take no time at all.")
     elif possiblePermutations < 1e5:
@@ -592,7 +592,7 @@ def tile_search_exhaustive(Jobs, X, Y, xspacing, yspacing, searchTimeout):
     else:
         print("don't hold your breath.")
     print("Press Ctrl-C to stop and use the best placement so far.")
-    print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs, xspacing, yspacing) * 100))
+    print("Estimated maximum possible utilization is {:.1f}%.".format(tiling.maxUtilization(Jobs, xspacing, yspacing) * 100))
 
     try:
         search.run()
@@ -601,8 +601,9 @@ def tile_search_exhaustive(Jobs, X, Y, xspacing, yspacing, searchTimeout):
         print()
         print("Interrupted.")
 
+    #TODO: Remove this obsolete code
     #computeTime = time.time() - x.startTime
-    #print("Computed %ld permutations in %d seconds / %.1f permutations/second" % (x.permutations, computeTime, x.permutations / computeTime))
+    #print("Computed {:d} permutations in {:d} seconds / {:.1f} permutations/second".format(x.permutations, computeTime, x.permutations / computeTime))
     print('=' * 70)
 
     return search.bestTiling
@@ -619,7 +620,7 @@ def tile_search_random(Jobs, X, Y, xspacing, yspacing, searchTimeout, exhaustive
     print("=" * 70)
     print("Starting random placement trials. You must press Ctrl-C to")
     print("stop the process and use the best placement so far.")
-    print("Estimated maximum possible utilization is %.1f%%." % (tiling.maxUtilization(Jobs, xspacing, yspacing) * 100))
+    print("Estimated maximum possible utilization is {:.1f}.".format(tiling.maxUtilization(Jobs, xspacing, yspacing) * 100))
 
     bestScore = float("inf")
     bestTiling = None
@@ -650,7 +651,7 @@ def tile_search_random(Jobs, X, Y, xspacing, yspacing, searchTimeout, exhaustive
                         utilization = bestTiling.usedArea() / bestTiling.area() * 100.0
                     else:
                         utilization = 0.0
-                    print("\nTested %d placements over %d seconds. Best tiling at %.2f%% usage." % (placementsTried, time.time() - startTime, utilization))
+                    print("\nTested {:d} placements over {:d} seconds. Best tiling at {:.2f}% usage.".format(placementsTried, time.time() - startTime, utilization))
                 else:
                     print(".", end='')
                     sys.stdout.flush()
@@ -660,7 +661,7 @@ def tile_search_random(Jobs, X, Y, xspacing, yspacing, searchTimeout, exhaustive
         print("\nSearch ended by user.")
 
     computeTime = time.time() - startTime
-    print("Computed %ld placements in %d seconds (%.1f placements/second)." % (placementsTried, computeTime, placementsTried / computeTime))
+    print("Computed {:d} placements in {:d} seconds ({:.1f} placements/second).".format(placementsTried, computeTime, placementsTried / computeTime))
     print("=" * 70)
 
     return bestTiling

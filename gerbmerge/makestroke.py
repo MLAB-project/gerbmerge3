@@ -50,7 +50,7 @@ def rotateGlyph(glyph, degrees, glyphName):
     """Rotate a glyph counterclockwise by given number of degrees. The glyph
     is a list of lists, where each sub-list is a connected path."""
     try:
-        return RotatedGlyphs["%.1f_%s" % (degrees, glyphName)]
+        return RotatedGlyphs["{:.1f}_{:s}".format(degrees, glyphName)]
     except KeyError:
         pass  # Not cached yet
 
@@ -67,12 +67,12 @@ def rotateGlyph(glyph, degrees, glyphName):
             newpath.append((x, y))
         newglyph.append(newpath)
 
-    RotatedGlyphs["%.1f_%s" % (degrees, glyphName)] = newglyph
+    RotatedGlyphs["{:.1f}_{:s}".format(degrees, glyphName)] = newglyph
     return newglyph
 
 
 def writeFlash(fid, X, Y, D):
-    fid.write("X%07dY%07dD%02d*\n" % (X, Y, D))
+    fid.write("X{:07d}Y{:07d}D{:02d}*\n".format(int(X), int(Y), int(D)))
 
 
 def drawPolyline(fid, L, offX, offY, scale=1):
@@ -101,7 +101,7 @@ def writeChar(fid, c, X, Y, degrees, size=10):
     try:
         glyph = strokes.StrokeMap[c]
     except:
-        raise RuntimeError("No glyph for character %s" % hex(ord(c)))
+        raise RuntimeError("No glyph for character {:X}".format(ord(c)))
 
     writeGlyph(fid, glyph, X, Y, degrees, c, size)
 
@@ -144,7 +144,7 @@ def drawDimensionArrow(fid, X, Y, facing):
 
 
 def drawDrillHit(fid, X, Y, toolNum):
-    writeGlyph(fid, strokes.DrillStrokeList[toolNum], X, Y, 0, "Drill%02d" % toolNum)
+    writeGlyph(fid, strokes.DrillStrokeList[toolNum], X, Y, 0, "Drill{:02d}".format(toolNum))
 
 
 if __name__ == "__main__":
@@ -152,7 +152,7 @@ if __name__ == "__main__":
     s = string.digits + string.ascii_letters + string.punctuation
     #s = "The quick brown fox jumped over the lazy dog!"
     size = float(sys.argv[1]) if len(sys.argv) > 1 else 10
-    fid = open('test.ger', 'wt')
+    fid = open("test.ger", 'wt')
     fid.write("""G75*
   G70*
   %OFA0B0*%
@@ -174,7 +174,7 @@ if __name__ == "__main__":
     drawDimensionArrow(fid, 5000, 10000, FACING_DOWN)
 
     for diam in range(0, strokes.MaxNumDrillTools):
-        writeGlyph(fid, strokes.DrillStrokeList[diam], diam * 1250, 15000, 0, "%02d" % diam)
+        writeGlyph(fid, strokes.DrillStrokeList[diam], diam * 1250, 15000, 0, "{:02d}".format(diam))
 
     fid.write("M02*\n")
     fid.close()

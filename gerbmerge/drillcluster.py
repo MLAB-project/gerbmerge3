@@ -70,16 +70,16 @@ def cluster(drills, tolerance, debug=_DEBUG):
     # Create new dictionary of clustered drills
     for c in clusters:
         tool_num += 1
-        new_drill = "T%02d" % tool_num
+        new_drill = "T{:02d}".format(tool_num)
         c.sort()
         new_size = (min(c) + max(c)) / 2.0
         new_drills[new_size] = new_drill
 
-        debug_print(str_d(c) + " will be represented by " + new_drill + " (" + str_d(new_size) + ")")
+        debug_print("{:s} will be represented by {:s} ({:s})".format(str_d(c), new_drill, str_d(new_size)))
 
-    debug_print("\n  " + str(len(new_drills)) + " Clustered Drills:")
+    debug_print("\n {:d} Clustered Drills:".format(len(new_drills)))
     debug_print(drillsToString(new_drills))
-    debug_print("Drill count reduced from " + str(len(drills)) + " to " + str(len(new_drills)), True)
+    debug_print("Drill count reduced from {:d} to {:d}".format(len(drills), len(new_drills)), True)
 
     return new_drills
 
@@ -99,7 +99,7 @@ def remap(jobs, globalToolMap, debug=_DEBUG):
 
     for job in jobs:
         job = job.job  # Access job inside job layout
-        debug_print("\n  Job name: " + job.name)
+        debug_print("\n  Job name: {:s}".format(job.name))
         debug_print("\n  Original job tools:")
         debug_print(str(job.xdiam))
         debug_print("\n  Original commands:")
@@ -159,11 +159,11 @@ def str_d(drills):
     try:
         len(drills)
     except:
-        string = "%.4f" % drills
+        string = "{:.4f}".format(drills)
     else:
         string = "["
         for drill in drills:
-            string += ("%.4f" % drill + ", ")
+            string += ("{:.4f}, ".format(drill))
         string = string[:len(string) - 2] + "]"
 
     return string
@@ -179,7 +179,7 @@ def drillsToString(drills):
 
     drills = sorted(drills.items())
     for size, drill in drills:
-        string += drill + " = " + str_d(size) + "\n  "
+        string += "{:s} = {:s}\n  ".format(drill, str_d(size))
 
     return string
 
@@ -199,6 +199,6 @@ if __name__ == "__main__":
         if rand_size in old:
             continue
         tool_num += 1
-        old[rand_size] = "T%02d" % tool_num
+        old[rand_size] = "T{:02d}".format(tool_num)
 
     new = cluster(old, .0003, True)

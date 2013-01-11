@@ -34,58 +34,58 @@ import excellon
 #   D03 -- flash aperture
 
 # Patterns for Gerber RS274X file interpretation
-apdef_pat = re.compile(r'^%AD(D\d+)([^*$]+)\*%$')     # Aperture definition
-apmdef_pat = re.compile(r'^%AM([^*$]+)\*$')           # Aperture macro definition
-comment_pat = re.compile(r'G0?4[^*]*\*')              # Comment (GerbTool comment omits the 0)
-tool_pat = re.compile(r'(D\d+)\*')                   # Aperture selection
-gcode_pat = re.compile(r'G(\d{1,2})\*?')              # G-codes
-drawXY_pat = re.compile(r'X([+-]?\d+)Y([+-]?\d+)D0?([123])\*')  # Drawing command
-drawX_pat = re.compile(r'X([+-]?\d+)D0?([123])\*')        # Drawing command, Y is implied
-drawY_pat = re.compile(r'Y([+-]?\d+)D0?([123])\*')        # Drawing command, X is implied
-format_pat = re.compile(r'%FS(L|T)?(A|I)(N\d+)?(X\d\d)(Y\d\d)\*%')  # Format statement
-layerpol_pat = re.compile(r'^%LP[CD]\*%')             # Layer polarity (D=dark, C=clear)
+apdef_pat = re.compile(r"^%AD(D\d+)([^*$]+)\*%$")     # Aperture definition
+apmdef_pat = re.compile(r"^%AM([^*$]+)\*$")           # Aperture macro definition
+comment_pat = re.compile(r"G0?4[^*]*\*")              # Comment (GerbTool comment omits the 0)
+tool_pat = re.compile(r"(D\d+)\*")                   # Aperture selection
+gcode_pat = re.compile(r"G(\d{1,2})\*?")              # G-codes
+drawXY_pat = re.compile(r"X([+-]?\d+)Y([+-]?\d+)D0?([123])\*")  # Drawing command
+drawX_pat = re.compile(r"X([+-]?\d+)D0?([123])\*")        # Drawing command, Y is implied
+drawY_pat = re.compile(r"Y([+-]?\d+)D0?([123])\*")        # Drawing command, X is implied
+format_pat = re.compile(r"%FS(L|T)?(A|I)(N\d+)?(X\d\d)(Y\d\d)\*%")  # Format statement
+layerpol_pat = re.compile(r"^%LP[CD]\*%")             # Layer polarity (D=dark, C=clear)
 
 # Circular interpolation drawing commands (from Protel)
-cdrawXY_pat = re.compile(r'X([+-]?\d+)Y([+-]?\d+)I([+-]?\d+)J([+-]?\d+)D0?([123])\*')
-cdrawX_pat = re.compile(r'X([+-]?\d+)I([+-]?\d+)J([+-]?\d+)D0?([123])\*')  # Y is implied
-cdrawY_pat = re.compile(r'Y([+-]?\d+)I([+-]?\d+)J([+-]?\d+)D0?([123])\*')  # X is implied
+cdrawXY_pat = re.compile(r"X([+-]?\d+)Y([+-]?\d+)I([+-]?\d+)J([+-]?\d+)D0?([123])\*")
+cdrawX_pat = re.compile(r"X([+-]?\d+)I([+-]?\d+)J([+-]?\d+)D0?([123])\*")  # Y is implied
+cdrawY_pat = re.compile(r"Y([+-]?\d+)I([+-]?\d+)J([+-]?\d+)D0?([123])\*")  # X is implied
 
 IgnoreList = (
     # These are for Eagle, and RS274X files in general
-    re.compile(r'^%OFA0B0\*%$'),
-    re.compile(r'^%IPPOS\*%'),
-    re.compile(r'^%AMOC8\*$'),                         # Eagle's octagon defined by macro with a $1 parameter
-    re.compile(r'^5,1,8,0,0,1\.08239X\$1,22\.5\*$'),   # Eagle's octagon, 22.5 degree rotation
-    re.compile(r'^5,1,8,0,0,1\.08239X\$1,0\.0\*$'),    # Eagle's octagon, 0.0 degree rotation
-    re.compile(r'^\*?%$'),
-    re.compile(r'^M0?2\*$'),
+    re.compile(r"^%OFA0B0\*%$"),
+    re.compile(r"^%IPPOS\*%"),
+    re.compile(r"^%AMOC8\*$"),                         # Eagle's octagon defined by macro with a $1 parameter
+    re.compile(r"^5,1,8,0,0,1\.08239X\$1,22\.5\*$"),   # Eagle's octagon, 22.5 degree rotation
+    re.compile(r"^5,1,8,0,0,1\.08239X\$1,0\.0\*$"),    # Eagle's octagon, 0.0 degree rotation
+    re.compile(r"^\*?%$"),
+    re.compile(r"^M0?2\*$"),
 
     # These additional ones are for Orcad Layout, PCB, Protel, etc.
-    re.compile(r'\*'),            # Empty statement
-    re.compile(r'^%IN.*\*%'),
-    re.compile(r'^%ICAS\*%'),      # Not in RS274X spec.
-    re.compile(r'^%MOIN\*%'),
-    re.compile(r'^%ASAXBY\*%'),
-    re.compile(r'^%AD\*%'),        # GerbTool empty aperture definition
-    re.compile(r'^%LN.*\*%')       # Layer name
+    re.compile(r"\*"),            # Empty statement
+    re.compile(r"^%IN.*\*%"),
+    re.compile(r"^%ICAS\*%"),      # Not in RS274X spec.
+    re.compile(r"^%MOIN\*%"),
+    re.compile(r"^%ASAXBY\*%"),
+    re.compile(r"^%AD\*%"),        # GerbTool empty aperture definition
+    re.compile(r"^%LN.*\*%")       # Layer name
 )
 
 # Patterns for Excellon interpretation
-xtool_pat = re.compile(r'^(T\d+)$')                               # Tool selection
-xydraw_pat = re.compile(r'^X([+-]?\d+)Y([+-]?\d+)$')              # Plunge command
-xdraw_pat = re.compile(r'^X([+-]?\d+)$')                          # Plunge command, repeat last Y value
-ydraw_pat = re.compile(r'^Y([+-]?\d+)$')                          # Plunge command, repeat last X value
-xtdef_pat = re.compile(r'^(T\d+)(?:F\d+)?(?:S\d+)?C([0-9.]+)$')   # Tool+diameter definition with optional
+xtool_pat = re.compile(r"^(T\d+)$")                               # Tool selection
+xydraw_pat = re.compile(r"^X([+-]?\d+)Y([+-]?\d+)$")              # Plunge command
+xdraw_pat = re.compile(r"^X([+-]?\d+)$")                          # Plunge command, repeat last Y value
+ydraw_pat = re.compile(r"^Y([+-]?\d+)$")                          # Plunge command, repeat last X value
+xtdef_pat = re.compile(r"^(T\d+)(?:F\d+)?(?:S\d+)?C([0-9.]+)$")   # Tool+diameter definition with optional
                                                                   # feed/speed (for Protel)
-xtdef2_pat = re.compile(r'^(T\d+)C([0-9.]+)(?:F\d+)?(?:S\d+)?$')  # Tool+diameter definition with optional
+xtdef2_pat = re.compile(r"^(T\d+)C([0-9.]+)(?:F\d+)?(?:S\d+)?$")  # Tool+diameter definition with optional
                                                                   # feed/speed at the end (for OrCAD)
-xzsup_pat = re.compile(r'^INCH,([LT])Z$')                         # Leading/trailing zeros INCLUDED
+xzsup_pat = re.compile(r"^INCH,([LT])Z$")                         # Leading/trailing zeros INCLUDED
 
 XIgnoreList = (
-    re.compile(r'^%$'),
-    re.compile(r'^M30$'),   # End of job
-    re.compile(r'^M48$'),   # Program header to first %
-    re.compile(r'^M72$')    # Inches
+    re.compile(r"^%$"),
+    re.compile(r"^M30$"),   # End of job
+    re.compile(r"^M48$"),   # Program header to first %
+    re.compile(r"^M72$")    # Inches
 )
 
 
@@ -312,15 +312,15 @@ class Job:
             match = apdef_pat.match(line)
             if match:
                 if currtool:
-                    raise RuntimeError("File %s has an aperture definition that comes after drawing commands." % fullname)
+                    raise RuntimeError("File {:s} has an aperture definition that comes after drawing commands.".format(fullname))
 
                 A = aptable.parseAperture(line, self.apmxlat[layername])
                 if not A:
-                    raise RuntimeError("Unknown aperture definition in file %s" % fullname)
+                    raise RuntimeError("Unknown aperture definition in file {:s}".format(fullname))
 
                 hash = A.hash()
                 if hash not in RevGAT:
-                    raise RuntimeError("File %s has aperture definition \"%s\" not in global aperture table." % (fullname, hash))
+                    raise RuntimeError("File {:s} has aperture definition \"{:s}\" not in global aperture table.".format(fullname, hash))
 
                 # This says that all draw commands with this aperture code will
                 # be replaced by aperture self.apxlat[layername][code].
@@ -329,18 +329,18 @@ class Job:
 
             # Ignore %AMOC8* from Eagle for now as it uses a macro parameter, which
             # is not yet supported in GerbMerge.
-            if line[:7] == '%AMOC8*':
+            if line[:7] == "%AMOC8*":
                 continue
 
             # See if this is an aperture macro definition, and if so, map it.
             M = amacro.parseApertureMacro(line, fid)
             if M:
                 if currtool:
-                    raise RuntimeError("File %s has an aperture macro definition that comes after drawing commands." % fullname)
+                    raise RuntimeError("File {:s} has an aperture macro definition that comes after drawing commands.".format(fullname))
 
                 hash = M.hash()
                 if hash not in RevGAMT:
-                    raise RuntimeError("File %s has aperture macro definition not in global aperture macro table:\n%s" % (fullname, hash))
+                    raise RuntimeError("File {:s} has aperture macro definition not in global aperture macro table:\n{:s}".format(fullname, hash))
 
                 # This says that all aperture definition commands that reference this macro name
                 # will be replaced by aperture macro name self.apmxlat[layername][macroname].
@@ -399,7 +399,7 @@ class Job:
 
                     # Determine if this is a G-Code that we have to emit because it matters.
                     if gcode in [1, 2, 3, 36, 37, 74, 75]:
-                        self.commands[layername].append("G%02d" % gcode)
+                        self.commands[layername].append("G{:02d}".format(gcode))
 
                         # Determine if this is a G-code that sets a new mode
                         if gcode in [1, 36, 37]:
@@ -414,7 +414,7 @@ class Job:
 
                         continue
 
-                    raise RuntimeError("G-Code 'G%02d' is not supported" % gcode)
+                    raise RuntimeError("G-Code 'G{:02d}' is not supported".format(gcode))
 
                 # See if this is a tool change (aperture change) command
                 match = tool_pat.match(sub_line)
@@ -439,7 +439,7 @@ class Job:
 
                     # Map it using our translation table
                     if currtool not in self.apxlat[layername]:
-                        raise RuntimeError("File %s has tool change command \"%s\" with no corresponding translation" % (fullname, currtool))
+                        raise RuntimeError("File {:s} has tool change command \"{:s}\" with no corresponding translation".format(fullname, currtool))
 
                     currtool = self.apxlat[layername][currtool]
 
@@ -496,7 +496,7 @@ class Job:
                         # It's also OK if we're in the middle of a G36 polygon fill as we're only defining
                         # the polygon extents.
                         if (d != 2) and (last_gmode != 36):
-                            raise RuntimeError("File %s has draw command %s with no aperture chosen" % (fullname, sub_line))
+                            raise RuntimeError("File {:s} has draw command {:s} with no aperture chosen".format(fullname, sub_line))
 
                     # Save last_x/y BEFORE scaling to 2.5 format else subsequent single-ordinate
                     # flashes (e.g., Y with no X) will be scaled twice!
@@ -547,7 +547,7 @@ class Job:
                     if match:
                         break
                 else:
-                    raise RuntimeError("File %s has uninterpretable line:\n  %s" % (fullname, line))
+                    raise RuntimeError("File {:s} has uninterpretable line:\n  {:s}".format(fullname, line))
 
                 sub_line = sub_line[match.end():]
             # end while still things to match on this line
@@ -614,14 +614,14 @@ class Job:
                 try:
                     diam = float(diam)
                 except:
-                    raise RuntimeError("File %s has illegal tool diameter '%s'" % (fullname, diam))
+                    raise RuntimeError("File {:s} has illegal tool diameter '{:s}'".format(fullname, diam))
 
                 # Canonicalize tool number because Protel (of course) sometimes specifies it
                 # as T01 and sometimes as T1. We canonicalize to T01.
-                currtool = 'T%02d' % int(currtool[1:])
+                currtool = "T{:02d}".format(int(currtool[1:]))
 
                 if currtool in self.xdiam:
-                    raise RuntimeError("File %s defines tool %s more than once" % (fullname, currtool))
+                    raise RuntimeError("File {:s} defines tool {:s} more than once".format(fullname, currtool))
                 self.xdiam[currtool] = diam
                 continue
 
@@ -632,7 +632,7 @@ class Job:
 
                 # Canonicalize tool number because Protel (of course) sometimes specifies it
                 # as T01 and sometimes as T1. We canonicalize to T01.
-                currtool = 'T%02d' % int(currtool[1:])
+                currtool = "T{:02d}".format(int(currtool[1:]))
 
                 # Diameter will be obtained from embedded tool definition, local tool list or if not found, the global tool list
                 try:
@@ -642,12 +642,12 @@ class Job:
                         try:
                             diam = self.ToolList[currtool]
                         except:
-                            raise RuntimeError("File %s uses tool code %s that is not defined in the job's tool list" % (fullname, currtool))
+                            raise RuntimeError("File {:s} uses tool code {:s} that is not defined in the job's tool list".format(fullname, currtool))
                     else:
                         try:
                             diam = config.DefaultToolList[currtool]
                         except:
-                            raise RuntimeError("File %s uses tool code %s that is not defined in default tool list" % (fullname, currtool))
+                            raise RuntimeError("File {:s} uses tool code {:s} that is not defined in default tool list".format(fullname, currtool))
 
                 self.xdiam[currtool] = diam
                 continue
@@ -669,7 +669,7 @@ class Job:
 
             if match:
                 if currtool is None:
-                    raise RuntimeError("File %s has plunge command without previous tool selection" % fullname)
+                    raise RuntimeError("File {:s} has plunge command without previous tool selection".format(fullname))
 
                 try:
                     self.xcommands[currtool].append((x, y))
@@ -685,7 +685,7 @@ class Job:
                 if pat.match(line):
                     break
             else:
-                raise RuntimeError("File %s has uninterpretable line:\n  %s" % (fullname, line))
+                raise RuntimeError("File {:s} has uninterpretable line:\n  {:s}".format(fullname, line))
 
     def hasLayer(self, layername):
         return layername in self.commands
@@ -709,23 +709,23 @@ class Job:
         # (exposure off). This prevents an unintentional draw from the end
         # of one job to the beginning of the next when a layer is repeated
         # due to panelizing.
-        fid.write('X%07dY%07dD02*\n' % (X, Y))
+        fid.write("X{:07d}Y{:07d}D02*\n".format(X, Y))
         for cmd in self.commands[layername]:
             if isinstance(cmd, tuple):
                 if len(cmd) == 3:
                     x, y, d = cmd
-                    fid.write('X%07dY%07dD%02d*\n' % (x + DX, y + DY, d))
+                    fid.write("X{:07d}Y{:07d}D{:02d}*\n".format(x + DX, y + DY, d))
                 else:
                     x, y, I, J, d, s = cmd
-                    fid.write('X%07dY%07dI%07dJ%07dD%02d*\n' % (x + DX, y + DY, I, J, d))  # I,J are relative
+                    fid.write("X{:07d}Y{:07d}I{:07d}J{:07d}D{:02d}*\n".format(x + DX, y + DY, I, J, d))  # I,J are relative
             else:
                 # It's an aperture change, G-code, or RS274-X command that begins with '%'. If
                 # it's an aperture code, the aperture has already been translated
                 # to the global aperture table during the parse phase.
                 if cmd[0] == '%':
-                    fid.write('%s\n' % cmd)  # The command already has a * in it (e.g., "%LPD*%")
+                    fid.write("{:s}\n".format(cmd))  # The command already has a * in it (e.g., "%LPD*%")
                 else:
-                    fid.write('%s*\n' % cmd)
+                    fid.write("{:s}*\n".format(cmd))
 
     def findTools(self, diameter):
         "Find the tools, if any, with the given diameter in inches. There may be more than one!"
@@ -779,7 +779,7 @@ class Job:
         "Find or create a layer-specific aperture code to represent the global aperture given"
         if AP.code not in self.apxlat[layername].values():
             lastCode = aptable.findHighestApertureCode(self.apxlat[layername].keys())
-            localCode = 'D%d' % (lastCode + 1)
+            localCode = "D{:d}".format(lastCode + 1)
             self.apxlat[layername][localCode] = AP.code
 
     def inBorders(self, x, y):
@@ -990,7 +990,7 @@ class JobLayout:
         return [self]
 
     def __str__(self):
-        return "JobLayout(%s,x=%f,y=%f)" % (str(self.job), self.x, self.y)
+        return "JobLayout({:s},x={:f},y={:f})".format(self.job, self.x, self.y)
 
     def writeGerber(self, fid, layername):
         assert self.x
@@ -1059,24 +1059,24 @@ class JobLayout:
         # The way it is now with "if 1 or....", much of this function is
         # unnecessary. Heck, we could even just use the boardoutline layer
         # directly.
-        if 1 or left:
-            fid.write('X%07dY%07dD02*\n' % BL)
-            fid.write('X%07dY%07dD01*\n' % TL)
+        if True or left:
+            fid.write("X{0[0]:07d}Y{0[1]:07d}D02*\n".format(BL))
+            fid.write("X{0[0]:07d}Y{0[1]:07d}D01*\n".format(TL))
 
-        if 1 or top:
+        if True or top:
             if not left:
-                fid.write('X%07dY%07dD02*\n' % TL)
-            fid.write('X%07dY%07dD01*\n' % TR)
+                fid.write("X{0[0]:07d}Y{0[1]:07d}D02*\n".format(TL))
+            fid.write("X{0[0]:07d}Y{0[1]:07d}D01*\n".format(TR))
 
-        if 1 or right:
+        if True or right:
             if not top:
-                fid.write('X%07dY%07dD02*\n' % TR)
-            fid.write('X%07dY%07dD01*\n' % BR)
+                fid.write("X{0[0]:07d}Y{0[1]:07d}D02*\n".format(TR))
+            fid.write("X{0[0]:07d}Y{0[1]:07d}D01*\n".format(BR))
 
-        if 1 or bot:
+        if True or bot:
             if not right:
-                fid.write('X%07dY%07dD02*\n' % BR)
-            fid.write('X%07dY%07dD01*\n' % BL)
+                fid.write("X{0[0]:07d}Y{0[1]:07d}D02*\n".format(BR))
+            fid.write("X{0[0]:07d}Y{0[1]:07d}D01*\n".format(BL))
 
     def setPosition(self, x, y):
         self.x = x
@@ -1109,11 +1109,11 @@ def rotateJob(job, degrees=90, firstpass=True):
     GAMT = config.GAMT
     if firstpass:
         if degrees == 270:
-            J = Job(job.name + '*rotated270')
+            J = Job(job.name + "*rotated270")
         elif degrees == 180:
-            J = Job(job.name + '*rotated180')
+            J = Job(job.name + "*rotated180")
         else:
-            J = Job(job.name + '*rotated90')
+            J = Job(job.name + "*rotated90")
     else:
         J = Job(job.name)
 
@@ -1259,11 +1259,11 @@ def findJob(jobname, rotated, Jobs):
       Return found job
     """
     if rotated == 90:
-        fullname = jobname + '*rotated90'
+        fullname = jobname + "*rotated90"
     elif rotated == 180:
-        fullname = jobname + '*rotated180'
+        fullname = jobname + "*rotated180"
     elif rotated == 270:
-        fullname = jobname + '*rotated270'
+        fullname = jobname + "*rotated270"
     else:
         fullname = jobname
 
@@ -1275,6 +1275,6 @@ def findJob(jobname, rotated, Jobs):
             job = rotateJob(job, rotated)
             Jobs[fullname] = job
         except:
-            raise RuntimeError("Job name '%s' not found" % jobname)
+            raise RuntimeError("Job name '{:s}' not found".format(jobname))
 
     return JobLayout(job)

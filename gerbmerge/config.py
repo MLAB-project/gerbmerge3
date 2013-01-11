@@ -134,7 +134,7 @@ def parseStringList(L):
 
     # This pattern matches quotes at the beginning and end...quotes must match
     quotepat = re.compile(r'^([' "'" '"' r']?)([^\1]*)\1$')
-    delimitpat = re.compile(r'[ \t]*[,;][ \t]*')
+    delimitpat = re.compile(r"[ \t]*[,;][ \t]*")
 
     match = quotepat.match(L)
     if match:
@@ -180,7 +180,7 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
                 print('*' * 73)
                 sys.exit(1)
             else:
-                raise RuntimeError("Unknown option '%s' in [Options] section of configuration file" % opt)
+                raise RuntimeError("Unknown option '{:s}' in [Options] section of configuration file".format(opt))
     else:
         raise RuntimeError("Missing [Options] section in configuration file")
 
@@ -234,10 +234,10 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
 
         # Ensure all jobs have a board outline
         if not CP.has_option(jobname, 'boardoutline'):
-            raise RuntimeError("Job '%s' does not have a board outline specified" % jobname)
+            raise RuntimeError("Job '{:s}' does not have a board outline specified".format(jobname))
 
         if not CP.has_option(jobname, 'drills'):
-            raise RuntimeError("Job '%s' does not have a drills layer specified" % jobname)
+            raise RuntimeError("Job '{:s}' does not have a drills layer specified".format(jobname))
 
         for layername in CP.options(jobname):
             if layername[0] == '*' or layername == 'boardoutline':
@@ -291,12 +291,12 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
                 try:
                     J.ExcellonDecimals = int(fname)
                 except:
-                    raise RuntimeError("Excellon decimals '%s' in config file is not a valid integer" % fname)
+                    raise RuntimeError("Excellon decimals '{:s}' in config file is not a valid integer".format(fname))
             elif layername == 'repeat':
                 try:
                     J.Repeat = int(fname)
                 except:
-                    raise RuntimeError("Repeat count '%s' in config file is not a valid integer" % fname)
+                    raise RuntimeError("Repeat count '{:s}' in config file is not a valid integer".format(fname))
 
         for layername in CP.options(jobname):
             fname = CP.get(jobname, layername)
@@ -318,9 +318,9 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
             if errstr == 'ERROR':
                 do_abort = True
 
-            print("%s: Job %s is missing the following layers:" % (errstr, jobname))
+            print("{:s}: Job {:s} is missing the following layers:".format(errstr, jobname))
             for layername in LL.keys():
-                print("  %s" % layername)
+                print("  {:s}".format(layername))
 
         # Store the job in the global Jobs dictionary, keyed by job name
         Jobs[jobname] = J

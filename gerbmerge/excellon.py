@@ -2,18 +2,18 @@ import re
 import string
 
 
-def writeheader(fid, tools, units="mm"):
+def writeheader(fid, tools, units='mm'):
     """This file writes the header for an Excellon drill file. Specifically it specifies the name of each drill and its size and specifies the units both the drills and the placement values. Note that tools should be a list of tuples with the tool name and then its size."""
     # Print start of header
-    fid.write('%\nM48\n')
+    fid.write("%\nM48\n")
     
     # Specify units
-    if units == "mm":
+    if units == 'mm':
         fid.write("M71\n")
-    elif units == "in":
+    elif units == 'in':
         fid.write("M72\n")
     else:
-        raise RuntimeError("Invalid units %s specified in excellon.writeheader()" % units)
+        raise RuntimeError("Invalid units {:s} specified in excellon.writeheader()".format(units))
 
     # Write out all tool dimensions
     for tool in tools:
@@ -24,21 +24,21 @@ def writeheader(fid, tools, units="mm"):
 
 
 def writefooter(fid):
-    fid.write('M30\n')
+    fid.write("M30\n")
 
 
-def writetool(fid, tool, size, units="mm"):
-    if units == "mm":
-        numformat = "%4.2f"
-    elif units == "in":
-        numformat = "%2.4f"
+def writetool(fid, tool, size, units='mm'):
+    if units == 'mm':
+        numformat = "{:4.2f}"
+    elif units == 'in':
+        numformat = "{:2.4f}"
     else:
-        raise RuntimeError("Invalid units %s specified in excellon.writetool()" % units)
-    fid.write(("%sC" + numformat + "\n") % (tool, size))
+        raise RuntimeError("Invalid units {:s} specified in excellon.writetool()".format(units))
+    fid.write(("{:s}C" + numformat + "\n").format(tool, size))
 
 
 def writetoolname(fid, tool):
-    fid.write("%s\n" % tool)
+    fid.write("{:s}\n".format(tool))
 
 
 def parseToolList(fname):
@@ -51,9 +51,9 @@ def parseToolList(fname):
     try:
         fid = open(fname, 'rt')
     except Exception as detail:
-        raise RuntimeError("Unable to open tool list file '%s':\n  %s" % (fname, str(detail)))
+        raise RuntimeError("Unable to open tool list file '{:s}':\n  {:s}".format(fname, str(detail)))
 
-    units_pat = re.compile(r'\s*(T\d+)\s+([0-9.]+)\s*(in|mm|mil)\s*')
+    units_pat = re.compile(r"\s*(T\d+)\s+([0-9.]+)\s*(in|mm|mil)\s*")
     for line in fid:
         line = line.lstrip()
         if line[0] == '#' or line[0] == ';':
@@ -67,20 +67,20 @@ def parseToolList(fname):
         try:
             size = float(size)
         except:
-            raise RuntimeError("Tool size in file '%s' is not a valid floating-point number:\n  %s" % (fname, line))
+            raise RuntimeError("Tool size in file '{:s}' is not a valid floating-point number:\n  {:s}".format(fname, line))
 
         # Convert any non-inches unit to inches
-        if units == "mil":
+        if units == 'mil':
             size = size * 0.001  # Convert mil to inches
-        elif units == "mm":
+        elif units == 'mm':
             size = size / 25.4   # Convert mm to inches
 
         # Canonicalize tool so that T1 becomes T01
-        tool = 'T%02d' % int(tool[1:])
+        tool = "T{:02d}".format(tool[1:])
 
         # If this tool already exists, there's a problem with the file
         if tool in TL:
-            raise RuntimeError("Tool '%s' defined more than once in tool list file '%s'" % (tool, fname))
+            raise RuntimeError("Tool '{:s}' defined more than once in tool list file '{:s}'".format(tool, fname))
 
         TL[tool] = size
     fid.close()
@@ -112,13 +112,13 @@ def write_excellon(fid, diameter, Xoff, Yoff, leadingZeros, xdiam, xcommands, mi
             ltools.append(tool)
 
     if leadingZeros:
-        fmtstr = 'X%06dY%06d\n'
+        fmtstr = "X%06dY%06d\n"
     else:
-        fmtstr = 'X%dY%d\n'
+        fmtstr = "X%dY%d\n"
 
     # Boogie
     for ltool in ltools:
         if ltool in xcommands:
             for cmd in xcommands[ltool]:
                 x, y = cmd
-                fid.write(fmtstr % (x + DX, y + DY))
+                fid.write(fmtstr.format(x + DX, y + DY))
