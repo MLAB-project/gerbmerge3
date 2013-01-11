@@ -43,7 +43,7 @@ class Placement:
         try:
             root = ET.fromstring(unparsedXml)
         except ET.ParseError as e:
-            raise RuntimeError("Layout file cannot be parsed. Error at %d, %d." % e.position)
+            raise RuntimeError("Layout file cannot be parsed. Error at {0[0]}, {0[1]}.".format(e.position))
 
         # Build up the array of rows
         rows = []
@@ -234,8 +234,8 @@ def parseJobSpec(spec, globalJobs):
     try:
         x = float(spec.get('x', 'nan'))
         y = float(spec.get('y', 'nan'))
-    except TypeError as e:
-        raise RuntimeError("Illegal (x,y) coordinates in placement file:\n %s" % e.line)
+    except ValueError:
+        raise RuntimeError("Illegal (x,y) coordinates in placement (x='{}',y='{}') file for job '{}'".format(spec.get('x', ''), spec.get('y', ''), spec.get('name')))
 
     # Now prepare the job
     job = jobs.findJob(spec.get('name'), rotation, globalJobs)
@@ -253,7 +253,7 @@ def parseColSpec(spec, globalJobs):
         elif coljob.tag == 'row':
             jobs.addjob(parseRowSpec(coljob, globalJobs))
         else:
-            raise RuntimeError("Unexpected element '%s' encountered while parsing jobs file" % coljob.tag)
+            raise RuntimeError("Unexpected element '{:s}' encountered while parsing jobs file".format(coljob.tag))
 
     return jobs
 
@@ -267,6 +267,6 @@ def parseRowSpec(spec, globalJobs):
         elif rowjob.tag == 'col':
             jobs.addjob(parseColSpec(rowjob, globalJobs))
         else:
-            raise RuntimeError("Unexpected element '%s' encountered while parsing jobs file" % rowjob.tag)
+            raise RuntimeError("Unexpected element '{:s}' encountered while parsing jobs file".format(rowjob.tag))
 
     return jobs

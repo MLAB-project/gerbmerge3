@@ -85,7 +85,7 @@ class Tiling:
         fid.write("Points:\n  ")
         count = 0
         for XY in self.points:
-            fid.write("%s " % str(XY))
+            fid.write("{:s} ".format(XY))
             count += 1
             if count == 8:
                 fid.write("\n  ")
@@ -95,11 +95,11 @@ class Tiling:
 
         fid.write("Jobs:\n")
         for bl, tr, Job in self.jobs:
-            fid.write("  %s: %s\n" % (str(Job), str(bl)))
+            fid.write("  {:s}: {:s}\n".format(Job, bl))
 
     def joblist(self, fid=sys.stdout):
         for bl, tr, Job in self.jobs:
-            fid.write("%s@(%.1f,%.1f) " % (Job.name, bl[0], bl[1]))
+            fid.write("{}@({:.1f},{:.1f}) ".format(Job.name, bl[0], bl[1]))
         fid.write('\n')
 
     def isOverlap(self, ix, X, Y):

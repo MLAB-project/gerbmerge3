@@ -76,7 +76,7 @@ class RandomSearch(TileSearch):
             utilization = 0.0
 
         if self.placements > 0:
-            return "\n  %ld placements | Smallest area: %.1f sq. in. | Best utilization: %.1f%%" % (self.placements, area, utilization)
+            return "\n  {:d} placements | Smallest area: {:.1f} sq. in. | Best utilization: {.1f}%".format(self.placements, area, utilization)
         else:
             return "\n  No calculations yet."
 
@@ -194,7 +194,7 @@ class ExhaustiveSearch(TileSearch):
 
         if self.permutations > 0:
             percent = 100.0 * self.permutations / self.possiblePermutations
-            return "\n  %5.2f complete | %d/%d Permutations checked | Smallest area: %.1f sq. in. / Best utilization: %.1f%%" % (percent, self.permutations, self.possiblePermutations, area, utilization)
+            return "\n  {:5.2f} complete | {:d}/{:d} Permutations checked | Smallest area: {:.1f} sq. in. / Best utilization: {:.1f}%".format(percent, self.permutations, self.possiblePermutations, area, utilization)
         else:
             return "\n  No calculations yet."
 
