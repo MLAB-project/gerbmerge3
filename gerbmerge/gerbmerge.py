@@ -695,5 +695,13 @@ if __name__ == "__main__":
     disclaimer(args.ack)
 
     # Run gerbmerge
-    sys.exit(merge(args))
+    try:
+        rv = merge(args)
+    except RuntimeError as e:
+        print(e.args[0])
+        print("Exiting...")
+    finally:
+        rv = 0
+
+    sys.exit(rv)
 # vim: expandtab ts=2 sw=2 ai syntax=python
