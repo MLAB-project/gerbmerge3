@@ -31,9 +31,10 @@ class Placement:
         # object.
         self.jobs = self.jobs + t.canonicalize(OriginX, OriginY)
 
-    def addFromFile(self, file, OriginX, OriginY):
+    def addFromFile(self, placementFile, OriginX, OriginY):
         # Preprocess the XML jobs file removing lines that start with '#' as those're comment lines.
         # They're not handled by the XML parser, so we remove them beforehand.
+        file = open(placementFile, 'r')
         unparsedXml = ""
         for line in file:
             if line[0] != '#':

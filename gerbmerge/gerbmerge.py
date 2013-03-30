@@ -687,8 +687,8 @@ if __name__ == "__main__":
     parser.add_argument('--text-stroke', type=int, metavar='N', default=10, help="Stroke (width in mils) of text.")
     parser.add_argument('--text-x', type=int, default=0, metavar='X', help="X position of text. Defaults to inside space between jobs")
     parser.add_argument('--text-y', type=int, default=0, metavar='Y', help="Y position of text. Defaults to inside space between jobs")
-    parser.add_argument('configfile', type=argparse.FileType('r'), help=".cfg file setting configuration values for this panel")
-    parser.add_argument('layoutfile', type=argparse.FileType('r'), default=None, nargs='?', help=".xml file specifying a manual layout for this panel")
+    parser.add_argument('configfile', type=str, help=".cfg file setting configuration values for this panel")
+    parser.add_argument('layoutfile', type=str, help=".xml file specifying a manual layout for this panel")
 
     args = parser.parse_args()
 

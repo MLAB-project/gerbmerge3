@@ -14,6 +14,7 @@ http://ruggedcircuits.com/gerbmerge
 import sys
 import configparser
 import re
+import os
 
 import jobs
 import aptable
@@ -155,13 +156,16 @@ def parseStringList(L):
 #     table, GAT, and the global aperture macro table, GAMT
 #
 #   * read the tool list file and populate the DefaultToolList dictionary
-def parseConfigFile(fid, Config=Config, Jobs=Jobs):
+def parseConfigFile(configFilePath, Config=Config, Jobs=Jobs):
     global DefaultToolList
 
     CP = configparser.ConfigParser()
-    CP.readfp(fid)
+    CP.read(configFilePath)
 
-    # First parse global options
+    # Store the base directory that all files are referenced from (the one the config file is in).
+    configDir = os.path.dirname(configFilePath)
+
+    # First parse global options and merge them into the global Config options object.
     if CP.has_section('Options'):
         for opt in CP.options('Options'):
             # Is it one we expect
@@ -250,7 +254,7 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
     # Now construct global aperture tables, GAT and GAMT. This step actually
     # reads in the jobs for aperture data but doesn't store Gerber
     # data yet.
-    aptable.constructApertureTable(apfiles, GAT, GAMT)
+    aptable.constructApertureTable([os.path.join(configDir, x) for x in apfiles], GAT, GAMT)
     del apfiles
 
     # Parse the tool list
@@ -286,6 +290,7 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
             fname = CP.get(jobname, layername)
 
             if layername == 'toollist':
+                fname = os.path.join(configDir, CP.get(jobname, layername))
                 J.ToolList = excellon.parseToolList(fname)
             elif layername == 'excellondecimals':
                 try:
@@ -299,7 +304,7 @@ def parseConfigFile(fid, Config=Config, Jobs=Jobs):
                     raise RuntimeError("Repeat count '{:s}' in config file is not a valid integer".format(fname))
 
         for layername in CP.options(jobname):
-            fname = CP.get(jobname, layername)
+            fname = os.path.join(configDir, CP.get(jobname, layername))
 
             if layername == 'boardoutline':
                 J.parseGerber(fname, layername, updateExtents=1)
