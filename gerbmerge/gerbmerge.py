@@ -90,9 +90,9 @@ def disclaimer(ack=False):
   """)
     if ack:
         return
-    s = input()
+    s = input('> ')
     # Couldn't get `s == "y"` to work, but the following works correctly on python 3.2 on w64
-    if s[0] == "y"[0]:
+    if len(s) == 1 and s[0] == 'y'[0]:
         return
 
     print("\nExiting...")
