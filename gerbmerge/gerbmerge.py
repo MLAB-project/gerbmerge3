@@ -397,19 +397,7 @@ def merge(opts, gui=None):
         fid = open(fullname, 'wt')
         writeGerberHeader(fid)
 
-        # Write width-1 aperture to file
-        AP = aptable.Aperture(aptable.Circle, 'D10', 0.001)
-        AP.writeDef(fid)
-
-        # Choose drawing aperture D10
-        fid.write("D10*\n")
-
-        # Draw the rectangle
-        fid.write("X{:07d}Y{:07d}D02*\n".format(util.in2gerb(OriginX), util.in2gerb(OriginY)))        # Bottom-left
-        fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(OriginX), util.in2gerb(MaxYExtent)))     # Top-left
-        fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(MaxXExtent), util.in2gerb(MaxYExtent)))  # Top-right
-        fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(MaxXExtent), util.in2gerb(OriginY)))     # Bottom-right
-        fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(OriginX), util.in2gerb(OriginY)))        # Bottom-left
+        gerber.writeOutline(fid, OriginX, OriginY, MaxXExtent, MaxYExtent)
 
         gerber.writeFooter(fid)
         fid.close()
@@ -426,7 +414,7 @@ def merge(opts, gui=None):
         AP.writeDef(fid)
 
         # Choose drawing aperture D10
-        fid.write("D10*\n")
+        gerber.writeCurrentAperture(fid, 10)
 
         # Draw the scoring lines
         scoring.writeScoring(fid, Place, OriginX, OriginY, MaxXExtent, MaxYExtent, config.Config['xspacing'], config.Config['yspacing'])

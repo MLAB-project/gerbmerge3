@@ -1,6 +1,6 @@
 import config
 import util
-
+import aptable
 
 def writeHeader22degrees(fid):
     fid.write("""G75*
@@ -27,6 +27,9 @@ G70*
 %
 """)
 
+
+def writeCurrentAperture(fid, aperture):
+    fid.write("D{:d}*\n".format(aperture))
 
 def writeApertureMacros(fid, usedDict):
     keys = list(config.GAMT.keys())
@@ -76,14 +79,14 @@ def writeOutline(fid, OriginX, OriginY, MaxXExtent, MaxYExtent):
     AP.writeDef(fid)
 
     # Choose drawing aperture D10
-    fid.write("D10*\n")
+    writeCurrentAperture(fid, 10)
 
-    # Draw the rectangle
-    fid.write("X{:07d}Y{:07d}D02*\n".format(util.in2gerb(OriginX), util.in2gerb(OriginY)))        # Bottom-left
-    fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(OriginX), util.in2gerb(MaxYExtent)))     # Top-left
-    fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(MaxXExtent), util.in2gerb(MaxYExtent)))  # Top-right
-    fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(MaxXExtent), util.in2gerb(OriginY)))     # Bottom-right
-    fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(OriginX), util.in2gerb(OriginY)))        # Bottom-left
+    # Draw the rectangle starting at the bottom left and going clockwise.
+    fid.write("X{:07d}Y{:07d}D02*\n".format(util.in2gerb(OriginX), util.in2gerb(OriginY)))
+    fid.write("Y{:07d}D01*\n".format(util.in2gerb(MaxYExtent)))
+    fid.write("X{:07d}D01*\n".format(util.in2gerb(MaxXExtent)))
+    fid.write("Y{:07d}D01*\n".format(util.in2gerb(OriginY)))
+    fid.write("X{:07d}D01*\n".format(util.in2gerb(OriginX)))
 
 
 def writeCropMarks(fid, drawing_code, OriginX, OriginY, MaxXExtent, MaxYExtent):
@@ -100,26 +103,26 @@ def writeCropMarks(fid, drawing_code, OriginX, OriginY, MaxXExtent, MaxYExtent):
     x = OriginX + offset
     y = OriginY + offset
     fid.write("X{:07d}Y{:07d}D02*\n".format(util.in2gerb(x + 0.125), util.in2gerb(y + 0.000)))
-    fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(x + 0.000), util.in2gerb(y + 0.000)))
-    fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(x + 0.000), util.in2gerb(y + 0.125)))
+    fid.write("X{:07d}D01*\n".format(util.in2gerb(x + 0.000)))
+    fid.write("Y{:07d}D01*\n".format(util.in2gerb(y + 0.125)))
 
     # Lower-right
     x = MaxXExtent - offset
     y = OriginY + offset
     fid.write("X{:07d}Y{:07d}D02*\n".format(util.in2gerb(x + 0.000), util.in2gerb(y + 0.125)))
-    fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(x + 0.000), util.in2gerb(y + 0.000)))
-    fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(x - 0.125), util.in2gerb(y + 0.000)))
+    fid.write("Y{:07d}D01*\n".format(util.in2gerb(y + 0.000)))
+    fid.write("X{:07d}D01*\n".format(util.in2gerb(x - 0.125)))
 
     # Upper-right
     x = MaxXExtent - offset
     y = MaxYExtent - offset
     fid.write("X{:07d}Y{:07d}D02*\n".format(util.in2gerb(x - 0.125), util.in2gerb(y + 0.000)))
-    fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(x + 0.000), util.in2gerb(y + 0.000)))
-    fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(x + 0.000), util.in2gerb(y - 0.125)))
+    fid.write("X{:07d}D01*\n".format(util.in2gerb(x + 0.000)))
+    fid.write("Y{:07d}D01*\n".format(util.in2gerb(y - 0.125)))
 
     # Upper-left
     x = OriginX + offset
     y = MaxYExtent - offset
     fid.write("X{:07d}Y{:07d}D02*\n".format(util.in2gerb(x + 0.000), util.in2gerb(y - 0.125)))
-    fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(x + 0.000), util.in2gerb(y + 0.000)))
-    fid.write("X{:07d}Y{:07d}D01*\n".format(util.in2gerb(x + 0.125), util.in2gerb(y + 0.000)))
+    fid.write("Y{:07d}D01*\n".format(util.in2gerb(y + 0.000)))
+    fid.write("X{:07d}D01*\n".format(util.in2gerb(x + 0.125)))
