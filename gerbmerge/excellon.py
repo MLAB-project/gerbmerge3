@@ -112,9 +112,9 @@ def write_excellon(fid, diameter, Xoff, Yoff, leadingZeros, xdiam, xcommands, mi
             ltools.append(tool)
 
     if leadingZeros:
-        fmtstr = "X%06dY%06d\n"
+        fmtstr = "X{:06d}Y{:06d}\n"
     else:
-        fmtstr = "X%dY%d\n"
+        fmtstr = "X{:d}Y{:d}\n"
 
     # Boogie
     for ltool in ltools:
