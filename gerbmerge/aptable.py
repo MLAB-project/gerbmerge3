@@ -260,7 +260,7 @@ def constructApertureTable(fileList):
     fid.close()
 
   # Now, go through and assign sequential codes to all apertures
-  code = 10
+  code = 11  #start at 11 since we will be using aperture 10 for the overall outline
   for val in AT.values():
     key = 'D%d' % code
     GAT[key] = val
