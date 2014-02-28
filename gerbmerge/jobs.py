@@ -89,7 +89,9 @@ XIgnoreList = ( \
   re.compile(r'^M30$'),   # End of job
   re.compile(r'^M48$'),   # Program header to first %
   re.compile(r'^M72$')    # Inches
-  )
+  re.compile(r'^G05$'),   # happens in kicad
+  re.compile(r'^G90$')    # kicad
+ )
 
 # A Job is a single input board. It is expected to have:
 #    - a board outline file in RS274X format
@@ -655,6 +657,9 @@ class Job:
               diam = config.DefaultToolList[currtool]
             except:
               #print config.DefaultToolList
+              if currtool == 'T00':
+                print "Warning: File %s uses non standard tool T0" % (fullname)
+                continue
               raise RuntimeError, "File %s uses tool code %s that is not defined in default tool list" % (fullname, currtool)
 
         self.xdiam[currtool] = diam
