@@ -25,16 +25,19 @@ if sys.platform == 'win32' or ('bdist_wininst' in sys.argv):
   BinFiles = ['misc/gerbmerge.bat']
   BinDir = '.'
 else:
-  DestLib = distutils.sysconfig.get_config_var('LIBPYTHON')
+  DestLib = distutils.sysconfig.get_python_lib()
   DestDir = os.path.join(DestLib, 'gerbmerge')
   BinFiles = ['misc/gerbmerge']
-  BinDir = distutils.sysconfig.get_config_var('BINDIR')  
+  BinDir = distutils.sysconfig.get_config_var('BINDIR')
+
+  print "DestDir: " + DestDir
+  print "BinDir:  " + BinDir
 
   # Create top-level invocation program
   fid = file('misc/gerbmerge', 'wt')
   fid.write( \
   r"""#!/bin/sh
-python %s/site-packages/gerbmerge/gerbmerge.py $*
+python %s/gerbmerge/gerbmerge.py $*
   """ % DestLib)
   fid.close()
 
@@ -62,7 +65,7 @@ URL below.
        url = "http://ruggedcircuits.com/gerbmerge",
        packages = ['gerbmerge'],
        platforms = ['all'],
-       data_files = [ (DestDir, AuxFiles), 
+       data_files = [ (DestDir, AuxFiles),
                       (os.path.join(DestDir,'testdata'), SampleFiles),
                       (os.path.join(DestDir,'doc'), DocFiles),
                       (BinDir, BinFiles) ]
@@ -92,7 +95,7 @@ if do_fix_perms:
           os.chmod(fullname, CHMOD_644)
 
     os.path.walk(DestDir, fixperms, 1)
-    os.path.walk(os.path.join(DestLib, 'site-packages/gerbmerge'), fixperms, 1)
+    os.path.walk(os.path.join(DestLib, 'gerbmerge'), fixperms, 1)
 
     os.chmod(os.path.join(BinDir, 'gerbmerge'), CHMOD_755)
     print("done")
