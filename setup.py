@@ -30,8 +30,8 @@ else:
   BinFiles = ['misc/gerbmerge']
   BinDir = distutils.sysconfig.get_config_var('BINDIR')
 
-  print "DestDir: " + DestDir
-  print "BinDir:  " + BinDir
+  print("DestDir: " + DestDir)
+  print("BinDir: " + BinDir)
 
   # Create top-level invocation program
   fid = file('misc/gerbmerge', 'wt')
