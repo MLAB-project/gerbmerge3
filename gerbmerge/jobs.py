@@ -650,7 +650,7 @@ class Job:
                             diam = config.DefaultToolList[currtool]
                         except:
                             if currtool == 'T00':
-                                print "Warning: File %s uses non standard tool T0" % (fullname)
+                                print("Warning: File {:s} uses non standard tool T0".format(fullname))
                                 continue
                             raise RuntimeError("File {:s} uses tool code {:s} that is not defined in default tool list".format(fullname, currtool))
 
