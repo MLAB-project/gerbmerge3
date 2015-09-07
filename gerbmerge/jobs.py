@@ -67,7 +67,8 @@ IgnoreList = (
     re.compile(r"^%MOIN\*%"),
     re.compile(r"^%ASAXBY\*%"),
     re.compile(r"^%AD\*%"),        # GerbTool empty aperture definition
-    re.compile(r"^%LN.*\*%")       # Layer name
+    re.compile(r"^%LN.*\*%"),       # Layer name
+    re.compile(r"^%MOMM\*%")   # happens in kicad
 )
 
 # Patterns for Excellon interpretation
@@ -86,8 +87,11 @@ XIgnoreList = (
     re.compile(r"^M30$"),   # End of job
     re.compile(r"^M48$"),   # Program header to first %
     re.compile(r"^M72$"),    # Inches
+    re.compile(r"^M71$"),    # metric?
     re.compile(r"^G05$"),   # happens in kicad
-    re.compile(r"^G90$")    # kicad
+    re.compile(r"^G90$"),    # kicad
+    re.compile(r"^FMAT,2"),   # happens in kicad
+    re.compile(r"METRIC,TZ")   # happens in kicad
  )
 
 
