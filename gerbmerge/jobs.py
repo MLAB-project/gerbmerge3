@@ -719,10 +719,10 @@ class Job:
             if isinstance(cmd, tuple):
                 if len(cmd) == 3:
                     x, y, d = cmd
-                    fid.write("X{:07d}Y{:07d}D{:02d}*\n".format(x + DX, y + DY, d))
+                    fid.write("X{:07.0f}Y{:07.0f}D{:02.0f}*\n".format(x + DX, y + DY, d))
                 else:
                     x, y, I, J, d, s = cmd
-                    fid.write("X{:07d}Y{:07d}I{:07d}J{:07d}D{:02d}*\n".format(x + DX, y + DY, I, J, d))  # I,J are relative
+                    fid.write("X{:07.0f}Y{:07.0f}I{:07.0f}J{:07.0f}D{:02.0f}*\n".format(x + DX, y + DY, I, J, d))  # I,J are relative
             else:
                 # It's an aperture change, G-code, or RS274-X command that begins with '%'. If
                 # it's an aperture code, the aperture has already been translated

@@ -639,7 +639,7 @@ def tile_search_random(Jobs, X, Y, xspacing, yspacing, searchTimeout, exhaustive
                         utilization = bestTiling.usedArea() / bestTiling.area() * 100.0
                     else:
                         utilization = 0.0
-                    print("\nTested {:d} placements over {:d} seconds. Best tiling at {:.2f}% usage.".format(placementsTried, time.time() - startTime, utilization))
+                    print("\nTested {:d} placements over {:.2f} seconds. Best tiling at {:.2f}% usage.".format(placementsTried, time.time() - startTime, utilization))
                 else:
                     print(".", end='')
                     sys.stdout.flush()
@@ -649,7 +649,7 @@ def tile_search_random(Jobs, X, Y, xspacing, yspacing, searchTimeout, exhaustive
         print("\nSearch ended by user.")
 
     computeTime = time.time() - startTime
-    print("Computed {:d} placements in {:d} seconds ({:.1f} placements/second).".format(placementsTried, computeTime, placementsTried / computeTime))
+    print("Computed {:d} placements in {:.2f} seconds ({:.1f} placements/second).".format(placementsTried, computeTime, placementsTried / computeTime))
     print("=" * 70)
 
     return bestTiling
@@ -676,7 +676,7 @@ if __name__ == "__main__":
     parser.add_argument('--text-x', type=int, default=0, metavar='X', help="X position of text. Defaults to inside space between jobs")
     parser.add_argument('--text-y', type=int, default=0, metavar='Y', help="Y position of text. Defaults to inside space between jobs")
     parser.add_argument('configfile', type=str, help=".cfg file setting configuration values for this panel")
-    parser.add_argument('layoutfile', type=str, help=".xml file specifying a manual layout for this panel")
+    parser.add_argument('--layoutfile', type=str, help=".xml file specifying a manual layout for this panel")
 
     args = parser.parse_args()
 
