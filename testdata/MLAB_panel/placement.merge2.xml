@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<panel>
+	<board name="I2C232V01A" x="0.1" y="0.1"/>
+	<board name="I2C232V01A" x="1.2800000000000002" y="0.1"/>
+	<board name="I2C232V01A" x="2.4600000000000004" y="0.1"/>
+	<board name="BATPOWER04C" x="3.6400000000000006" y="0.1"/>
+	<board name="BATPOWER04C" x="5.2198" y="0.1"/>
+	<board name="I2C232V01A" x="6.7996" y="0.1"/>
+</panel>

@@ -91,7 +91,7 @@ XIgnoreList = (
     re.compile(r"^G05$"),   # happens in kicad
     re.compile(r"^G90$"),    # kicad
     re.compile(r"^FMAT,2"),   # happens in kicad
-    re.compile(r"METRIC,TZ")   # happens in kicad
+    re.compile(r"^")   # happens in gerbv  (blank line at the end of the file)
  )
 
 
